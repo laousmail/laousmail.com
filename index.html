@@ -2,41 +2,65 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<script>(function(){try{var t=localStorage.getItem("eclipsetone-theme");if(t!=="light"&&t!=="dark")t="dark";document.documentElement.setAttribute("data-theme",t)}catch(e){document.documentElement.setAttribute("data-theme","dark")}document.documentElement.classList.add("js")})();</script>
+<script>(function(){try{var t=localStorage.getItem("laousmail-theme");if(t!=="light"&&t!=="dark")t="dark";document.documentElement.setAttribute("data-theme",t)}catch(e){document.documentElement.setAttribute("data-theme","dark")}document.documentElement.classList.add("js")})();</script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="description" content="SMA!L · Laousmail — artist, guitar, production. Music, the 15-song challenge, and Ceux qui écoutent. Montréal · EclipseTone." />
+<meta name="description" content="LAOUSMAIL — singer and songwriter in Montréal. Original songs carrying Amazigh roots into contemporary R&B and soul. Follow the music and the upcoming live show." />
 <meta name="theme-color" content="#070605" />
 <link rel="canonical" href="https://laousmail.com/" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://laousmail.com/" />
-<meta property="og:title" content="SMA!L · Laousmail" />
-<meta property="og:description" content="Artist hub for SMA!L / Laousmail — music, story, and the private circle Ceux qui écoutent." />
+<meta property="og:title" content="LAOUSMAIL — Singer, Songwriter & Artist | Montréal" />
+<meta property="og:description" content="Songs between where he comes from and who he’s becoming. Amazigh roots, Montréal present, a body of work moving toward the stage." />
 <meta property="og:image" content="https://laousmail.com/media/portrait-park.webp" />
 <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="LAOUSMAIL — Singer, Songwriter & Artist | Montréal" />
+<meta name="twitter:description" content="Original music. Amazigh roots. Montréal. Follow the songs and the show." />
+<meta name="twitter:image" content="https://laousmail.com/media/portrait-park.webp" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Outfit:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="site.css" />
-<title>SMA!L · Laousmail</title>
+<title>LAOUSMAIL — Singer, Songwriter &amp; Artist | Montréal</title>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MusicGroup",
+  "name": "LAOUSMAIL",
+  "alternateName": ["Laousmail", "SMA!L", "Smail Laouchedi"],
+  "url": "https://laousmail.com/",
+  "genre": ["R&B", "Soul", "Amazigh", "Kabyle"],
+  "foundingLocation": { "@type": "Place", "name": "Montréal" },
+  "sameAs": [
+    "https://open.spotify.com/artist/60GjJwhvGe1eVg98jFPgMp",
+    "https://instagram.com/laousmail"
+  ]
+}
+</script>
 </head>
 <body>
+<div class="pointer-glow" aria-hidden="true"></div>
 <a class="skip" href="#music"><span data-lang="en">Skip to content</span><span data-lang="fr">Aller au contenu</span></a>
 
 <header class="nav">
   <a class="brand" href="#top">
     <img src="media/logo-smail.webp" alt="" width="36" height="36" />
-    SMA<span class="brand-mark">!</span>L
+    <span>LAOUSMAIL</span>
   </a>
-  <input id="nav-menu" class="nav-checkbox" type="checkbox" />
-  <label class="nav-toggle" for="nav-menu" aria-label="Menu" tabindex="0"><span></span></label>
-  <nav class="nav-links" aria-label="Primary">
+
+  <button class="nav-open" type="button" data-nav-open aria-expanded="false" aria-controls="site-menu">
+    <span class="nav-open-lines" aria-hidden="true"><i></i><i></i></span>
+    <span class="visually-hidden"><span data-lang="en">Open menu</span><span data-lang="fr">Ouvrir le menu</span></span>
+  </button>
+
+  <div class="nav-desktop" aria-label="Primary">
     <a href="#music"><span data-lang="en">Music</span><span data-lang="fr">Musique</span></a>
-    <a href="#about"><span data-lang="en">About</span><span data-lang="fr">À propos</span></a>
-    <a href="#circle"><span data-lang="en">The circle</span><span data-lang="fr">Le cercle</span></a>
-    <a href="#moments"><span data-lang="en">Moments</span><span data-lang="fr">Moments</span></a>
-    <a href="#connect"><span data-lang="en">Connect</span><span data-lang="fr">Contact</span></a>
-  </nav>
+    <a href="#journey"><span data-lang="en">Journey</span><span data-lang="fr">Parcours</span></a>
+    <a href="#story"><span data-lang="en">Story</span><span data-lang="fr">Histoire</span></a>
+    <a href="#live"><span data-lang="en">Live</span><span data-lang="fr">Live</span></a>
+    <a href="#circle">Ceux qui écoutent</a>
+  </div>
+
   <div class="tools">
     <div class="lang" role="group" aria-label="Language">
       <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
@@ -49,308 +73,291 @@
   </div>
 </header>
 
+<div class="menu" id="site-menu" data-menu hidden>
+  <div class="menu-panel">
+    <div class="menu-top">
+      <span class="menu-mark">LAOUSMAIL</span>
+      <button type="button" class="menu-close" data-nav-close>
+        <span data-lang="en">Close</span><span data-lang="fr">Fermer</span>
+      </button>
+    </div>
+    <nav class="menu-links" aria-label="Mobile">
+      <a href="#music" data-menu-link><span data-lang="en">Music</span><span data-lang="fr">Musique</span></a>
+      <a href="#journey" data-menu-link><span data-lang="en">Journey</span><span data-lang="fr">Parcours</span></a>
+      <a href="#story" data-menu-link><span data-lang="en">Story</span><span data-lang="fr">Histoire</span></a>
+      <a href="#live" data-menu-link><span data-lang="en">Live</span><span data-lang="fr">Live</span></a>
+      <a href="#circle" data-menu-link>Ceux qui écoutent</a>
+    </nav>
+    <a class="btn menu-spotify" href="https://open.spotify.com/artist/60GjJwhvGe1eVg98jFPgMp" target="_blank" rel="noreferrer">Spotify</a>
+  </div>
+</div>
+
 <main id="top">
-  <section class="hero" aria-label="SMA!L">
+  <!-- HERO -->
+  <section class="hero" aria-label="LAOUSMAIL">
     <div class="hero-media" aria-hidden="true">
-      <img src="media/lifestyle-overhead.webp" alt="" width="1600" height="1200" fetchpriority="high" />
+      <img src="media/lifestyle-overhead.webp" alt="" width="1600" height="1000" fetchpriority="high" />
+      <i class="hero-grain"></i>
+      <i class="hero-light"></i>
     </div>
     <div class="hero-shade" aria-hidden="true"></div>
     <div class="hero-copy">
-      <svg class="yaz" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-        <path d="M16 3v26M6 10l10 6 10-6M6 22l10-6 10 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <p class="brand-lockup" aria-label="SMA!L">SMA<span class="bang">!</span>L</p>
-      <h1>
-        <span data-lang="en">Music that stays in the room with you.</span>
-        <span data-lang="fr">Une musique qui reste dans la pièce avec toi.</span>
+      <p class="identity reveal-hero" data-delay="0">LAOUSMAIL · MONTRÉAL</p>
+      <div class="yaz reveal-hero" data-delay="1" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none"><path d="M16 3v26M6 10l10 6 10-6M6 22l10-6 10 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h1 class="hero-title">
+        <span class="line reveal-hero" data-delay="2">
+          <span data-lang="en">Songs between where I come from</span>
+          <span data-lang="fr">Des chansons entre d’où je viens</span>
+        </span>
+        <span class="line reveal-hero" data-delay="3">
+          <span data-lang="en">and who I’m becoming.</span>
+          <span data-lang="fr">et ce que je suis en train de devenir.</span>
+        </span>
       </h1>
-      <p class="hero-lead">
-        <span data-lang="en">Laousmail — guitar, voice, and the craft behind EclipseTone. Montréal.</span>
-        <span data-lang="fr">Laousmail — guitare, voix, et le craft derrière EclipseTone. Montréal.</span>
+      <p class="hero-lead reveal-hero" data-delay="4">
+        <span data-lang="en">A singer and songwriter carrying Amazigh roots into contemporary R&amp;B and soul — writing from migration, memory, freedom, love, and the life being built in Montréal.</span>
+        <span data-lang="fr">Chanteur et auteur-compositeur : des racines amazighes portées dans la R&amp;B et la soul contemporaines — écrire depuis la migration, la mémoire, la liberté, l’amour, et la vie qui se construit à Montréal.</span>
       </p>
-      <div class="cta-row">
-        <a class="btn" href="https://open.spotify.com/artist/60GjJwhvGe1eVg98jFPgMp" target="_blank" rel="noreferrer">
-          <span data-lang="en">Listen on Spotify</span>
-          <span data-lang="fr">Écouter sur Spotify</span>
+      <div class="cta-row reveal-hero" data-delay="5">
+        <a class="btn" href="#music">
+          <span data-lang="en">Listen to the music</span>
+          <span data-lang="fr">Écouter la musique</span>
         </a>
-        <a class="btn ghost" href="#circle">
-          <span data-lang="en">Join Ceux qui écoutent</span>
-          <span data-lang="fr">Rejoindre Ceux qui écoutent</span>
+        <a class="btn ghost" href="#live">
+          <span data-lang="en">Be there for the show</span>
+          <span data-lang="fr">Être là pour le spectacle</span>
         </a>
       </div>
     </div>
   </section>
 
-  <section class="sec" id="music">
+  <!-- MUSIC -->
+  <section class="sec music" id="music">
     <p class="eyebrow reveal">
-      <span data-lang="en">Music</span><span data-lang="fr">Musique</span>
+      <span data-lang="en">The music</span><span data-lang="fr">La musique</span>
     </p>
     <h2 class="reveal">
-      <span data-lang="en">Out now.</span>
-      <span data-lang="fr">Sorties.</span>
+      <span data-lang="en">Songs I’m leaving behind in the world.</span>
+      <span data-lang="fr">Des chansons que je laisse dans le monde.</span>
     </h2>
     <p class="sub reveal">
-      <span data-lang="en">Three releases into a public challenge: 15 original songs before the end of 2026.</span>
-      <span data-lang="fr">Trois sorties dans un défi public : 15 chansons originales avant la fin de 2026.</span>
+      <span data-lang="en">Original songs — an evolving body of work. Not a catalogue. A trail.</span>
+      <span data-lang="fr">Des chansons originales — un corpus qui évolue. Pas un catalogue. Une trace.</span>
     </p>
+    <div class="releases" data-releases></div>
+  </section>
 
-    <div class="releases">
-      <a class="release reveal" href="https://open.spotify.com/track/61hi8m9E2ltpqLtVHV5ktC" target="_blank" rel="noreferrer">
-        <div class="release-art">
-          <img src="https://image-cdn-fa.spotifycdn.com/image/ab67616d0000b2736f57f75ecb6ffb76d9250c95" alt="" width="640" height="640" loading="lazy" decoding="async" />
-        </div>
-        <div class="release-meta">
-          <div class="release-num">01 · 2026</div>
-          <h3>Nnan-iyi</h3>
-          <span data-lang="en">Listen</span><span data-lang="fr">Écouter</span>
-        </div>
-      </a>
-      <a class="release reveal" href="https://open.spotify.com/track/1cjaikZQ2PIXLMsn0gd6zV" target="_blank" rel="noreferrer">
-        <div class="release-art">
-          <img src="media/asiwel-cover.webp" alt="" width="640" height="640" loading="lazy" decoding="async" />
-        </div>
-        <div class="release-meta">
-          <div class="release-num">02 · 2026</div>
-          <h3>Asiwel</h3>
-          <span data-lang="en">Listen</span><span data-lang="fr">Écouter</span>
-        </div>
-      </a>
-      <a class="release reveal" href="https://open.spotify.com/track/4kCgTs7P4qoW9mEQHAHdt7" target="_blank" rel="noreferrer">
-        <div class="release-art">
-          <img src="https://image-cdn-fa.spotifycdn.com/image/ab67616d0000b273abe852294a3e13bd9a29c2dc" alt="" width="640" height="640" loading="lazy" decoding="async" />
-        </div>
-        <div class="release-meta">
-          <div class="release-num">03 · 2026</div>
-          <h3>TAFAT</h3>
-          <span data-lang="en">Listen</span><span data-lang="fr">Écouter</span>
-        </div>
+  <!-- JOURNEY -->
+  <section class="sec journey" id="journey">
+    <p class="eyebrow reveal">
+      <span data-lang="en">The journey</span><span data-lang="fr">Le parcours</span>
+    </p>
+    <h2 class="reveal">
+      <span data-lang="en">15 songs. One year. One body of work.</span>
+      <span data-lang="fr">15 chansons. Une année. Un corpus.</span>
+    </h2>
+    <p class="sub reveal">
+      <span data-lang="en">Each release lights another point in the orbit — toward a live show built from this music.</span>
+      <span data-lang="fr">Chaque sortie allume un autre point dans l’orbite — vers un spectacle vivant bâti sur cette musique.</span>
+    </p>
+    <div class="orbit reveal" data-orbit aria-live="polite">
+      <div class="orbit-ring" aria-hidden="true"></div>
+      <div class="orbit-nodes" data-orbit-nodes></div>
+      <div class="orbit-center">
+        <strong data-orbit-count>3 / 15</strong>
+        <span data-lang="en">songs out</span>
+        <span data-lang="fr">sorties</span>
+      </div>
+    </div>
+    <div class="cta-row reveal" style="margin-top:2rem">
+      <a class="btn ghost" href="#circle">
+        <span data-lang="en">Follow the journey →</span>
+        <span data-lang="fr">Suivre le parcours →</span>
       </a>
     </div>
+  </section>
 
-    <div class="challenge-strip reveal">
-      <div>
+  <!-- STORY -->
+  <section class="sec story" id="story">
+    <p class="eyebrow reveal">
+      <span data-lang="en">The story</span><span data-lang="fr">L’histoire</span>
+    </p>
+    <h2 class="reveal">
+      <span data-lang="en">Why these songs sound like this.</span>
+      <span data-lang="fr">Pourquoi ces chansons sonnent comme ça.</span>
+    </h2>
+
+    <div class="story-grid">
+      <article class="story-block reveal">
+        <span class="story-num">01</span>
+        <h3>
+          <span data-lang="en">Where I come from</span>
+          <span data-lang="fr">D’où je viens</span>
+        </h3>
         <p>
-          <span data-lang="en">Toward a real stage show. Dream room: L’Olympia, Montréal.</span>
-          <span data-lang="fr">Vers un vrai spectacle. Salle rêvée : L’Olympia, Montréal.</span>
+          <span data-lang="en">Algerian and Amazigh roots — language, rhythm, and memory that don’t stay in the past. They keep showing up in the writing, in the voice, in what feels true.</span>
+          <span data-lang="fr">Racines algériennes et amazighes — langue, rythme, mémoire qui ne restent pas au passé. Elles reviennent dans l’écriture, dans la voix, dans ce qui sonne juste.</span>
         </p>
-        <div class="progress" style="margin-top:0.85rem">
-          <strong>3 / 15</strong>
-          <div class="bar" aria-hidden="true"><i></i></div>
-        </div>
+      </article>
+      <article class="story-block reveal">
+        <span class="story-num">02</span>
+        <h3>
+          <span data-lang="en">Where I am</span>
+          <span data-lang="fr">Où j’en suis</span>
+        </h3>
+        <p>
+          <span data-lang="en">Montréal. Distance and rebuilding. Migration as a daily texture — not a slogan. A life being made between places, and songs that hold that tension without explaining it away.</span>
+          <span data-lang="fr">Montréal. La distance et la reconstruction. La migration comme texture du quotidien — pas un slogan. Une vie entre les lieux, et des chansons qui portent cette tension sans l’expliquer.</span>
+        </p>
+      </article>
+      <div class="story-photo reveal">
+        <img src="media/portrait-park.webp" alt="LAOUSMAIL outdoors in Montréal" width="900" height="1125" loading="lazy" decoding="async" />
       </div>
-      <a class="btn ghost" href="https://eclipsetone.com/#challenge">
-        <span data-lang="en">See the full challenge</span>
-        <span data-lang="fr">Voir le défi complet</span>
+      <article class="story-block reveal">
+        <span class="story-num">03</span>
+        <h3>
+          <span data-lang="en">What I make</span>
+          <span data-lang="fr">Ce que je fais</span>
+        </h3>
+        <p>
+          <span data-lang="en">Guitar and voice at the center. Contemporary R&amp;B and soul that still make room for Kabyle and Amazigh colour — songs that bring worlds together without forcing a category.</span>
+          <span data-lang="fr">Guitare et voix au centre. R&amp;B et soul contemporaines qui laissent de la place à la couleur kabyle et amazighe — des chansons qui rapprochent des mondes sans forcer une case.</span>
+        </p>
+      </article>
+      <article class="story-block reveal">
+        <span class="story-num">04</span>
+        <h3>
+          <span data-lang="en">Where I’m going</span>
+          <span data-lang="fr">Où je vais</span>
+        </h3>
+        <p>
+          <span data-lang="en">Fifteen songs into a year. Then the stage — a live experience built from this body of work, not around a pitch. Becoming, not pretending to have arrived.</span>
+          <span data-lang="fr">Quinze chansons dans une année. Puis la scène — une expérience live bâtie sur ce corpus, pas autour d’un pitch. Devenir, sans prétendre être déjà arrivé.</span>
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- LIVE -->
+  <section class="sec live" id="live">
+    <div class="live-atmosphere" aria-hidden="true"><i></i><i></i></div>
+    <p class="eyebrow reveal">
+      <span data-lang="en">Live</span><span data-lang="fr">Live</span>
+    </p>
+    <h2 class="reveal">
+      <span data-lang="en">The songs are becoming a show.</span>
+      <span data-lang="fr">Les chansons deviennent un spectacle.</span>
+    </h2>
+    <p class="sub reveal">
+      <span data-lang="en">A live experience built around voice, guitar, rhythm, light, visuals, and the worlds behind the songs.</span>
+      <span data-lang="fr">Une expérience live autour de la voix, de la guitare, du rythme, de la lumière, des images, et des mondes derrière les chansons.</span>
+    </p>
+    <p class="live-status reveal">
+      <span data-lang="en">The first show is coming.</span>
+      <span data-lang="fr">Le premier spectacle arrive.</span>
+    </p>
+    <p class="sub reveal" style="margin-bottom:1.75rem">
+      <span data-lang="en">Leave your email and be the first to know when the date is announced.</span>
+      <span data-lang="fr">Laisse ton email et sois le premier à savoir quand la date sera annoncée.</span>
+    </p>
+    <div class="cta-row reveal">
+      <a class="btn" href="#circle">
+        <span data-lang="en">I want to hear about the show</span>
+        <span data-lang="fr">Je veux entendre parler du spectacle</span>
       </a>
     </div>
   </section>
 
-  <section class="sec" id="about">
-    <div class="about-grid">
-      <div class="about-photo reveal">
-        <img src="media/portrait-park.webp" alt="SMA!L — Laousmail seated outdoors" width="900" height="1125" loading="lazy" decoding="async" />
-      </div>
-      <div class="about-copy">
-        <p class="eyebrow reveal">
-          <span data-lang="en">About</span><span data-lang="fr">À propos</span>
-        </p>
-        <h2 class="reveal">
-          <span data-lang="en">Open in the session. Off-grid on stage.</span>
-          <span data-lang="fr">Ouvert en session. Hors grille sur scène.</span>
-        </h2>
-        <blockquote class="reveal">
-          <span data-lang="en">“There is nothing where you are freer than music.”</span>
-          <span data-lang="fr">« Il n’y a rien où tu es plus libre que la musique. »</span>
-        </blockquote>
-        <p class="reveal">
-          <span data-lang="en">Smail Laouchedi — artist name Laousmail, also styled SMA!L. Founder of EclipseTone Productions in Montréal. Guitar, production, and songs that keep Amazigh roots close while living in the present tense.</span>
-          <span data-lang="fr">Smail Laouchedi — nom d’artiste Laousmail, aussi stylé SMA!L. Fondateur d’EclipseTone Productions à Montréal. Guitare, production, et des chansons qui gardent les racines amazighes tout en vivant au présent.</span>
-        </p>
-        <p class="reveal">
-          <span data-lang="en">He builds music in a room with people — not alone with a screen — and leads a public promise: fifteen originals before 2026 ends.</span>
-          <span data-lang="fr">Il construit la musique en pièce avec des gens — pas seul devant un écran — et mène une promesse publique : quinze originaux avant la fin de 2026.</span>
-        </p>
-        <div class="chips reveal">
-          <span data-lang="en">Artist</span><span data-lang="fr">Artiste</span>
-          <span data-lang="en">Guitar</span><span data-lang="fr">Guitare</span>
-          <span data-lang="en">Production</span><span data-lang="fr">Production</span>
-          <span>Montréal</span>
-          <span>ⵣ</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
+  <!-- CEUX QUI ÉCOUTENT -->
   <section class="sec circle" id="circle">
     <div class="circle-inner">
       <div class="eclipse reveal" aria-hidden="true">
         <strong>Ceux qui écoutent</strong>
-        <svg viewBox="0 0 32 32" fill="none">
-          <path d="M16 3v26M6 10l10 6 10-6M6 22l10-6 10 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <svg viewBox="0 0 32 32" fill="none"><path d="M16 3v26M6 10l10 6 10-6M6 22l10-6 10 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <p class="eyebrow reveal">
-        <span data-lang="en">Private circle</span><span data-lang="fr">Cercle privé</span>
+        <span data-lang="en">Stay close</span><span data-lang="fr">Reste proche</span>
       </p>
       <h2 class="reveal">
-        <span data-lang="en">A private space for people who love sound.</span>
-        <span data-lang="fr">Un espace privé pour les passionnés de son &amp; de musique.</span>
+        <span data-lang="en">The people who want to be there before everyone else.</span>
+        <span data-lang="fr">Ceux qui veulent être là avant tout le monde.</span>
       </h2>
       <p class="sub reveal">
-        <span data-lang="en">A small group for people who really love the work — where I share what I don’t publish anywhere else. A circle, not an audience.</span>
-        <span data-lang="fr">Un petit groupe pour ceux qui aiment vraiment ce que je fais — où je partage ce que je ne publie nulle part ailleurs. Un cercle, pas une audience.</span>
+        <span data-lang="en">New songs. First announcements. The story behind the music. And, when the time comes, the first word about the show.</span>
+        <span data-lang="fr">Nouvelles chansons. Premières annonces. L’histoire derrière la musique. Et, le moment venu, le premier mot sur le spectacle.</span>
       </p>
-
-      <div class="values reveal">
-        <div>
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 12h2c2 0 3-4 5-4s3 8 5 8 3-4 5-4h1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          <span data-lang="en">No algorithms</span><span data-lang="fr">Pas d’algorithmes</span>
-        </div>
-        <div>
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5zM16 9a3 3 0 0 1 0 6M18.5 7a6 6 0 0 1 0 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span data-lang="en">No noise</span><span data-lang="fr">Pas de bruit</span>
-        </div>
-        <div>
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.6-7 10-7 10z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-          <span data-lang="en">Just the essentials</span><span data-lang="fr">Juste l’essentiel</span>
-        </div>
-        <div>
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          <span>100% <span data-lang="en">private</span><span data-lang="fr">privé</span></span>
-        </div>
-      </div>
-
-      <p class="eyebrow reveal" style="margin-bottom:0.75rem">
-        <span data-lang="en">Inside, you’re first to hear</span>
-        <span data-lang="fr">À l’intérieur tu seras le premier à écouter</span>
-      </p>
-      <ul class="inside reveal">
-        <li><span data-lang="en">Early-release sounds</span><span data-lang="fr">Sons en avant-première</span></li>
-        <li><span data-lang="en">Demos &amp; unreleased versions</span><span data-lang="fr">Démos &amp; versions inédites</span></li>
-        <li><span data-lang="en">Stories behind the songs</span><span data-lang="fr">Histoires derrière les chansons</span></li>
-        <li><span data-lang="en">Studio moments shared only with you</span><span data-lang="fr">Moments de studio partagés qu’avec vous</span></li>
-      </ul>
 
       <form class="join-form reveal" id="join-form" novalidate>
         <div class="join-fields">
           <label for="join-email"><span data-lang="en">Email</span><span data-lang="fr">Courriel</span></label>
           <input id="join-email" name="email" type="email" autocomplete="email" required placeholder="email@" />
-          <button class="btn" type="submit">
-            <span data-lang="en">Join the private group</span>
-            <span data-lang="fr">Rejoindre le groupe privé</span>
+          <!-- honeypot -->
+          <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <label class="consent">
+            <input type="checkbox" name="consent" value="1" required />
+            <span>
+              <span data-lang="en">I want updates about new songs and the show. No spam.</span>
+              <span data-lang="fr">Je veux des nouvelles des chansons et du spectacle. Pas de spam.</span>
+            </span>
+          </label>
+          <button class="btn" type="submit" data-submit>
+            <span data-lang="en">Stay close to the music</span>
+            <span data-lang="fr">Rester proche de la musique</span>
           </button>
         </div>
-        <div class="join-success" role="status">
-          <span data-lang="en">Thanks — open Instagram and message @laousmail with the word ÉCOUTE so I can add you.</span>
-          <span data-lang="fr">Merci — ouvre Instagram et écris à @laousmail avec le mot ÉCOUTE pour que je t’ajoute.</span>
-          <div class="cta-row" style="justify-content:center;margin-top:0.9rem">
-            <a class="btn" href="https://instagram.com/laousmail" target="_blank" rel="noreferrer">Instagram</a>
-          </div>
+        <div class="join-success" role="status" hidden>
+          <p>
+            <span data-lang="en">You’re in. I’ll let you know when the next song — or the show — is ready.</span>
+            <span data-lang="fr">Tu es dedans. Je te préviendrai quand la prochaine chanson — ou le spectacle — sera prêt.</span>
+          </p>
         </div>
+        <div class="join-error" role="alert" hidden></div>
         <p class="join-note">
-          <span data-lang="en">No spam. Just me, my music — and what I don’t share everywhere.</span>
-          <span data-lang="fr">Pas de spam. Juste moi, ma musique — et ce que je ne partage pas partout.</span>
+          <span data-lang="en">Private list. Unsubscribe anytime. See </span>
+          <span data-lang="fr">Liste privée. Désinscription en un clic. Voir la </span>
+          <a href="privacy.html"><span data-lang="en">privacy note</span><span data-lang="fr">note de confidentialité</span></a>.
         </p>
       </form>
     </div>
   </section>
 
-  <section class="sec" id="love">
+  <!-- SOCIAL -->
+  <section class="sec social" id="listen">
     <p class="eyebrow reveal">
-      <span data-lang="en">Fan love</span><span data-lang="fr">Messages</span>
+      <span data-lang="en">Listen &amp; follow</span>
+      <span data-lang="fr">Écouter &amp; suivre</span>
     </p>
     <h2 class="reveal">
-      <span data-lang="en">What stays after the song.</span>
-      <span data-lang="fr">Ce qui reste après la chanson.</span>
+      <span data-lang="en">Find the music where you already are.</span>
+      <span data-lang="fr">Retrouve la musique là où tu es déjà.</span>
     </h2>
-    <div class="quotes">
-      <figure class="reveal">
-        <blockquote>« L’essentiel c’est que ça m’a plu beaucoup. »</blockquote>
-        <figcaption><span data-lang="en">Listener message</span><span data-lang="fr">Message d’auditeur</span></figcaption>
-      </figure>
-      <figure class="reveal">
-        <blockquote>« Je viens de te découvrir. Et j’adore. »</blockquote>
-        <figcaption><span data-lang="en">New listener</span><span data-lang="fr">Nouvelle écoute</span></figcaption>
-      </figure>
-      <figure class="reveal">
-        <blockquote>« Je te souhaite beaucoup de succès. »</blockquote>
-        <figcaption><span data-lang="en">From the DMs</span><span data-lang="fr">Depuis les DM</span></figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <section class="sec" id="moments">
-    <p class="eyebrow reveal">
-      <span data-lang="en">Moments</span><span data-lang="fr">Moments</span>
-    </p>
-    <h2 class="reveal">
-      <span data-lang="en">Park grass. Skate. Drums. Guitar.</span>
-      <span data-lang="fr">Herbe du parc. Skate. Batterie. Guitare.</span>
-    </h2>
-    <p class="sub reveal">
-      <span data-lang="en">Life between sessions — Jeanne-Mance afternoons and whatever the day brings.</span>
-      <span data-lang="fr">La vie entre les sessions — après-midis à Jeanne-Mance et ce que le jour apporte.</span>
-    </p>
-    <div class="moments-grid">
-      <figure class="reveal">
-        <img src="media/drums-park.webp" alt="SMA!L with a compact drum kit in the park" width="1200" height="900" loading="lazy" decoding="async" />
-        <figcaption>Park session</figcaption>
-      </figure>
-      <figure class="reveal">
-        <img src="media/lifestyle-park.webp" alt="Overhead: guitar and skateboard in the grass" width="900" height="1200" loading="lazy" decoding="async" />
-        <figcaption>Guitar · skate</figcaption>
-      </figure>
-      <figure class="reveal">
-        <img src="media/asiwel-cover.webp" alt="Asiwel mood — headphones, night light" width="900" height="900" loading="lazy" decoding="async" />
-        <figcaption>Asiwel</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <section class="sec" id="connect">
-    <div class="connect-panel reveal">
-      <div>
-        <p class="eyebrow">
-          <span data-lang="en">Connect</span><span data-lang="fr">Contact</span>
-        </p>
-        <h2>
-          <span data-lang="en">Say hello. Book the craft. Follow the songs.</span>
-          <span data-lang="fr">Dis bonjour. Réserve le craft. Suis les chansons.</span>
-        </h2>
-        <p class="sub" style="margin-bottom:0">
-          <span data-lang="en">WhatsApp is fastest for sessions. Instagram for the day-to-day.</span>
-          <span data-lang="fr">WhatsApp, c’est le plus rapide pour les sessions. Instagram pour le quotidien.</span>
-        </p>
-        <div class="cta-row" style="margin-top:1.4rem">
-          <a class="btn" href="https://wa.me/14384668971">WhatsApp</a>
-          <a class="btn ghost" href="https://instagram.com/laousmail" target="_blank" rel="noreferrer">@laousmail</a>
-          <a class="btn ghost" href="https://eclipsetone.com/">EclipseTone</a>
-        </div>
-        <div class="connect-links">
-          <a href="https://open.spotify.com/artist/60GjJwhvGe1eVg98jFPgMp" target="_blank" rel="noreferrer">Spotify</a>
-          <a href="https://instagram.com/eclipsetone" target="_blank" rel="noreferrer">@eclipsetone</a>
-          <a href="https://eclipsetone.com/people/smail-laouchedi.html"><span data-lang="en">EclipseTone crew profile</span><span data-lang="fr">Profil équipe EclipseTone</span></a>
-        </div>
-      </div>
-      <div class="connect-aside">
-        <img src="media/logo-smail.webp" alt="SMA!L" width="320" height="320" loading="lazy" decoding="async" />
-      </div>
-    </div>
+    <ul class="social-list reveal">
+      <li><a href="https://open.spotify.com/artist/60GjJwhvGe1eVg98jFPgMp" target="_blank" rel="noreferrer">Spotify</a></li>
+      <li><a href="https://instagram.com/laousmail" target="_blank" rel="noreferrer">Instagram</a></li>
+      <li><a href="https://www.youtube.com/@laousmail" target="_blank" rel="noreferrer">YouTube</a></li>
+      <li><a href="https://www.tiktok.com/@laousmail" target="_blank" rel="noreferrer">TikTok</a></li>
+    </ul>
   </section>
 </main>
 
 <footer class="foot">
-  <div>
-    <strong>SMA!L</strong>
-    <div>Laousmail · Montréal</div>
+  <div class="foot-brand">
+    <strong>LAOUSMAIL</strong>
+    <span>Montréal</span>
   </div>
-  <div>
-    <a href="https://eclipsetone.com/">eclipsetone.com</a>
-    · <a href="https://laousmail.com/">laousmail.com</a>
-    · © 2026
+  <div class="foot-links">
+    <a href="https://open.spotify.com/artist/60GjJwhvGe1eVg98jFPgMp" target="_blank" rel="noreferrer">Spotify</a>
+    <a href="https://instagram.com/laousmail" target="_blank" rel="noreferrer">Instagram</a>
+    <a href="https://www.youtube.com/@laousmail" target="_blank" rel="noreferrer">YouTube</a>
+    <a href="privacy.html"><span data-lang="en">Privacy</span><span data-lang="fr">Confidentialité</span></a>
   </div>
+  <div class="foot-copy">© <span data-year>2026</span> LAOUSMAIL</div>
 </footer>
 
+<script src="config.js"></script>
+<script src="releases.js"></script>
 <script src="artist.js" defer></script>
 </body>
 </html>

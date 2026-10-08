@@ -333,7 +333,8 @@
     if (!orbit || !nodesRoot) return
 
     const goal = journeyGoal()
-    const out = releases().length
+    const list = releases()
+    const out = list.length
     const yearPct = yearProgressThrough2026()
     const L = lang()
 
@@ -371,25 +372,42 @@
       traveler.title = L === 'fr' ? 'Position dans l’année 2026' : 'Place in the year 2026'
     }
 
+    // Only place dots for songs released so far (no empty waiting nodes).
     nodesRoot.innerHTML = ''
     const cx = 50
     const cy = 50
     const radius = 42
-    for (let i = 0; i < goal; i++) {
+    list.forEach((release, i) => {
       const angle = (Math.PI * 2 * i) / goal - Math.PI / 2
       const x = cx + radius * Math.cos(angle)
       const y = cy + radius * Math.sin(angle)
-      const node = document.createElement('span')
-      const lit = i < out
-      node.className = 'orbit-node' + (lit ? ' lit' : ' waiting')
+      const outward = angle
+      const labelSide = Math.cos(outward) >= 0 ? 'right' : 'left'
+
+      const node = document.createElement('button')
+      node.type = 'button'
+      node.className = 'orbit-node lit'
       node.style.left = `${x}%`
       node.style.top = `${y}%`
       node.style.setProperty('--i', String(i))
-      node.title = lit ? releases()[i]?.title || String(i + 1) : `${i + 1}`
-      nodesRoot.appendChild(node)
-    }
+      node.setAttribute('data-orbit-song', String(i))
+      node.setAttribute('aria-label', release.title || `Song ${i + 1}`)
+      node.title = release.title || String(i + 1)
 
-    // Stagger lit nodes on every render when hero is visible.
+      const label = document.createElement('span')
+      label.className = `orbit-node-label is-${labelSide}`
+      label.textContent = release.title || String(i + 1)
+      node.appendChild(label)
+
+      node.addEventListener('click', (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        openPreviewModal(i)
+      })
+
+      nodesRoot.appendChild(node)
+    })
+
     $$('.orbit-node.lit', nodesRoot).forEach((n, i) => {
       n.classList.remove('in')
       window.setTimeout(() => n.classList.add('in'), 180 + i * 110)
@@ -600,11 +618,10 @@
     if (el) el.textContent = String(new Date().getFullYear())
   }
 
-  /* ——— Live comments: expand / minimize / dismiss / side toasts ——— */
+  /* ——— Messages rail: expand / minimize / dismiss ——— */
   function initLiveComments() {
     const rail = $('[data-live-rail]')
     const layer = $('[data-live-comments]')
-    const toggle = $('[data-live-toggle]')
     const minBtn = $('[data-live-minimize]')
     const fab = $('[data-live-fab]')
     const fabCount = $('[data-live-fab-count]')
@@ -612,26 +629,24 @@
     if (!layer || !rail) return
 
     const pool = Array.isArray(window.LAOUSMAIL_COMMENTS) ? window.LAOUSMAIL_COMMENTS.slice() : []
-    if (!pool.length) {
-      toggle && (toggle.hidden = true)
-      rail.hidden = true
-      fab && (fab.hidden = true)
-      document.body.classList.remove('live-rail-on', 'live-rail-min')
-      return
+    const messageCta = {
+      type: 'cta',
+      handle: '@you',
+      text: '',
+      href: '#circle',
     }
 
     let on = true
     let minimized = false
     let timer = 0
     let unseen = 0
-    let idx = Math.floor(Math.random() * pool.length)
+    let idx = pool.length ? Math.floor(Math.random() * pool.length) : 0
+    let spawnCount = 0
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const dismissKey = 'laousmail-dismissed-comments'
     let dismissed = new Set()
 
     try {
-      const saved = localStorage.getItem('laousmail-live-comments')
-      if (saved === 'off') on = false
       const minSaved = localStorage.getItem('laousmail-live-minimized')
       if (minSaved === '1') minimized = true
       const raw = localStorage.getItem(dismissKey)
@@ -640,15 +655,9 @@
       /* private mode */
     }
 
-    function sourceLabel(source) {
-      if (source === 'tiktok') return 'TikTok'
-      if (source === 'instagram') return 'Instagram'
-      if (source === 'dm') return 'DM'
-      return ''
-    }
-
     function commentKey(item) {
-      return `${item.source || ''}|${item.handle || ''}|${item.text || ''}`
+      if (item?.type === 'cta') return 'cta|leave-a-message'
+      return `${item.handle || ''}|${item.text || ''}`
     }
 
     function persistDismissed() {
@@ -660,25 +669,25 @@
     }
 
     function updateFab() {
-      if (!fab || !fabCount) return
-      fabCount.textContent = String(Math.min(unseen, 99))
+      if (!fab) return
+      if (fabCount) {
+        const n = Math.min(unseen, 99)
+        fabCount.textContent = String(n)
+        fabCount.hidden = n < 1
+      }
       fab.classList.toggle('has-new', unseen > 0)
       fab.hidden = !(on && minimized)
     }
 
     function setChrome() {
-      if (toggle) {
-        toggle.setAttribute('aria-pressed', on ? 'true' : 'false')
-        toggle.classList.toggle('is-off', !on)
-      }
       rail.hidden = !(on && !minimized)
       rail.setAttribute('aria-hidden', on && !minimized ? 'false' : 'true')
       document.body.classList.toggle('live-rail-on', on && !minimized)
       document.body.classList.toggle('live-rail-min', on && minimized)
+      document.body.classList.remove('live-dim')
       if (minBtn) {
         minBtn.setAttribute('aria-expanded', minimized ? 'false' : 'true')
-        const open = minimized
-        minBtn.innerHTML = open
+        minBtn.innerHTML = minimized
           ? '<span data-lang="en">Open</span><span data-lang="fr">Ouvrir</span>'
           : '<span data-lang="en">Hide</span><span data-lang="fr">Réduire</span>'
       }
@@ -694,22 +703,39 @@
       window.setTimeout(() => el.remove(), 280)
     }
 
+    function ctaCopy() {
+      return lang() === 'fr' ? 'Laisse un message pour Smail' : 'Leave a message for Smail'
+    }
+
     function buildBubble(item, toast) {
-      const bubble = document.createElement('div')
-      bubble.className = toast ? 'live-toast' : 'live-bubble'
-      const src = sourceLabel(item.source)
+      const bubble = document.createElement(item.type === 'cta' ? 'a' : 'div')
+      bubble.className = `${toast ? 'live-toast' : 'live-bubble'}${item.type === 'cta' ? ' is-cta' : ''}`
       const closeLabel = lang() === 'fr' ? 'Retirer' : 'Dismiss'
-      bubble.innerHTML = `${
-        src ? `<span class="live-source">${escapeHtml(src)}</span>` : ''
-      }<span class="live-handle">${escapeHtml(item.handle || '@fan')}</span><span class="live-text">${escapeHtml(
-        item.text || '',
-      )}</span><button type="button" class="live-dismiss" aria-label="${closeLabel}">×</button>`
+
+      if (item.type === 'cta') {
+        bubble.href = item.href || '#circle'
+        bubble.innerHTML = `<span class="live-cta-mark" aria-hidden="true">✦</span><span class="live-text">${escapeHtml(
+          ctaCopy(),
+        )}</span><button type="button" class="live-dismiss" aria-label="${closeLabel}">×</button>`
+      } else {
+        bubble.innerHTML = `<span class="live-handle">${escapeHtml(
+          item.handle || '@fan',
+        )}</span><span class="live-text">${escapeHtml(
+          item.text || '',
+        )}</span><button type="button" class="live-dismiss" aria-label="${closeLabel}">×</button>`
+      }
+
       bubble.querySelector('.live-dismiss')?.addEventListener('click', (e) => {
+        e.preventDefault()
         e.stopPropagation()
         dismissBubble(bubble, item)
       })
+
       if (toast) {
-        bubble.addEventListener('click', () => {
+        bubble.addEventListener('click', (e) => {
+          if (e.target.closest?.('.live-dismiss')) return
+          if (item.type === 'cta') return
+          e.preventDefault()
           minimized = false
           try {
             localStorage.setItem('laousmail-live-minimized', '0')
@@ -725,38 +751,29 @@
     }
 
     function nextItem() {
+      spawnCount += 1
+      // Float the message CTA with the feed (first, then every few bubbles).
+      if (spawnCount === 1 || spawnCount % 4 === 0) {
+        if (!dismissed.has(commentKey(messageCta))) return messageCta
+      }
+      if (!pool.length) {
+        return dismissed.has(commentKey(messageCta)) ? null : messageCta
+      }
       for (let n = 0; n < pool.length; n += 1) {
         const item = pool[idx % pool.length]
         idx += 1
         if (!dismissed.has(commentKey(item))) return item
       }
-      return null
+      return dismissed.has(commentKey(messageCta)) ? null : messageCta
     }
 
     function spawn() {
-      if (!on || document.hidden) return
+      if (!on || document.hidden || minimized) return
       if (document.body.classList.contains('menu-open') || document.body.classList.contains('preview-open')) {
         return
       }
       const item = nextItem()
       if (!item) return
-
-      if (minimized) {
-        unseen += 1
-        updateFab()
-        if (toasts) {
-          const toast = buildBubble(item, true)
-          toasts.appendChild(toast)
-          void toast.offsetWidth
-          toast.classList.add('in')
-          window.setTimeout(() => {
-            toast.classList.add('out')
-            window.setTimeout(() => toast.remove(), 400)
-          }, reduce ? 4200 : 3200)
-          while (toasts.children.length > 3) toasts.firstChild?.remove()
-        }
-        return
-      }
 
       const bubble = buildBubble(item, false)
       layer.appendChild(bubble)
@@ -764,7 +781,7 @@
       void bubble.offsetWidth
       bubble.classList.add('in')
 
-      const life = reduce ? 10000 : 8000 + Math.random() * 3000
+      const life = item.type === 'cta' ? (reduce ? 14000 : 12000) : reduce ? 10000 : 8000 + Math.random() * 3000
       window.setTimeout(() => {
         if (!bubble.isConnected || bubble.classList.contains('dismissed')) return
         bubble.classList.add('out')
@@ -776,7 +793,7 @@
 
     function schedule() {
       window.clearTimeout(timer)
-      if (!on) return
+      if (!on || minimized) return
       const gap = reduce ? 3400 : 1500 + Math.random() * 1600
       timer = window.setTimeout(() => {
         spawn()
@@ -784,58 +801,41 @@
       }, gap)
     }
 
-    function start() {
-      on = true
-      setChrome()
-      try {
-        localStorage.setItem('laousmail-live-comments', 'on')
-      } catch {
-        /* private mode */
-      }
-      spawn()
-      window.setTimeout(spawn, 500)
-      schedule()
-    }
-
-    function stop() {
-      on = false
-      minimized = false
-      unseen = 0
-      setChrome()
-      window.clearTimeout(timer)
-      layer.innerHTML = ''
-      if (toasts) toasts.innerHTML = ''
-      try {
-        localStorage.setItem('laousmail-live-comments', 'off')
-        localStorage.setItem('laousmail-live-minimized', '0')
-      } catch {
-        /* private mode */
-      }
-    }
-
     function setMinimized(next) {
-      minimized = next
+      minimized = !!next
       if (!minimized) unseen = 0
+      // Hide must not leave a grey overlay — clear toasts and pads cleanly.
+      if (minimized) {
+        window.clearTimeout(timer)
+        if (toasts) toasts.innerHTML = ''
+        layer.innerHTML = ''
+      }
       setChrome()
       try {
         localStorage.setItem('laousmail-live-minimized', minimized ? '1' : '0')
       } catch {
         /* private mode */
       }
-      if (on && !minimized) spawn()
+      if (on && !minimized) {
+        spawn()
+        schedule()
+      }
     }
 
-    toggle?.addEventListener('click', () => (on ? stop() : start()))
     minBtn?.addEventListener('click', () => setMinimized(!minimized))
     fab?.addEventListener('click', () => setMinimized(false))
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) window.clearTimeout(timer)
-      else if (on) schedule()
+      else if (on && !minimized) schedule()
     })
 
     setChrome()
-    if (on) start()
+    if (on && !minimized) {
+      spawn()
+      window.setTimeout(spawn, 500)
+      schedule()
+    }
   }
 
   /* ——— First-visit UI hints with motion ——— */
@@ -855,13 +855,9 @@
     }
 
     const copy = {
-      live: {
-        en: 'LIVE opens fan comments. Hide tucks them; × removes one.',
-        fr: 'LIVE ouvre les commentaires. Réduire les range ; × en retire un.',
-      },
       orbit: {
-        en: 'This circle fills with each song — full by end of 2026.',
-        fr: 'Ce cercle se remplit à chaque chanson — plein fin 2026.',
+        en: 'Each lit point is a released song — tap a name to preview it. The circle fills by end of 2026.',
+        fr: 'Chaque point allumé est une chanson sortie — touche un nom pour l’extrait. Le cercle se remplit fin 2026.',
       },
       preview: {
         en: 'Tap a song for a 30s preview, then pick where to listen.',
@@ -873,7 +869,7 @@
       },
     }
 
-    const queue = ['live', 'orbit', 'preview']
+    const queue = ['orbit', 'preview']
     let active = null
     let timer = 0
 

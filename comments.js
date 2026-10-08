@@ -1,23 +1,20 @@
 /**
- * Live fan comments — TikTok / Instagram / DM.
- *
- * TikTok & Instagram block scraping from this site, so paste real comments here.
- * They stream in the reserved LIVE rail (does not cover the page).
+ * Listener messages shown in the reserved rail.
+ * Paste real comments anytime. No source labels are shown on the page.
  *
  * Format:
- *   { handle: '@someone', text: 'comment', heart: true, source: 'tiktok' | 'instagram' | 'dm' }
+ *   { handle: '@someone', text: 'comment', heart: true }
+ *
+ * A floating “Leave a message for Smail” tab is injected automatically
+ * and streams with the other bubbles.
  */
 window.LAOUSMAIL_COMMENTS = [
-  // Real fan messages already shared
-  { handle: '@fan', text: "L'essentiel c'est que ça m'a plu beaucoup", heart: true, source: 'dm' },
-  { handle: '@fan', text: 'Je te souhaite beaucoup de succès', heart: true, source: 'dm' },
-  { handle: '@fan', text: 'Finalement tu chantes depuis longtemps', heart: true, source: 'dm' },
-  { handle: '@fan', text: 'Je viens de te découvrir', heart: true, source: 'dm' },
-  { handle: '@fan', text: "Et j'adore", heart: true, source: 'dm' },
+  { handle: '@fan', text: "L'essentiel c'est que ça m'a plu beaucoup", heart: true },
+  { handle: '@fan', text: 'Je te souhaite beaucoup de succès', heart: true },
+  { handle: '@fan', text: 'Finalement tu chantes depuis longtemps', heart: true },
+  { handle: '@fan', text: 'Je viens de te découvrir', heart: true },
+  { handle: '@fan', text: "Et j'adore", heart: true },
 
-  // Paste real TikTok comments below (copy from your videos)
-  // { handle: '@real_handle', text: 'exact comment text', heart: true, source: 'tiktok' },
-
-  // Paste real Instagram comments below
-  // { handle: '@real_handle', text: 'exact comment text', heart: true, source: 'instagram' },
+  // Paste real TikTok / Instagram comments below
+  // { handle: '@real_handle', text: 'exact comment text', heart: true },
 ]

@@ -40,27 +40,24 @@
 </head>
 <body>
 <div class="pointer-glow" aria-hidden="true"></div>
-<aside class="live-rail" data-live-rail aria-label="Live comments" hidden>
+<aside class="live-rail" data-live-rail aria-label="Messages" hidden>
   <div class="live-rail-head">
-    <span class="live-dot" aria-hidden="true"></span>
-    <strong>LIVE</strong>
+    <strong data-lang="en">Messages</strong>
+    <strong data-lang="fr">Messages</strong>
     <span class="live-rail-sub">
-      <span data-lang="en">Fan comments</span>
-      <span data-lang="fr">Commentaires</span>
+      <span data-lang="en">From listeners</span>
+      <span data-lang="fr">Des auditeurs</span>
     </span>
-    <button type="button" class="live-rail-min" data-live-minimize aria-expanded="true" title="Minimize">
+    <button type="button" class="live-rail-min-btn" data-live-minimize aria-expanded="true" title="Hide">
       <span data-lang="en">Hide</span><span data-lang="fr">Réduire</span>
     </button>
   </div>
-  <p class="live-rail-hint" data-live-rail-hint>
-    <span data-lang="en">Tap × to dismiss · Hide tucks the feed</span>
-    <span data-lang="fr">Touche × pour retirer · Réduire range le fil</span>
-  </p>
   <div class="live-comments" data-live-comments></div>
 </aside>
-<button type="button" class="live-fab" data-live-fab hidden aria-label="Show live comments">
-  <span class="live-dot" aria-hidden="true"></span>
-  <span data-live-fab-count>0</span>
+<button type="button" class="live-fab" data-live-fab hidden aria-label="Show messages">
+  <span data-lang="en">Messages</span>
+  <span data-lang="fr">Messages</span>
+  <span data-live-fab-count hidden>0</span>
 </button>
 <div class="live-toast-layer" data-live-toasts aria-hidden="true"></div>
 <a class="skip" href="#music"><span data-lang="en">Skip to content</span><span data-lang="fr">Aller au contenu</span></a>
@@ -95,10 +92,6 @@
     <a class="pill" href="#music">
       <span data-lang="en">Play</span><span data-lang="fr">Écouter</span>
     </a>
-    <button type="button" class="live-toggle hintable" data-live-toggle data-hint="live" aria-pressed="true" title="Live comments">
-      <span class="live-dot" aria-hidden="true"></span>
-      LIVE
-    </button>
   </div>
 </header>
 

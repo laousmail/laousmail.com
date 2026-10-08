@@ -616,7 +616,7 @@
     if (el) el.textContent = String(new Date().getFullYear())
   }
 
-  /* ——— Comments rail: expand / minimize / compose (localStorage) ——— */
+  /* ——— Comments rail: shared backend + local fallback ——— */
   function initLiveComments() {
     const rail = $('[data-live-rail]')
     const layer = $('[data-live-comments]')
@@ -628,36 +628,54 @@
     if (!layer || !rail) return
 
     const STORAGE_KEY = 'laousmail-user-comments'
+    const apiCfg = window.LAOUSMAIL_COMMENTS_API || {}
+    const apiEndpoint = String(apiCfg.endpoint || '').trim()
+    const pollMs = Math.max(8000, Number(apiCfg.pollMs) || 20000)
     const seed = Array.isArray(window.LAOUSMAIL_COMMENTS) ? window.LAOUSMAIL_COMMENTS.slice() : []
-    let userComments = []
+    let remoteComments = []
+    let localComments = []
+    let apiOnline = false
 
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (raw) {
         const parsed = JSON.parse(raw)
         if (Array.isArray(parsed)) {
-          userComments = parsed
+          localComments = parsed
             .filter((c) => c && typeof c.text === 'string' && c.text.trim())
             .map((c) => ({
               handle: String(c.handle || '@fan').slice(0, 24),
               text: String(c.text).slice(0, 160),
               heart: !!c.heart,
               ts: Number(c.ts) || Date.now(),
+              id: c.id || '',
             }))
             .slice(0, 100)
         }
       }
     } catch {
-      userComments = []
+      localComments = []
+    }
+
+    function commentKey(item) {
+      return `${item.id || ''}|${item.handle || ''}|${item.text || ''}|${item.ts || ''}`
     }
 
     function pool() {
-      return userComments.concat(seed)
+      const seen = new Set()
+      const out = []
+      for (const item of remoteComments.concat(localComments).concat(seed)) {
+        const key = commentKey(item)
+        if (seen.has(key)) continue
+        seen.add(key)
+        out.push(item)
+      }
+      return out
     }
 
-    function persistUserComments() {
+    function persistLocal() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(userComments.slice(0, 100)))
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(localComments.slice(0, 100)))
       } catch {
         /* private mode */
       }
@@ -668,6 +686,7 @@
     let on = true
     let minimized = false
     let timer = 0
+    let pollTimer = 0
     let unseen = 0
     let idx = 0
     let spawnCount = 0
@@ -801,6 +820,43 @@
       }, gap)
     }
 
+    async function fetchRemoteComments() {
+      if (!apiEndpoint || !isSafeHttps(apiEndpoint)) return
+      try {
+        const res = await fetch(apiEndpoint, {
+          method: 'GET',
+          headers: { Accept: 'application/json' },
+          mode: 'cors',
+          cache: 'no-store',
+        })
+        if (!res.ok) throw new Error(`status ${res.status}`)
+        const data = await res.json()
+        const list = Array.isArray(data?.comments) ? data.comments : []
+        remoteComments = list
+          .filter((c) => c && typeof c.text === 'string' && c.text.trim())
+          .map((c) => ({
+            id: c.id || '',
+            handle: String(c.handle || '@fan').slice(0, 24),
+            text: String(c.text).slice(0, 160),
+            heart: c.heart !== false,
+            ts: Number(c.ts) || Date.now(),
+            source: c.source || 'site',
+          }))
+        apiOnline = true
+      } catch {
+        apiOnline = false
+      }
+    }
+
+    function schedulePoll() {
+      window.clearTimeout(pollTimer)
+      if (!apiEndpoint) return
+      pollTimer = window.setTimeout(async () => {
+        await fetchRemoteComments()
+        schedulePoll()
+      }, pollMs)
+    }
+
     function setMinimized(next) {
       minimized = !!next
       if (!minimized) unseen = 0
@@ -827,10 +883,12 @@
       return (raw.startsWith('@') ? raw : `@${raw}`).slice(0, 24)
     }
 
-    compose?.addEventListener('submit', (event) => {
+    compose?.addEventListener('submit', async (event) => {
       event.preventDefault()
       const handleInput = compose.querySelector('[name="handle"]')
       const textInput = compose.querySelector('[name="text"]')
+      const hp = compose.querySelector('[name="website"]')
+      const postBtn = compose.querySelector('[data-live-post]')
       const text = String(textInput?.value || '').trim()
       if (!text) {
         textInput?.focus()
@@ -842,12 +900,54 @@
         heart: true,
         ts: Date.now(),
       }
-      userComments.unshift(entry)
-      persistUserComments()
-      if (handleInput) handleInput.value = entry.handle
+
+      if (postBtn) postBtn.disabled = true
+
+      let saved = entry
+      let postedRemote = false
+      if (apiEndpoint && isSafeHttps(apiEndpoint)) {
+        try {
+          const res = await fetch(apiEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            mode: 'cors',
+            body: JSON.stringify({
+              handle: entry.handle,
+              text: entry.text,
+              website: hp?.value || '',
+            }),
+          })
+          if (res.ok) {
+            const data = await res.json()
+            if (data?.comment) {
+              saved = {
+                id: data.comment.id || '',
+                handle: data.comment.handle || entry.handle,
+                text: data.comment.text || entry.text,
+                heart: true,
+                ts: data.comment.ts || entry.ts,
+                source: 'site',
+              }
+              postedRemote = true
+              apiOnline = true
+              remoteComments.unshift(saved)
+            }
+          }
+        } catch {
+          postedRemote = false
+        }
+      }
+
+      if (!postedRemote) {
+        localComments.unshift(entry)
+        persistLocal()
+      }
+
+      if (handleInput) handleInput.value = saved.handle
       if (textInput) textInput.value = ''
       if (minimized) setMinimized(false)
-      showBubble(entry, { sticky: true })
+      showBubble(saved, { sticky: true })
+      if (postBtn) postBtn.disabled = false
       textInput?.focus()
     })
 
@@ -855,21 +955,29 @@
     fab?.addEventListener('click', () => setMinimized(false))
 
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) window.clearTimeout(timer)
-      else if (on && !minimized) schedule()
+      if (document.hidden) {
+        window.clearTimeout(timer)
+        window.clearTimeout(pollTimer)
+      } else if (on) {
+        if (!minimized) schedule()
+        schedulePoll()
+        fetchRemoteComments()
+      }
     })
 
-    // Keep placeholders in sync when language changes
     $$('[data-lang-btn]').forEach((btn) => {
       btn.addEventListener('click', () => window.setTimeout(syncComposePlaceholders, 0))
     })
 
     setChrome()
-    if (on && !minimized) {
-      spawn()
-      window.setTimeout(spawn, 500)
-      schedule()
-    }
+    fetchRemoteComments().finally(() => {
+      if (on && !minimized) {
+        spawn()
+        window.setTimeout(spawn, 500)
+        schedule()
+      }
+      schedulePoll()
+    })
   }
 
   /* ——— First-visit UI hints with motion ——— */

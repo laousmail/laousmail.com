@@ -1876,6 +1876,14 @@ body.live-rail-min {
   gap: 0.35rem;
   align-items: center;
   padding-top: 0.15rem;
+  position: relative;
+}
+
+.live-compose .hp {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
 }
 
 .live-compose input {

@@ -20,14 +20,14 @@ Static HTML / CSS / JS. GitHub Pages compatible. No build step.
 | `config.js` | Fan signup endpoint (no secrets) |
 | `privacy.html` | Short privacy note |
 
-## Live comments + Spotify preview
+## Comments backend + Spotify preview
 
-- Comments stream in a **reserved LIVE rail**. **Hide** minimizes it; side toasts + FAB reopen; **×** dismisses a comment.
-- First visit shows short animated UI hints (LIVE, orbit, preview, platforms).
-- TikTok/Instagram can’t be scraped — paste real comments in `comments.js`.
-- First click on a song opens a popup with the 30s preview.
-- Then choose **Spotify**, **YouTube**, or **Apple Music** — each opens that destination.
-- Links + preview URLs live in `releases.js` (`spotify`, `youtube`, `appleMusic`, `preview`).
+- Comments rail posts to a **Cloudflare Worker + KV** API (`comments-api/`). Shared across visitors.
+- Config: `config.js` → `LAOUSMAIL_COMMENTS_API.endpoint`.
+- Seed/fallback list still lives in `comments.js` if the API is briefly unreachable.
+- **Claim the temporary Worker** — see `comments-api/CLAIM.md` (time-limited).
+- First click on a song opens a popup with the 30s preview, then **Spotify / YouTube / Apple Music**.
+- Links + preview URLs live in `releases.js`.
 
 ## Local preview
 

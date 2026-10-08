@@ -1,0 +1,7 @@
+name = "laousmail-comments"
+main = "src/worker.js"
+compatibility_date = "2026-10-08"
+
+[[kv_namespaces]]
+binding = "COMMENTS"
+id = "36c134cd80e744b898a43deca9e31fdd"

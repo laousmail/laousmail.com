@@ -420,8 +420,14 @@ html[lang="fr"] [data-lang="en"] {
   min-height: calc(100svh - var(--nav-h));
   display: grid;
   align-items: center;
-  overflow: hidden;
+  overflow: visible;
   isolation: isolate;
+}
+
+.hero-media,
+.hero-shade {
+  overflow: hidden;
+  border-radius: 0;
 }
 
 .hero-media {

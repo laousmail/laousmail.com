@@ -381,8 +381,6 @@
       const angle = (Math.PI * 2 * i) / goal - Math.PI / 2
       const x = cx + radius * Math.cos(angle)
       const y = cy + radius * Math.sin(angle)
-      const outward = angle
-      const labelSide = Math.cos(outward) >= 0 ? 'right' : 'left'
 
       const node = document.createElement('button')
       node.type = 'button'
@@ -395,7 +393,7 @@
       node.title = release.title || String(i + 1)
 
       const label = document.createElement('span')
-      label.className = `orbit-node-label is-${labelSide}`
+      label.className = 'orbit-node-label'
       label.textContent = release.title || String(i + 1)
       node.appendChild(label)
 
@@ -618,7 +616,7 @@
     if (el) el.textContent = String(new Date().getFullYear())
   }
 
-  /* ——— Messages rail: expand / minimize / dismiss ——— */
+  /* ——— Comments rail: expand / minimize / compose (localStorage) ——— */
   function initLiveComments() {
     const rail = $('[data-live-rail]')
     const layer = $('[data-live-comments]')
@@ -626,46 +624,68 @@
     const fab = $('[data-live-fab]')
     const fabCount = $('[data-live-fab-count]')
     const toasts = $('[data-live-toasts]')
+    const compose = $('[data-live-compose]')
     if (!layer || !rail) return
 
-    const pool = Array.isArray(window.LAOUSMAIL_COMMENTS) ? window.LAOUSMAIL_COMMENTS.slice() : []
-    const messageCta = {
-      type: 'cta',
-      handle: '@you',
-      text: '',
-      href: '#circle',
+    const STORAGE_KEY = 'laousmail-user-comments'
+    const seed = Array.isArray(window.LAOUSMAIL_COMMENTS) ? window.LAOUSMAIL_COMMENTS.slice() : []
+    let userComments = []
+
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed)) {
+          userComments = parsed
+            .filter((c) => c && typeof c.text === 'string' && c.text.trim())
+            .map((c) => ({
+              handle: String(c.handle || '@fan').slice(0, 24),
+              text: String(c.text).slice(0, 160),
+              heart: !!c.heart,
+              ts: Number(c.ts) || Date.now(),
+            }))
+            .slice(0, 100)
+        }
+      }
+    } catch {
+      userComments = []
     }
+
+    function pool() {
+      return userComments.concat(seed)
+    }
+
+    function persistUserComments() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(userComments.slice(0, 100)))
+      } catch {
+        /* private mode */
+      }
+    }
+
+    const messageCta = { type: 'cta', handle: '@you', text: '' }
 
     let on = true
     let minimized = false
     let timer = 0
     let unseen = 0
-    let idx = pool.length ? Math.floor(Math.random() * pool.length) : 0
+    let idx = 0
     let spawnCount = 0
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const dismissKey = 'laousmail-dismissed-comments'
-    let dismissed = new Set()
 
     try {
       const minSaved = localStorage.getItem('laousmail-live-minimized')
       if (minSaved === '1') minimized = true
-      const raw = localStorage.getItem(dismissKey)
-      if (raw) dismissed = new Set(JSON.parse(raw))
     } catch {
       /* private mode */
     }
 
-    function commentKey(item) {
-      if (item?.type === 'cta') return 'cta|leave-a-message'
-      return `${item.handle || ''}|${item.text || ''}`
-    }
-
-    function persistDismissed() {
-      try {
-        localStorage.setItem(dismissKey, JSON.stringify([...dismissed].slice(-80)))
-      } catch {
-        /* private mode */
-      }
+    function syncComposePlaceholders() {
+      if (!compose) return
+      const L = lang()
+      $$('input[data-ph-en]', compose).forEach((input) => {
+        input.placeholder = L === 'fr' ? input.getAttribute('data-ph-fr') || '' : input.getAttribute('data-ph-en') || ''
+      })
     }
 
     function updateFab() {
@@ -692,79 +712,75 @@
           : '<span data-lang="en">Hide</span><span data-lang="fr">Réduire</span>'
       }
       updateFab()
-    }
-
-    function dismissBubble(el, item) {
-      if (item) {
-        dismissed.add(commentKey(item))
-        persistDismissed()
-      }
-      el.classList.add('out', 'dismissed')
-      window.setTimeout(() => el.remove(), 280)
+      syncComposePlaceholders()
     }
 
     function ctaCopy() {
-      return lang() === 'fr' ? 'Laisse un message pour Smail' : 'Leave a message for Smail'
+      return lang() === 'fr' ? 'Laisse un commentaire pour Smail' : 'Leave a comment for Smail'
     }
 
-    function buildBubble(item, toast) {
-      const bubble = document.createElement(item.type === 'cta' ? 'a' : 'div')
-      bubble.className = `${toast ? 'live-toast' : 'live-bubble'}${item.type === 'cta' ? ' is-cta' : ''}`
-      const closeLabel = lang() === 'fr' ? 'Retirer' : 'Dismiss'
-
-      if (item.type === 'cta') {
-        bubble.href = item.href || '#circle'
+    function buildBubble(item) {
+      const isCta = item.type === 'cta'
+      if (isCta) {
+        const bubble = document.createElement('button')
+        bubble.type = 'button'
+        bubble.className = 'live-bubble is-cta'
         bubble.innerHTML = `<span class="live-cta-mark" aria-hidden="true">✦</span><span class="live-text">${escapeHtml(
           ctaCopy(),
-        )}</span><button type="button" class="live-dismiss" aria-label="${closeLabel}">×</button>`
-      } else {
-        bubble.innerHTML = `<span class="live-handle">${escapeHtml(
-          item.handle || '@fan',
-        )}</span><span class="live-text">${escapeHtml(
-          item.text || '',
-        )}</span><button type="button" class="live-dismiss" aria-label="${closeLabel}">×</button>`
-      }
-
-      bubble.querySelector('.live-dismiss')?.addEventListener('click', (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        dismissBubble(bubble, item)
-      })
-
-      if (toast) {
-        bubble.addEventListener('click', (e) => {
-          if (e.target.closest?.('.live-dismiss')) return
-          if (item.type === 'cta') return
-          e.preventDefault()
-          minimized = false
-          try {
-            localStorage.setItem('laousmail-live-minimized', '0')
-          } catch {
-            /* private mode */
-          }
-          unseen = 0
-          setChrome()
-          bubble.remove()
+        )}</span>`
+        bubble.addEventListener('click', () => {
+          const input = $('#live-text')
+          input?.focus()
+          input?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
         })
+        return bubble
       }
+      const bubble = document.createElement('div')
+      bubble.className = 'live-bubble'
+      bubble.innerHTML = `<span class="live-handle">${escapeHtml(
+        item.handle || '@fan',
+      )}</span><span class="live-text">${escapeHtml(item.text || '')}</span>`
       return bubble
     }
 
     function nextItem() {
       spawnCount += 1
-      // Float the message CTA with the feed (first, then every few bubbles).
-      if (spawnCount === 1 || spawnCount % 4 === 0) {
-        if (!dismissed.has(commentKey(messageCta))) return messageCta
-      }
-      if (!pool.length) {
-        return dismissed.has(commentKey(messageCta)) ? null : messageCta
-      }
-      for (let n = 0; n < pool.length; n += 1) {
-        const item = pool[idx % pool.length]
-        idx += 1
-        if (!dismissed.has(commentKey(item))) return item
-      }
-      return dismissed.has(commentKey(messageCta)) ? null : messageCta
+      const list = pool()
+      if (spawnCount === 1 || spawnCount % 5 === 0) return messageCta
+      if (!list.length) return messageCta
+      const item = list[idx % list.length]
+      idx += 1
+      return item
+    }
+
+    function showBubble(item, { sticky = false } = {}) {
+      if (!item) return
+      const bubble = buildBubble(item)
+      if (sticky) bubble.classList.add('is-fresh')
+      layer.appendChild(bubble)
+      layer.scrollTop = layer.scrollHeight
+      void bubble.offsetWidth
+      bubble.classList.add('in')
+
+      const life = sticky
+        ? reduce
+          ? 16000
+          : 14000
+        : item.type === 'cta'
+          ? reduce
+            ? 12000
+            : 10000
+          : reduce
+            ? 10000
+            : 8000 + Math.random() * 3000
+
+      window.setTimeout(() => {
+        if (!bubble.isConnected) return
+        bubble.classList.add('out')
+        window.setTimeout(() => bubble.remove(), 500)
+      }, life)
+
+      while (layer.children.length > 8) layer.firstChild?.remove()
     }
 
     function spawn() {
@@ -772,29 +788,13 @@
       if (document.body.classList.contains('menu-open') || document.body.classList.contains('preview-open')) {
         return
       }
-      const item = nextItem()
-      if (!item) return
-
-      const bubble = buildBubble(item, false)
-      layer.appendChild(bubble)
-      layer.scrollTop = layer.scrollHeight
-      void bubble.offsetWidth
-      bubble.classList.add('in')
-
-      const life = item.type === 'cta' ? (reduce ? 14000 : 12000) : reduce ? 10000 : 8000 + Math.random() * 3000
-      window.setTimeout(() => {
-        if (!bubble.isConnected || bubble.classList.contains('dismissed')) return
-        bubble.classList.add('out')
-        window.setTimeout(() => bubble.remove(), 500)
-      }, life)
-
-      while (layer.children.length > 7) layer.firstChild?.remove()
+      showBubble(nextItem())
     }
 
     function schedule() {
       window.clearTimeout(timer)
       if (!on || minimized) return
-      const gap = reduce ? 3400 : 1500 + Math.random() * 1600
+      const gap = reduce ? 3400 : 1600 + Math.random() * 1800
       timer = window.setTimeout(() => {
         spawn()
         schedule()
@@ -804,7 +804,6 @@
     function setMinimized(next) {
       minimized = !!next
       if (!minimized) unseen = 0
-      // Hide must not leave a grey overlay — clear toasts and pads cleanly.
       if (minimized) {
         window.clearTimeout(timer)
         if (toasts) toasts.innerHTML = ''
@@ -822,12 +821,47 @@
       }
     }
 
+    function normalizeHandle(value) {
+      const raw = String(value || '').trim().replace(/\s+/g, '')
+      if (!raw) return '@fan'
+      return (raw.startsWith('@') ? raw : `@${raw}`).slice(0, 24)
+    }
+
+    compose?.addEventListener('submit', (event) => {
+      event.preventDefault()
+      const handleInput = compose.querySelector('[name="handle"]')
+      const textInput = compose.querySelector('[name="text"]')
+      const text = String(textInput?.value || '').trim()
+      if (!text) {
+        textInput?.focus()
+        return
+      }
+      const entry = {
+        handle: normalizeHandle(handleInput?.value),
+        text: text.slice(0, 160),
+        heart: true,
+        ts: Date.now(),
+      }
+      userComments.unshift(entry)
+      persistUserComments()
+      if (handleInput) handleInput.value = entry.handle
+      if (textInput) textInput.value = ''
+      if (minimized) setMinimized(false)
+      showBubble(entry, { sticky: true })
+      textInput?.focus()
+    })
+
     minBtn?.addEventListener('click', () => setMinimized(!minimized))
     fab?.addEventListener('click', () => setMinimized(false))
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) window.clearTimeout(timer)
       else if (on && !minimized) schedule()
+    })
+
+    // Keep placeholders in sync when language changes
+    $$('[data-lang-btn]').forEach((btn) => {
+      btn.addEventListener('click', () => window.setTimeout(syncComposePlaceholders, 0))
     })
 
     setChrome()

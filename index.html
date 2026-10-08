@@ -40,10 +40,10 @@
 </head>
 <body>
 <div class="pointer-glow" aria-hidden="true"></div>
-<aside class="live-rail" data-live-rail aria-label="Messages" hidden>
+<aside class="live-rail" data-live-rail aria-label="Comments" hidden>
   <div class="live-rail-head">
-    <strong data-lang="en">Messages</strong>
-    <strong data-lang="fr">Messages</strong>
+    <strong data-lang="en">Comments</strong>
+    <strong data-lang="fr">Commentaires</strong>
     <span class="live-rail-sub">
       <span data-lang="en">From listeners</span>
       <span data-lang="fr">Des auditeurs</span>
@@ -53,19 +53,34 @@
     </button>
   </div>
   <div class="live-comments" data-live-comments></div>
+  <form class="live-compose" data-live-compose>
+    <label class="visually-hidden" for="live-handle">
+      <span data-lang="en">Your name</span><span data-lang="fr">Ton nom</span>
+    </label>
+    <input id="live-handle" name="handle" type="text" maxlength="24" autocomplete="nickname"
+      data-ph-en="@you" data-ph-fr="@toi" placeholder="@you" />
+    <label class="visually-hidden" for="live-text">
+      <span data-lang="en">Your comment</span><span data-lang="fr">Ton commentaire</span>
+    </label>
+    <input id="live-text" name="text" type="text" maxlength="160" required
+      data-ph-en="Leave a comment for Smail…" data-ph-fr="Laisse un commentaire pour Smail…"
+      placeholder="Leave a comment for Smail…" />
+    <button type="submit" data-live-post>
+      <span data-lang="en">Post</span><span data-lang="fr">Publier</span>
+    </button>
+  </form>
 </aside>
-<button type="button" class="live-fab" data-live-fab hidden aria-label="Show messages">
-  <span data-lang="en">Messages</span>
-  <span data-lang="fr">Messages</span>
+<button type="button" class="live-fab" data-live-fab hidden aria-label="Show comments">
+  <span data-lang="en">Comments</span>
+  <span data-lang="fr">Commentaires</span>
   <span data-live-fab-count hidden>0</span>
 </button>
 <div class="live-toast-layer" data-live-toasts aria-hidden="true"></div>
 <a class="skip" href="#music"><span data-lang="en">Skip to content</span><span data-lang="fr">Aller au contenu</span></a>
 
 <header class="nav">
-  <a class="brand" href="#top">
-    <img src="media/logo-smail.webp" alt="" width="36" height="36" />
-    <span>LAOUSMAIL</span>
+  <a class="brand" href="#top" aria-label="LAOUSMAIL">
+    <img src="media/logo-smail.webp" alt="LAOUSMAIL" width="40" height="40" />
   </a>
 
   <button class="nav-open" type="button" data-nav-open aria-expanded="false" aria-controls="site-menu">
@@ -87,7 +102,8 @@
       <button type="button" data-lang-btn="fr" aria-pressed="false">FR</button>
     </div>
     <button class="mode" type="button" data-theme-toggle aria-label="Theme">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M21 13.5A9 9 0 1 1 10.5 3a7 7 0 0 0 10.5 10.5z"/></svg>
+      <svg class="mode-icon mode-icon-moon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M21 13.5A9 9 0 1 1 10.5 3a7 7 0 0 0 10.5 10.5z"/></svg>
+      <svg class="mode-icon mode-icon-sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path stroke-linecap="round" d="M12 2.8v2.2M12 19v2.2M2.8 12h2.2M19 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M5.2 18.8l1.6-1.6M17.2 6.8l1.6-1.6"/></svg>
     </button>
     <a class="pill" href="#music">
       <span data-lang="en">Play</span><span data-lang="fr">Écouter</span>
@@ -98,7 +114,6 @@
 <div class="menu" id="site-menu" data-menu hidden>
   <div class="menu-panel">
     <div class="menu-top">
-      <span class="menu-mark">LAOUSMAIL</span>
       <button type="button" class="menu-close" data-nav-close>
         <span data-lang="en">Close</span><span data-lang="fr">Fermer</span>
       </button>

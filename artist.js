@@ -600,15 +600,18 @@
     if (el) el.textContent = String(new Date().getFullYear())
   }
 
-  /* ——— Live TikTok-style comments ——— */
+  /* ——— Live comments (reserved rail — never covers the page) ——— */
   function initLiveComments() {
+    const rail = $('[data-live-rail]')
     const layer = $('[data-live-comments]')
     const toggle = $('[data-live-toggle]')
-    if (!layer) return
+    if (!layer || !rail) return
 
     const pool = Array.isArray(window.LAOUSMAIL_COMMENTS) ? window.LAOUSMAIL_COMMENTS.slice() : []
     if (!pool.length) {
       toggle && (toggle.hidden = true)
+      rail.hidden = true
+      document.body.classList.remove('live-rail-on')
       return
     }
 
@@ -624,46 +627,56 @@
       /* private mode */
     }
 
+    function sourceLabel(source) {
+      if (source === 'tiktok') return 'TikTok'
+      if (source === 'instagram') return 'Instagram'
+      if (source === 'dm') return 'DM'
+      return ''
+    }
+
     function setToggle() {
       if (!toggle) return
       toggle.setAttribute('aria-pressed', on ? 'true' : 'false')
       toggle.classList.toggle('is-off', !on)
+      rail.hidden = !on
+      rail.setAttribute('aria-hidden', on ? 'false' : 'true')
+      document.body.classList.toggle('live-rail-on', on)
     }
 
     function spawn() {
-      if (!on || document.body.classList.contains('menu-open') || document.body.classList.contains('preview-open')) return
+      if (!on || document.body.classList.contains('menu-open') || document.body.classList.contains('preview-open')) {
+        return
+      }
       const item = pool[idx % pool.length]
       idx += 1
 
       const bubble = document.createElement('div')
       bubble.className = 'live-bubble'
-      const side = Math.random() > 0.45 ? 'left' : 'right'
-      bubble.dataset.side = side
-      const top = 12 + Math.random() * 62
-      bubble.style.top = `${top}%`
-      bubble.innerHTML = `<span class="live-handle">${escapeHtml(item.handle || '@fan')}</span><span class="live-text">${escapeHtml(item.text || '')}</span>${
-        item.heart ? '<span class="live-heart" aria-hidden="true">♥</span>' : ''
-      }`
+      const src = sourceLabel(item.source)
+      bubble.innerHTML = `${
+        src ? `<span class="live-source">${escapeHtml(src)}</span>` : ''
+      }<span class="live-handle">${escapeHtml(item.handle || '@fan')}</span><span class="live-text">${escapeHtml(
+        item.text || '',
+      )}</span>${item.heart ? '<span class="live-heart" aria-hidden="true">♥</span>' : ''}`
 
       layer.appendChild(bubble)
-      // force reflow for enter anim
+      layer.scrollTop = layer.scrollHeight
       void bubble.offsetWidth
       bubble.classList.add('in')
 
-      const life = reduce ? 5200 : 4200 + Math.random() * 1800
+      const life = reduce ? 9000 : 7000 + Math.random() * 2500
       window.setTimeout(() => {
         bubble.classList.add('out')
-        window.setTimeout(() => bubble.remove(), 700)
+        window.setTimeout(() => bubble.remove(), 600)
       }, life)
 
-      // keep DOM light
-      while (layer.children.length > 10) layer.firstChild?.remove()
+      while (layer.children.length > 8) layer.firstChild?.remove()
     }
 
     function schedule() {
       window.clearTimeout(timer)
       if (!on) return
-      const gap = reduce ? 2800 : 900 + Math.random() * 1100
+      const gap = reduce ? 3200 : 1400 + Math.random() * 1400
       timer = window.setTimeout(() => {
         spawn()
         schedule()
@@ -678,10 +691,9 @@
       } catch {
         /* private mode */
       }
-      // burst on load
       spawn()
-      window.setTimeout(spawn, 350)
-      window.setTimeout(spawn, 800)
+      window.setTimeout(spawn, 450)
+      window.setTimeout(spawn, 950)
       schedule()
     }
 
@@ -689,6 +701,7 @@
       on = false
       setToggle()
       window.clearTimeout(timer)
+      layer.innerHTML = ''
       try {
         localStorage.setItem('laousmail-live-comments', 'off')
       } catch {

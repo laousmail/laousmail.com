@@ -1578,80 +1578,154 @@ body.preview-open {
   filter: blur(0);
 }
 
-/* Live comment stream (TikTok-style) */
-.live-comments {
+/* Reserved LIVE rail — transparent, never covers page content */
+:root {
+  --live-rail-w: min(17.5rem, 28vw);
+}
+
+body.live-rail-on {
+  padding-right: calc(var(--live-rail-w) + 0.75rem);
+}
+
+.live-rail {
   position: fixed;
-  inset: 0;
-  z-index: 40;
+  top: calc(var(--nav-h) + 0.65rem);
+  right: 0.65rem;
+  bottom: 0.85rem;
+  width: var(--live-rail-w);
+  z-index: 35;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 0.45rem;
+  padding: 0.55rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  background: color-mix(in srgb, var(--bg) 28%, transparent);
+  backdrop-filter: blur(10px);
   pointer-events: none;
   overflow: hidden;
 }
 
+.live-rail[hidden] {
+  display: none !important;
+}
+
+.live-rail-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: "Syne", sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  opacity: 0.9;
+}
+
+.live-rail-head .live-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #e11d48;
+  box-shadow: 0 0 0 0 color-mix(in srgb, #e11d48 55%, transparent);
+  animation: livePulse 1.2s ease infinite;
+}
+
+.live-rail-sub {
+  margin-left: auto;
+  color: var(--mute);
+  letter-spacing: 0.04em;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.68rem;
+  text-transform: none;
+}
+
+.live-comments {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  min-height: 0;
+  overflow: hidden;
+  mask-image: linear-gradient(180deg, transparent, #000 12%, #000 100%);
+}
+
 .live-bubble {
-  position: absolute;
-  max-width: min(18rem, 72vw);
-  padding: 0.55rem 0.8rem;
-  border-radius: 1rem;
-  background: color-mix(in srgb, #121014 82%, transparent);
-  color: #fff;
-  border: 1px solid color-mix(in srgb, #fff 12%, transparent);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  font-size: 0.88rem;
+  position: relative;
+  width: 100%;
+  padding: 0.5rem 0.7rem 0.5rem 0.65rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--bg) 35%, transparent);
+  color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+  font-size: 0.82rem;
   line-height: 1.35;
   opacity: 0;
-  transform: translateY(12px) scale(0.96);
-  transition: opacity 0.45s var(--ease), transform 0.55s var(--ease);
-  backdrop-filter: blur(8px);
-}
-
-:root[data-theme="light"] .live-bubble {
-  background: color-mix(in srgb, #1a1512 88%, transparent);
-}
-
-.live-bubble[data-side="left"] {
-  left: clamp(0.75rem, 3vw, 1.5rem);
-}
-
-.live-bubble[data-side="right"] {
-  right: clamp(0.75rem, 3vw, 1.5rem);
+  transform: translateY(10px);
+  transition: opacity 0.4s var(--ease), transform 0.45s var(--ease);
 }
 
 .live-bubble.in {
-  opacity: 1;
-  transform: translateY(0) scale(1);
+  opacity: 0.92;
+  transform: translateY(0);
 }
 
 .live-bubble.out {
   opacity: 0;
-  transform: translateY(-18px) scale(0.98);
+  transform: translateY(-8px);
+}
+
+.live-source {
+  display: inline-block;
+  margin-bottom: 0.2rem;
+  padding: 0.08rem 0.35rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
 .live-handle {
   display: block;
   font-weight: 700;
-  font-size: 0.75rem;
-  color: #ff8fab;
-  margin-bottom: 0.15rem;
+  font-size: 0.72rem;
+  color: var(--accent);
+  margin-bottom: 0.12rem;
 }
 
 .live-text {
   display: block;
+  padding-right: 0.85rem;
 }
 
 .live-heart {
   position: absolute;
-  right: 0.55rem;
-  top: 0.45rem;
-  color: #ff3b5c;
-  font-size: 0.75rem;
+  right: 0.45rem;
+  top: 0.4rem;
+  color: color-mix(in srgb, var(--hot) 80%, #c45);
+  font-size: 0.7rem;
+  opacity: 0.85;
 }
 
-@media (max-width: 700px) {
-  .live-bubble[data-side="right"],
-  .live-bubble[data-side="left"] {
-    left: 0.75rem;
-    right: auto;
-    max-width: min(16rem, 78vw);
+@media (max-width: 900px) {
+  :root {
+    --live-rail-w: min(100%, 22rem);
+  }
+
+  body.live-rail-on {
+    padding-right: 0;
+    padding-bottom: min(34vh, 15rem);
+  }
+
+  .live-rail {
+    top: auto;
+    right: 0.55rem;
+    left: 0.55rem;
+    bottom: 0.55rem;
+    width: auto;
+    max-height: min(32vh, 14rem);
   }
 }
 

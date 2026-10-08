@@ -22,8 +22,8 @@ Static HTML / CSS / JS. GitHub Pages compatible. No build step.
 
 ## Live comments + Spotify preview
 
-- Comments float from page load (toggle **LIVE** in the nav).
-- Add real TikTok comments in `comments.js` as `{ handle, text, heart: true, source: 'tiktok' }`.
+- Comments stream in a **reserved transparent LIVE rail** (doesn’t cover the page). Toggle **LIVE** in the nav.
+- TikTok/Instagram can’t be scraped — paste real comments in `comments.js` as `{ handle, text, heart: true, source: 'tiktok' | 'instagram' | 'dm' }`.
 - First click on a song opens a popup with the 30s preview.
 - Then choose **Spotify**, **YouTube**, or **Apple Music** — each opens that destination.
 - Links + preview URLs live in `releases.js` (`spotify`, `youtube`, `appleMusic`, `preview`).

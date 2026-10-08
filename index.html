@@ -40,6 +40,7 @@
 </head>
 <body>
 <div class="pointer-glow" aria-hidden="true"></div>
+<div class="live-comments" data-live-comments aria-hidden="true"></div>
 <a class="skip" href="#music"><span data-lang="en">Skip to content</span><span data-lang="fr">Aller au contenu</span></a>
 
 <header class="nav">
@@ -69,7 +70,13 @@
     <button class="mode" type="button" data-theme-toggle aria-label="Theme">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M21 13.5A9 9 0 1 1 10.5 3a7 7 0 0 0 10.5 10.5z"/></svg>
     </button>
-    <a class="pill" href="https://open.spotify.com/artist/60GjJwhvGe1eVg98jFPgMp" target="_blank" rel="noreferrer">Spotify</a>
+    <a class="pill" href="#music">
+      <span data-lang="en">Play</span><span data-lang="fr">Écouter</span>
+    </a>
+    <button type="button" class="live-toggle" data-live-toggle aria-pressed="true" title="Live comments">
+      <span class="live-dot" aria-hidden="true"></span>
+      LIVE
+    </button>
   </div>
 </header>
 
@@ -93,7 +100,7 @@
 </div>
 
 <main id="top">
-  <!-- HERO -->
+  <!-- HERO — living 15-song orbit -->
   <section class="hero" aria-label="LAOUSMAIL">
     <div class="hero-media" aria-hidden="true">
       <img src="media/lifestyle-overhead.webp" alt="" width="1600" height="1000" fetchpriority="high" />
@@ -101,25 +108,42 @@
       <i class="hero-light"></i>
     </div>
     <div class="hero-shade" aria-hidden="true"></div>
-    <div class="hero-copy">
+
+    <div class="hero-compose">
       <p class="identity reveal-hero" data-delay="0">LAOUSMAIL · MONTRÉAL</p>
-      <div class="yaz reveal-hero" data-delay="1" aria-hidden="true">
-        <svg viewBox="0 0 32 32" fill="none"><path d="M16 3v26M6 10l10 6 10-6M6 22l10-6 10 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <h1 class="hero-title">
-        <span class="line reveal-hero" data-delay="2">
-          <span data-lang="en">Songs between where I come from</span>
-          <span data-lang="fr">Des chansons entre d’où je viens</span>
-        </span>
-        <span class="line reveal-hero" data-delay="3">
-          <span data-lang="en">and who I’m becoming.</span>
-          <span data-lang="fr">et ce que je suis en train de devenir.</span>
-        </span>
+      <h1 class="hero-title reveal-hero" data-delay="1">
+        <span data-lang="en">15 songs. One circle. Filling until the end of 2026.</span>
+        <span data-lang="fr">15 chansons. Un cercle. Qui se remplit jusqu’à fin 2026.</span>
       </h1>
-      <p class="hero-lead reveal-hero" data-delay="4">
-        <span data-lang="en">A singer and songwriter carrying Amazigh roots into contemporary R&amp;B and soul — writing from migration, memory, freedom, love, and the life being built in Montréal.</span>
-        <span data-lang="fr">Chanteur et auteur-compositeur : des racines amazighes portées dans la R&amp;B et la soul contemporaines — écrire depuis la migration, la mémoire, la liberté, l’amour, et la vie qui se construit à Montréal.</span>
+      <p class="hero-lead reveal-hero" data-delay="2">
+        <span data-lang="en">Each release lights a point. Watch the year move — the orbit will be full by December 2026.</span>
+        <span data-lang="fr">Chaque sortie allume un point. Regarde l’année avancer — l’orbite sera pleine en décembre 2026.</span>
       </p>
+
+      <div class="hero-orbit-wrap reveal-hero" data-delay="3" id="journey">
+        <div class="orbit orbit--hero is-alive" data-orbit aria-live="polite">
+          <svg class="orbit-progress" viewBox="0 0 100 100" aria-hidden="true">
+            <circle class="orbit-progress-track" cx="50" cy="50" r="42"></circle>
+            <circle class="orbit-progress-fill" data-orbit-year cx="50" cy="50" r="42"></circle>
+          </svg>
+          <div class="orbit-ring" aria-hidden="true"></div>
+          <div class="orbit-traveler-rail" data-orbit-traveler aria-hidden="true">
+            <i class="orbit-traveler"></i>
+          </div>
+          <div class="orbit-nodes" data-orbit-nodes></div>
+          <div class="orbit-center">
+            <strong data-orbit-count>3 / 15</strong>
+            <span data-lang="en">songs</span>
+            <span data-lang="fr">chansons</span>
+            <em data-orbit-destiny>
+              <span data-lang="en">Filling until end of 2026</span>
+              <span data-lang="fr">Se remplit jusqu’à fin 2026</span>
+            </em>
+            <small data-orbit-year-pct></small>
+          </div>
+        </div>
+      </div>
+
       <div class="cta-row reveal-hero" data-delay="5">
         <a class="btn" href="#music">
           <span data-lang="en">Listen to the music</span>
@@ -143,40 +167,30 @@
       <span data-lang="fr">Des chansons que je laisse dans le monde.</span>
     </h2>
     <p class="sub reveal">
-      <span data-lang="en">Original songs — an evolving body of work. Not a catalogue. A trail.</span>
-      <span data-lang="fr">Des chansons originales — un corpus qui évolue. Pas un catalogue. Une trace.</span>
+      <span data-lang="en">Original songs — an evolving body of work. Preview a track, then open the full song in Spotify. Live comments keep floating in.</span>
+      <span data-lang="fr">Des chansons originales — un corpus qui évolue. Écoute un extrait, puis ouvre la chanson complète sur Spotify. Les commentaires live continuent de flotter.</span>
     </p>
-    <div class="releases" data-releases></div>
-  </section>
 
-  <!-- JOURNEY -->
-  <section class="sec journey" id="journey">
-    <p class="eyebrow reveal">
-      <span data-lang="en">The journey</span><span data-lang="fr">Le parcours</span>
-    </p>
-    <h2 class="reveal">
-      <span data-lang="en">15 songs. One year. One body of work.</span>
-      <span data-lang="fr">15 chansons. Une année. Un corpus.</span>
-    </h2>
-    <p class="sub reveal">
-      <span data-lang="en">Each release lights another point in the orbit — toward a live show built from this music.</span>
-      <span data-lang="fr">Chaque sortie allume un autre point dans l’orbite — vers un spectacle vivant bâti sur cette musique.</span>
-    </p>
-    <div class="orbit reveal" data-orbit aria-live="polite">
-      <div class="orbit-ring" aria-hidden="true"></div>
-      <div class="orbit-nodes" data-orbit-nodes></div>
-      <div class="orbit-center">
-        <strong data-orbit-count>3 / 15</strong>
-        <span data-lang="en">songs out</span>
-        <span data-lang="fr">sorties</span>
-      </div>
+    <div class="player-shell reveal" data-player-shell>
+      <div class="player-tabs" data-player-tabs role="tablist" aria-label="Songs"></div>
+      <button type="button" class="player-stage" data-open-preview aria-haspopup="dialog">
+        <img data-stage-art src="media/portrait-park.webp" alt="" width="640" height="640" />
+        <span class="player-stage-copy">
+          <strong data-stage-title>Nnan-iyi</strong>
+          <em>
+            <span data-lang="en">Tap for a 30s preview</span>
+            <span data-lang="fr">Appuie pour un extrait de 30s</span>
+          </em>
+        </span>
+        <span class="player-stage-play" aria-hidden="true">▶</span>
+      </button>
+      <p class="player-hint">
+        <span data-lang="en">Preview first — then pick Spotify, YouTube, or Apple Music.</span>
+        <span data-lang="fr">D’abord l’extrait — puis Spotify, YouTube ou Apple Music.</span>
+      </p>
     </div>
-    <div class="cta-row reveal" style="margin-top:2rem">
-      <a class="btn ghost" href="#circle">
-        <span data-lang="en">Follow the journey →</span>
-        <span data-lang="fr">Suivre le parcours →</span>
-      </a>
-    </div>
+
+    <div class="releases" data-releases></div>
   </section>
 
   <!-- STORY -->
@@ -342,6 +356,53 @@
   </section>
 </main>
 
+<dialog class="preview-modal" data-preview-modal aria-labelledby="preview-title">
+  <div class="preview-panel">
+    <button type="button" class="preview-close" data-preview-close aria-label="Close">
+      <span aria-hidden="true">×</span>
+    </button>
+    <div class="preview-art-wrap">
+      <img data-preview-art src="" alt="" width="640" height="640" />
+      <i class="preview-pulse" aria-hidden="true"></i>
+    </div>
+    <p class="preview-kicker">
+      <span data-lang="en">Song preview</span>
+      <span data-lang="fr">Extrait</span>
+    </p>
+    <h3 id="preview-title" data-preview-title></h3>
+    <p class="preview-lead">
+      <span data-lang="en">Hear a taste here. Then choose where to play the full song.</span>
+      <span data-lang="fr">Un avant-goût ici. Ensuite choisis où écouter la chanson complète.</span>
+    </p>
+    <audio data-preview-audio preload="none" playsinline></audio>
+    <div class="preview-wave" data-preview-wave aria-hidden="true">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+    <p class="preview-choose">
+      <span data-lang="en">Listen on</span>
+      <span data-lang="fr">Écouter sur</span>
+    </p>
+    <div class="preview-platforms" role="group" aria-label="Listen on">
+      <button type="button" class="preview-platform" data-listen-on="spotify">
+        <span class="preview-platform-mark" aria-hidden="true">♪</span>
+        Spotify
+      </button>
+      <button type="button" class="preview-platform" data-listen-on="youtube">
+        <span class="preview-platform-mark" aria-hidden="true">▶</span>
+        YouTube
+      </button>
+      <button type="button" class="preview-platform" data-listen-on="apple">
+        <span class="preview-platform-mark" aria-hidden="true">○</span>
+        Apple Music
+      </button>
+    </div>
+    <p class="preview-note">
+      <span data-lang="en">Opens the app or site you choose.</span>
+      <span data-lang="fr">Ouvre l’app ou le site que tu choisis.</span>
+    </p>
+  </div>
+</dialog>
+
 <footer class="foot">
   <div class="foot-brand">
     <strong>LAOUSMAIL</strong>
@@ -358,6 +419,7 @@
 
 <script src="config.js"></script>
 <script src="releases.js"></script>
+<script src="comments.js"></script>
 <script src="artist.js" defer></script>
 </body>
 </html>

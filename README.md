@@ -16,8 +16,17 @@ Static HTML / CSS / JS. GitHub Pages compatible. No build step.
 | `site.css` | Design + motion |
 | `artist.js` | Lang, theme, menu, releases render, form |
 | `releases.js` | Song + journey data (edit here to add releases) |
+| `comments.js` | Live TikTok-style comments (paste more anytime) |
 | `config.js` | Fan signup endpoint (no secrets) |
 | `privacy.html` | Short privacy note |
+
+## Live comments + Spotify preview
+
+- Comments float from page load (toggle **LIVE** in the nav).
+- Add real TikTok comments in `comments.js` as `{ handle, text, heart: true, source: 'tiktok' }`.
+- First click on a song opens a popup with the 30s preview.
+- Then choose **Spotify**, **YouTube**, or **Apple Music** — each opens that destination.
+- Links + preview URLs live in `releases.js` (`spotify`, `youtube`, `appleMusic`, `preview`).
 
 ## Local preview
 

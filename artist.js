@@ -107,22 +107,193 @@
     return Number(window.LAOUSMAIL_JOURNEY?.goal) || 15
   }
 
+  let activeTrack = 0
+  let previewRelease = null
+
+  function artFor(r) {
+    return (r?.artworkRemote && isSafeHttps(r.artworkRemote) && r.artworkRemote) || r?.artwork || ''
+  }
+
+  function syncStage(index) {
+    const list = releases()
+    const r = list[index]
+    if (!r) return
+    activeTrack = index
+    const art = artFor(r)
+    const stageArt = $('[data-stage-art]')
+    const stageTitle = $('[data-stage-title]')
+    if (stageArt && art) stageArt.src = art
+    if (stageTitle) stageTitle.textContent = r.title || ''
+    $$('[data-track-tab]').forEach((btn) => {
+      const on = Number(btn.getAttribute('data-track-tab')) === index
+      btn.setAttribute('aria-selected', on ? 'true' : 'false')
+      btn.classList.toggle('is-active', on)
+    })
+    $$('[data-play-track]').forEach((btn) => {
+      btn.classList.toggle('is-playing', Number(btn.getAttribute('data-play-track')) === index)
+    })
+  }
+
+  function openExternal(url) {
+    if (!url || !isSafeHttps(url)) return
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  function openSpotifyDestination(r) {
+    const webUrl =
+      (r?.spotify && isSafeHttps(r.spotify) && r.spotify) ||
+      (r?.spotifyId ? `https://open.spotify.com/track/${encodeURIComponent(r.spotifyId)}` : '')
+    if (!webUrl) return
+    if (r?.spotifyId) {
+      const appUrl = `spotify:track:${r.spotifyId}`
+      const started = Date.now()
+      window.location.href = appUrl
+      window.setTimeout(() => {
+        if (document.hidden || Date.now() - started > 1600) return
+        openExternal(webUrl)
+      }, 850)
+      return
+    }
+    openExternal(webUrl)
+  }
+
+  function openListenDestination(platform) {
+    const r = previewRelease
+    if (!r) return
+    if (platform === 'spotify') {
+      openSpotifyDestination(r)
+      return
+    }
+    if (platform === 'youtube') {
+      openExternal(r.youtube)
+      return
+    }
+    if (platform === 'apple') {
+      openExternal(r.appleMusic)
+    }
+  }
+
+  function syncPlatformButtons(r) {
+    $$('[data-listen-on]').forEach((btn) => {
+      const platform = btn.getAttribute('data-listen-on')
+      const available =
+        (platform === 'spotify' && !!(r?.spotifyId || (r?.spotify && isSafeHttps(r.spotify)))) ||
+        (platform === 'youtube' && !!(r?.youtube && isSafeHttps(r.youtube))) ||
+        (platform === 'apple' && !!(r?.appleMusic && isSafeHttps(r.appleMusic)))
+      btn.disabled = !available
+      btn.hidden = !available
+    })
+  }
+
+  function closePreviewModal() {
+    const modal = $('[data-preview-modal]')
+    const audio = $('[data-preview-audio]')
+    if (audio) {
+      audio.pause()
+      audio.removeAttribute('src')
+      audio.load()
+    }
+    previewRelease = null
+    document.body.classList.remove('preview-open')
+    $('[data-preview-wave]')?.classList.remove('is-playing')
+    if (modal?.open) modal.close()
+  }
+
+  function openPreviewModal(index) {
+    const list = releases()
+    const r = list[index]
+    const modal = $('[data-preview-modal]')
+    const audio = $('[data-preview-audio]')
+    if (!r || !modal || !audio) return
+
+    syncStage(index)
+    previewRelease = r
+
+    const art = artFor(r)
+    const artEl = $('[data-preview-art]')
+    const titleEl = $('[data-preview-title]')
+    if (artEl) artEl.src = art
+    if (titleEl) titleEl.textContent = r.title || ''
+    syncPlatformButtons(r)
+
+    if (r.preview && isSafeHttps(r.preview)) {
+      audio.src = r.preview
+      audio.currentTime = 0
+      const play = audio.play()
+      if (play?.catch) play.catch(() => {})
+      $('[data-preview-wave]')?.classList.add('is-playing')
+    } else {
+      audio.removeAttribute('src')
+      $('[data-preview-wave]')?.classList.remove('is-playing')
+    }
+
+    document.body.classList.add('preview-open')
+    if (typeof modal.showModal === 'function') modal.showModal()
+    else modal.setAttribute('open', '')
+  }
+
+  function initPreviewModal() {
+    const modal = $('[data-preview-modal]')
+    if (!modal) return
+
+    $('[data-open-preview]')?.addEventListener('click', () => openPreviewModal(activeTrack))
+    $('[data-preview-close]')?.addEventListener('click', closePreviewModal)
+    $$('[data-listen-on]').forEach((btn) => {
+      btn.addEventListener('click', () => openListenDestination(btn.getAttribute('data-listen-on')))
+    })
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closePreviewModal()
+    })
+    modal.addEventListener('cancel', (e) => {
+      e.preventDefault()
+      closePreviewModal()
+    })
+
+    const audio = $('[data-preview-audio]')
+    audio?.addEventListener('ended', () => {
+      $('[data-preview-wave]')?.classList.remove('is-playing')
+    })
+    audio?.addEventListener('pause', () => {
+      if (audio.ended || audio.currentTime === 0) return
+      $('[data-preview-wave]')?.classList.remove('is-playing')
+    })
+    audio?.addEventListener('play', () => {
+      $('[data-preview-wave]')?.classList.add('is-playing')
+    })
+  }
+
+  function renderPlayerTabs() {
+    const tabs = $('[data-player-tabs]')
+    if (!tabs) return
+    tabs.innerHTML = releases()
+      .map((r, i) => {
+        const label = r.title || String(i + 1)
+        return `<button type="button" role="tab" class="player-tab${i === 0 ? ' is-active' : ''}" data-track-tab="${i}" aria-selected="${i === 0 ? 'true' : 'false'}">${escapeHtml(label)}</button>`
+      })
+      .join('')
+    tabs.querySelectorAll('[data-track-tab]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const i = Number(btn.getAttribute('data-track-tab'))
+        syncStage(i)
+        openPreviewModal(i)
+      })
+    })
+    syncStage(activeTrack)
+  }
+
   function renderReleases() {
     const root = $('[data-releases]')
     if (!root) return
     const L = lang()
     root.innerHTML = releases()
-      .map((r) => {
-        const art =
-          (r.artworkRemote && isSafeHttps(r.artworkRemote) && r.artworkRemote) ||
-          r.artwork ||
-          ''
+      .map((r, i) => {
+        const art = artFor(r)
         const desc = r.description?.[L] || r.description?.en || ''
         const meta = r.lang?.[L] || r.lang?.en || ''
         const n = String(r.number).padStart(2, '0')
-        const listen = L === 'fr' ? 'Écouter' : 'Listen'
-        const href = r.spotify && isSafeHttps(r.spotify) ? r.spotify : '#music'
-        return `<a class="release reveal" href="${escapeHtml(href)}" target="_blank" rel="noreferrer">
+        const listen = L === 'fr' ? 'Écouter l’extrait' : 'Play preview'
+        return `<button type="button" class="release reveal${i === 0 ? ' is-playing' : ''}" data-play-track="${i}">
           <div class="release-art">
             <img src="${escapeHtml(art)}" alt="" width="640" height="640" loading="lazy" decoding="async" />
             <i class="release-wave" aria-hidden="true"></i>
@@ -134,19 +305,71 @@
             ${desc ? `<p>${escapeHtml(desc)}</p>` : ''}
             <span class="release-go">${listen}</span>
           </div>
-        </a>`
+        </button>`
       })
       .join('')
+    root.querySelectorAll('[data-play-track]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        openPreviewModal(Number(btn.getAttribute('data-play-track')))
+      })
+    })
+    renderPlayerTabs()
     observeReveals(root)
   }
 
+  function yearProgressThrough2026() {
+    const start = Date.UTC(2026, 0, 1)
+    const end = Date.UTC(2026, 11, 31, 23, 59, 59, 999)
+    const now = Date.now()
+    if (now <= start) return 0
+    if (now >= end) return 1
+    return (now - start) / (end - start)
+  }
+
   function renderOrbit() {
+    const orbit = $('[data-orbit]')
     const nodesRoot = $('[data-orbit-nodes]')
     const countEl = $('[data-orbit-count]')
-    if (!nodesRoot) return
+    if (!orbit || !nodesRoot) return
+
     const goal = journeyGoal()
     const out = releases().length
+    const yearPct = yearProgressThrough2026()
+    const L = lang()
+
     if (countEl) countEl.textContent = `${out} / ${goal}`
+
+    const pctEl = $('[data-orbit-year-pct]')
+    if (pctEl) {
+      const pct = Math.round(yearPct * 100)
+      pctEl.textContent =
+        L === 'fr' ? `${pct}% de l’année 2026` : `${pct}% of 2026`
+    }
+
+    // Bright arc = songs released (circle filling). Traveler = where we are in 2026.
+    const songPct = goal ? out / goal : 0
+    const yearRing = $('[data-orbit-year]')
+    if (yearRing) {
+      const radius = 42
+      const circ = 2 * Math.PI * radius
+      yearRing.style.strokeDasharray = `${circ}`
+      yearRing.style.strokeDashoffset = `${circ}`
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          yearRing.style.strokeDashoffset = `${circ * (1 - songPct)}`
+        })
+      })
+    }
+
+    orbit.style.setProperty('--year-progress', String(yearPct))
+    orbit.style.setProperty('--song-progress', String(songPct))
+
+    const traveler = $('[data-orbit-traveler]')
+    if (traveler) {
+      // Year clock — moves around the ring toward Dec 31, 2026.
+      traveler.style.setProperty('--travel-angle', `${yearPct * 360}deg`)
+      traveler.title = L === 'fr' ? 'Position dans l’année 2026' : 'Place in the year 2026'
+    }
 
     nodesRoot.innerHTML = ''
     const cx = 50
@@ -157,12 +380,20 @@
       const x = cx + radius * Math.cos(angle)
       const y = cy + radius * Math.sin(angle)
       const node = document.createElement('span')
-      node.className = 'orbit-node' + (i < out ? ' lit' : '')
+      const lit = i < out
+      node.className = 'orbit-node' + (lit ? ' lit' : ' waiting')
       node.style.left = `${x}%`
       node.style.top = `${y}%`
-      node.title = i < out ? releases()[i]?.title || String(i + 1) : ''
+      node.style.setProperty('--i', String(i))
+      node.title = lit ? releases()[i]?.title || String(i + 1) : `${i + 1}`
       nodesRoot.appendChild(node)
     }
+
+    // Stagger lit nodes on every render when hero is visible.
+    $$('.orbit-node.lit', nodesRoot).forEach((n, i) => {
+      n.classList.remove('in')
+      window.setTimeout(() => n.classList.add('in'), 180 + i * 110)
+    })
   }
 
   function observeReveals(scope = document) {
@@ -177,11 +408,6 @@
         for (const entry of entries) {
           if (entry.isIntersecting) {
             entry.target.classList.add('in')
-            if (entry.target.classList.contains('orbit') || entry.target.closest('.orbit')) {
-              $$('.orbit-node.lit').forEach((n, i) => {
-                setTimeout(() => n.classList.add('in'), i * 90)
-              })
-            }
             observer.unobserve(entry.target)
           }
         }
@@ -194,8 +420,9 @@
   function initOrbitObserve() {
     const orbit = $('[data-orbit]')
     if (!orbit) return
-    orbit.classList.add('reveal')
-    observeReveals(orbit.parentElement || document)
+    // Hero orbit is in-view on load — breathe life immediately.
+    orbit.classList.add('is-alive')
+    renderOrbit()
   }
 
   /* ——— Mobile menu ——— */
@@ -373,8 +600,110 @@
     if (el) el.textContent = String(new Date().getFullYear())
   }
 
+  /* ——— Live TikTok-style comments ——— */
+  function initLiveComments() {
+    const layer = $('[data-live-comments]')
+    const toggle = $('[data-live-toggle]')
+    if (!layer) return
+
+    const pool = Array.isArray(window.LAOUSMAIL_COMMENTS) ? window.LAOUSMAIL_COMMENTS.slice() : []
+    if (!pool.length) {
+      toggle && (toggle.hidden = true)
+      return
+    }
+
+    let on = true
+    let timer = 0
+    let idx = Math.floor(Math.random() * pool.length)
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    try {
+      const saved = localStorage.getItem('laousmail-live-comments')
+      if (saved === 'off') on = false
+    } catch {
+      /* private mode */
+    }
+
+    function setToggle() {
+      if (!toggle) return
+      toggle.setAttribute('aria-pressed', on ? 'true' : 'false')
+      toggle.classList.toggle('is-off', !on)
+    }
+
+    function spawn() {
+      if (!on || document.body.classList.contains('menu-open') || document.body.classList.contains('preview-open')) return
+      const item = pool[idx % pool.length]
+      idx += 1
+
+      const bubble = document.createElement('div')
+      bubble.className = 'live-bubble'
+      const side = Math.random() > 0.45 ? 'left' : 'right'
+      bubble.dataset.side = side
+      const top = 12 + Math.random() * 62
+      bubble.style.top = `${top}%`
+      bubble.innerHTML = `<span class="live-handle">${escapeHtml(item.handle || '@fan')}</span><span class="live-text">${escapeHtml(item.text || '')}</span>${
+        item.heart ? '<span class="live-heart" aria-hidden="true">♥</span>' : ''
+      }`
+
+      layer.appendChild(bubble)
+      // force reflow for enter anim
+      void bubble.offsetWidth
+      bubble.classList.add('in')
+
+      const life = reduce ? 5200 : 4200 + Math.random() * 1800
+      window.setTimeout(() => {
+        bubble.classList.add('out')
+        window.setTimeout(() => bubble.remove(), 700)
+      }, life)
+
+      // keep DOM light
+      while (layer.children.length > 10) layer.firstChild?.remove()
+    }
+
+    function schedule() {
+      window.clearTimeout(timer)
+      if (!on) return
+      const gap = reduce ? 2800 : 900 + Math.random() * 1100
+      timer = window.setTimeout(() => {
+        spawn()
+        schedule()
+      }, gap)
+    }
+
+    function start() {
+      on = true
+      setToggle()
+      try {
+        localStorage.setItem('laousmail-live-comments', 'on')
+      } catch {
+        /* private mode */
+      }
+      // burst on load
+      spawn()
+      window.setTimeout(spawn, 350)
+      window.setTimeout(spawn, 800)
+      schedule()
+    }
+
+    function stop() {
+      on = false
+      setToggle()
+      window.clearTimeout(timer)
+      try {
+        localStorage.setItem('laousmail-live-comments', 'off')
+      } catch {
+        /* private mode */
+      }
+    }
+
+    toggle?.addEventListener('click', () => (on ? stop() : start()))
+    setToggle()
+    if (on) start()
+  }
+
   initTheme()
   initLang()
+  initPreviewModal()
   renderReleases()
   renderOrbit()
   initOrbitObserve()
@@ -383,4 +712,5 @@
   initPointerGlow()
   initJoinForm()
   initYear()
+  initLiveComments()
 })()

@@ -600,29 +600,42 @@
     if (el) el.textContent = String(new Date().getFullYear())
   }
 
-  /* ——— Live comments (reserved rail — never covers the page) ——— */
+  /* ——— Live comments: expand / minimize / dismiss / side toasts ——— */
   function initLiveComments() {
     const rail = $('[data-live-rail]')
     const layer = $('[data-live-comments]')
     const toggle = $('[data-live-toggle]')
+    const minBtn = $('[data-live-minimize]')
+    const fab = $('[data-live-fab]')
+    const fabCount = $('[data-live-fab-count]')
+    const toasts = $('[data-live-toasts]')
     if (!layer || !rail) return
 
     const pool = Array.isArray(window.LAOUSMAIL_COMMENTS) ? window.LAOUSMAIL_COMMENTS.slice() : []
     if (!pool.length) {
       toggle && (toggle.hidden = true)
       rail.hidden = true
-      document.body.classList.remove('live-rail-on')
+      fab && (fab.hidden = true)
+      document.body.classList.remove('live-rail-on', 'live-rail-min')
       return
     }
 
     let on = true
+    let minimized = false
     let timer = 0
+    let unseen = 0
     let idx = Math.floor(Math.random() * pool.length)
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const dismissKey = 'laousmail-dismissed-comments'
+    let dismissed = new Set()
 
     try {
       const saved = localStorage.getItem('laousmail-live-comments')
       if (saved === 'off') on = false
+      const minSaved = localStorage.getItem('laousmail-live-minimized')
+      if (minSaved === '1') minimized = true
+      const raw = localStorage.getItem(dismissKey)
+      if (raw) dismissed = new Set(JSON.parse(raw))
     } catch {
       /* private mode */
     }
@@ -634,49 +647,137 @@
       return ''
     }
 
-    function setToggle() {
-      if (!toggle) return
-      toggle.setAttribute('aria-pressed', on ? 'true' : 'false')
-      toggle.classList.toggle('is-off', !on)
-      rail.hidden = !on
-      rail.setAttribute('aria-hidden', on ? 'false' : 'true')
-      document.body.classList.toggle('live-rail-on', on)
+    function commentKey(item) {
+      return `${item.source || ''}|${item.handle || ''}|${item.text || ''}`
     }
 
-    function spawn() {
-      if (!on || document.body.classList.contains('menu-open') || document.body.classList.contains('preview-open')) {
-        return
+    function persistDismissed() {
+      try {
+        localStorage.setItem(dismissKey, JSON.stringify([...dismissed].slice(-80)))
+      } catch {
+        /* private mode */
       }
-      const item = pool[idx % pool.length]
-      idx += 1
+    }
 
+    function updateFab() {
+      if (!fab || !fabCount) return
+      fabCount.textContent = String(Math.min(unseen, 99))
+      fab.classList.toggle('has-new', unseen > 0)
+      fab.hidden = !(on && minimized)
+    }
+
+    function setChrome() {
+      if (toggle) {
+        toggle.setAttribute('aria-pressed', on ? 'true' : 'false')
+        toggle.classList.toggle('is-off', !on)
+      }
+      rail.hidden = !(on && !minimized)
+      rail.setAttribute('aria-hidden', on && !minimized ? 'false' : 'true')
+      document.body.classList.toggle('live-rail-on', on && !minimized)
+      document.body.classList.toggle('live-rail-min', on && minimized)
+      if (minBtn) {
+        minBtn.setAttribute('aria-expanded', minimized ? 'false' : 'true')
+        const open = minimized
+        minBtn.innerHTML = open
+          ? '<span data-lang="en">Open</span><span data-lang="fr">Ouvrir</span>'
+          : '<span data-lang="en">Hide</span><span data-lang="fr">Réduire</span>'
+      }
+      updateFab()
+    }
+
+    function dismissBubble(el, item) {
+      if (item) {
+        dismissed.add(commentKey(item))
+        persistDismissed()
+      }
+      el.classList.add('out', 'dismissed')
+      window.setTimeout(() => el.remove(), 280)
+    }
+
+    function buildBubble(item, toast) {
       const bubble = document.createElement('div')
-      bubble.className = 'live-bubble'
+      bubble.className = toast ? 'live-toast' : 'live-bubble'
       const src = sourceLabel(item.source)
+      const closeLabel = lang() === 'fr' ? 'Retirer' : 'Dismiss'
       bubble.innerHTML = `${
         src ? `<span class="live-source">${escapeHtml(src)}</span>` : ''
       }<span class="live-handle">${escapeHtml(item.handle || '@fan')}</span><span class="live-text">${escapeHtml(
         item.text || '',
-      )}</span>${item.heart ? '<span class="live-heart" aria-hidden="true">♥</span>' : ''}`
+      )}</span><button type="button" class="live-dismiss" aria-label="${closeLabel}">×</button>`
+      bubble.querySelector('.live-dismiss')?.addEventListener('click', (e) => {
+        e.stopPropagation()
+        dismissBubble(bubble, item)
+      })
+      if (toast) {
+        bubble.addEventListener('click', () => {
+          minimized = false
+          try {
+            localStorage.setItem('laousmail-live-minimized', '0')
+          } catch {
+            /* private mode */
+          }
+          unseen = 0
+          setChrome()
+          bubble.remove()
+        })
+      }
+      return bubble
+    }
 
+    function nextItem() {
+      for (let n = 0; n < pool.length; n += 1) {
+        const item = pool[idx % pool.length]
+        idx += 1
+        if (!dismissed.has(commentKey(item))) return item
+      }
+      return null
+    }
+
+    function spawn() {
+      if (!on || document.hidden) return
+      if (document.body.classList.contains('menu-open') || document.body.classList.contains('preview-open')) {
+        return
+      }
+      const item = nextItem()
+      if (!item) return
+
+      if (minimized) {
+        unseen += 1
+        updateFab()
+        if (toasts) {
+          const toast = buildBubble(item, true)
+          toasts.appendChild(toast)
+          void toast.offsetWidth
+          toast.classList.add('in')
+          window.setTimeout(() => {
+            toast.classList.add('out')
+            window.setTimeout(() => toast.remove(), 400)
+          }, reduce ? 4200 : 3200)
+          while (toasts.children.length > 3) toasts.firstChild?.remove()
+        }
+        return
+      }
+
+      const bubble = buildBubble(item, false)
       layer.appendChild(bubble)
       layer.scrollTop = layer.scrollHeight
       void bubble.offsetWidth
       bubble.classList.add('in')
 
-      const life = reduce ? 9000 : 7000 + Math.random() * 2500
+      const life = reduce ? 10000 : 8000 + Math.random() * 3000
       window.setTimeout(() => {
+        if (!bubble.isConnected || bubble.classList.contains('dismissed')) return
         bubble.classList.add('out')
-        window.setTimeout(() => bubble.remove(), 600)
+        window.setTimeout(() => bubble.remove(), 500)
       }, life)
 
-      while (layer.children.length > 8) layer.firstChild?.remove()
+      while (layer.children.length > 7) layer.firstChild?.remove()
     }
 
     function schedule() {
       window.clearTimeout(timer)
       if (!on) return
-      const gap = reduce ? 3200 : 1400 + Math.random() * 1400
+      const gap = reduce ? 3400 : 1500 + Math.random() * 1600
       timer = window.setTimeout(() => {
         spawn()
         schedule()
@@ -685,33 +786,176 @@
 
     function start() {
       on = true
-      setToggle()
+      setChrome()
       try {
         localStorage.setItem('laousmail-live-comments', 'on')
       } catch {
         /* private mode */
       }
       spawn()
-      window.setTimeout(spawn, 450)
-      window.setTimeout(spawn, 950)
+      window.setTimeout(spawn, 500)
       schedule()
     }
 
     function stop() {
       on = false
-      setToggle()
+      minimized = false
+      unseen = 0
+      setChrome()
       window.clearTimeout(timer)
       layer.innerHTML = ''
+      if (toasts) toasts.innerHTML = ''
       try {
         localStorage.setItem('laousmail-live-comments', 'off')
+        localStorage.setItem('laousmail-live-minimized', '0')
       } catch {
         /* private mode */
       }
     }
 
+    function setMinimized(next) {
+      minimized = next
+      if (!minimized) unseen = 0
+      setChrome()
+      try {
+        localStorage.setItem('laousmail-live-minimized', minimized ? '1' : '0')
+      } catch {
+        /* private mode */
+      }
+      if (on && !minimized) spawn()
+    }
+
     toggle?.addEventListener('click', () => (on ? stop() : start()))
-    setToggle()
+    minBtn?.addEventListener('click', () => setMinimized(!minimized))
+    fab?.addEventListener('click', () => setMinimized(false))
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) window.clearTimeout(timer)
+      else if (on) schedule()
+    })
+
+    setChrome()
     if (on) start()
+  }
+
+  /* ——— First-visit UI hints with motion ——— */
+  function initUiHints() {
+    const tip = $('[data-ui-hint]')
+    const tipText = $('[data-ui-hint-text]')
+    const tipOk = $('[data-ui-hint-ok]')
+    if (!tip || !tipText) return
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const key = 'laousmail-hints-v2'
+    let seen = {}
+    try {
+      seen = JSON.parse(localStorage.getItem(key) || '{}') || {}
+    } catch {
+      seen = {}
+    }
+
+    const copy = {
+      live: {
+        en: 'LIVE opens fan comments. Hide tucks them; × removes one.',
+        fr: 'LIVE ouvre les commentaires. Réduire les range ; × en retire un.',
+      },
+      orbit: {
+        en: 'This circle fills with each song — full by end of 2026.',
+        fr: 'Ce cercle se remplit à chaque chanson — plein fin 2026.',
+      },
+      preview: {
+        en: 'Tap a song for a 30s preview, then pick where to listen.',
+        fr: 'Touche une chanson pour 30s d’extrait, puis choisis où écouter.',
+      },
+      platforms: {
+        en: 'Choose Spotify, YouTube, or Apple Music — opens that app.',
+        fr: 'Choisis Spotify, YouTube ou Apple Music — ça ouvre l’app.',
+      },
+    }
+
+    const queue = ['live', 'orbit', 'preview']
+    let active = null
+    let timer = 0
+
+    function mark(id) {
+      seen[id] = 1
+      try {
+        localStorage.setItem(key, JSON.stringify(seen))
+      } catch {
+        /* private mode */
+      }
+    }
+
+    function clearPulse() {
+      $$('.hint-pulse').forEach((el) => el.classList.remove('hint-pulse'))
+    }
+
+    function hideTip() {
+      tip.hidden = true
+      clearPulse()
+      active = null
+    }
+
+    function showTip(id) {
+      const target = $(`[data-hint="${id}"]`)
+      const text = copy[id]
+      if (!target || !text || seen[id]) return false
+      active = id
+      tipText.textContent = text[lang()] || text.en
+      tip.hidden = false
+      tip.classList.remove('ui-hint-in')
+      void tip.offsetWidth
+      tip.classList.add('ui-hint-in')
+      clearPulse()
+      target.classList.add('hint-pulse')
+      target.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' })
+      return true
+    }
+
+    function next() {
+      window.clearTimeout(timer)
+      while (queue.length) {
+        const id = queue.shift()
+        if (showTip(id)) {
+          timer = window.setTimeout(() => {
+            mark(id)
+            hideTip()
+            timer = window.setTimeout(next, 700)
+          }, reduce ? 5200 : 4200)
+          return
+        }
+      }
+    }
+
+    tipOk?.addEventListener('click', () => {
+      if (active) mark(active)
+      hideTip()
+      window.clearTimeout(timer)
+      timer = window.setTimeout(next, 500)
+    })
+
+    // Platforms hint when preview opens
+    const modal = $('[data-preview-modal]')
+    modal?.addEventListener('close', () => {
+      /* no-op */
+    })
+    const openPreview = $('[data-open-preview]')
+    // After first preview open, teach platforms once
+    document.addEventListener(
+      'click',
+      (e) => {
+        if (!e.target.closest?.('[data-open-preview], [data-play-track], [data-track-tab]')) return
+        if (seen.platforms) return
+        window.setTimeout(() => {
+          if (!$('[data-preview-modal]')?.open) return
+          queue.unshift('platforms')
+          if (!active) next()
+        }, 600)
+      },
+      true,
+    )
+
+    window.setTimeout(next, reduce ? 900 : 1600)
   }
 
   initTheme()
@@ -726,4 +970,5 @@
   initJoinForm()
   initYear()
   initLiveComments()
+  initUiHints()
 })()

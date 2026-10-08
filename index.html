@@ -48,9 +48,21 @@
       <span data-lang="en">Fan comments</span>
       <span data-lang="fr">Commentaires</span>
     </span>
+    <button type="button" class="live-rail-min" data-live-minimize aria-expanded="true" title="Minimize">
+      <span data-lang="en">Hide</span><span data-lang="fr">Réduire</span>
+    </button>
   </div>
+  <p class="live-rail-hint" data-live-rail-hint>
+    <span data-lang="en">Tap × to dismiss · Hide tucks the feed</span>
+    <span data-lang="fr">Touche × pour retirer · Réduire range le fil</span>
+  </p>
   <div class="live-comments" data-live-comments></div>
 </aside>
+<button type="button" class="live-fab" data-live-fab hidden aria-label="Show live comments">
+  <span class="live-dot" aria-hidden="true"></span>
+  <span data-live-fab-count>0</span>
+</button>
+<div class="live-toast-layer" data-live-toasts aria-hidden="true"></div>
 <a class="skip" href="#music"><span data-lang="en">Skip to content</span><span data-lang="fr">Aller au contenu</span></a>
 
 <header class="nav">
@@ -83,7 +95,7 @@
     <a class="pill" href="#music">
       <span data-lang="en">Play</span><span data-lang="fr">Écouter</span>
     </a>
-    <button type="button" class="live-toggle" data-live-toggle aria-pressed="true" title="Live comments">
+    <button type="button" class="live-toggle hintable" data-live-toggle data-hint="live" aria-pressed="true" title="Live comments">
       <span class="live-dot" aria-hidden="true"></span>
       LIVE
     </button>
@@ -130,7 +142,7 @@
         <span data-lang="fr">Chaque sortie allume un point. Regarde l’année avancer — l’orbite sera pleine en décembre 2026.</span>
       </p>
 
-      <div class="hero-orbit-wrap reveal-hero" data-delay="3" id="journey">
+      <div class="hero-orbit-wrap reveal-hero hintable" data-delay="3" id="journey" data-hint="orbit">
         <div class="orbit orbit--hero is-alive" data-orbit aria-live="polite">
           <svg class="orbit-progress" viewBox="0 0 100 100" aria-hidden="true">
             <circle class="orbit-progress-track" cx="50" cy="50" r="42"></circle>
@@ -177,14 +189,14 @@
       <span data-lang="fr">Des chansons que je laisse dans le monde.</span>
     </h2>
     <p class="sub reveal">
-      <span data-lang="en">Original songs — an evolving body of work. Preview a track, then open the full song in Spotify. Live comments keep floating in.</span>
-      <span data-lang="fr">Des chansons originales — un corpus qui évolue. Écoute un extrait, puis ouvre la chanson complète sur Spotify. Les commentaires live continuent de flotter.</span>
+      <span data-lang="en">Original songs — an evolving body of work. Preview a track, then pick Spotify, YouTube, or Apple Music.</span>
+      <span data-lang="fr">Des chansons originales — un corpus qui évolue. Écoute un extrait, puis choisis Spotify, YouTube ou Apple Music.</span>
     </p>
 
     <div class="player-shell reveal" data-player-shell>
       <div class="player-tabs" data-player-tabs role="tablist" aria-label="Songs"></div>
-      <button type="button" class="player-stage" data-open-preview aria-haspopup="dialog">
-        <img data-stage-art src="media/portrait-park.webp" alt="" width="640" height="640" />
+      <button type="button" class="player-stage hintable" data-open-preview data-hint="preview" aria-haspopup="dialog">
+        <img data-stage-art src="media/portrait-park.webp" alt="" width="640" height="640" loading="lazy" decoding="async" />
         <span class="player-stage-copy">
           <strong data-stage-title>Nnan-iyi</strong>
           <em>
@@ -392,7 +404,7 @@
       <span data-lang="en">Listen on</span>
       <span data-lang="fr">Écouter sur</span>
     </p>
-    <div class="preview-platforms" role="group" aria-label="Listen on">
+    <div class="preview-platforms hintable" data-hint="platforms" role="group" aria-label="Listen on">
       <button type="button" class="preview-platform" data-listen-on="spotify">
         <span class="preview-platform-mark" aria-hidden="true">♪</span>
         Spotify
@@ -412,6 +424,13 @@
     </p>
   </div>
 </dialog>
+
+<div class="ui-hint" data-ui-hint hidden role="status">
+  <p data-ui-hint-text></p>
+  <button type="button" class="ui-hint-ok" data-ui-hint-ok>
+    <span data-lang="en">Got it</span><span data-lang="fr">Compris</span>
+  </button>
+</div>
 
 <footer class="foot">
   <div class="foot-brand">

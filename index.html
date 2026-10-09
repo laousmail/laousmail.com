@@ -155,15 +155,17 @@
 
       <div class="hero-orbit-wrap reveal-hero hintable" data-delay="3" id="journey" data-hint="orbit">
         <div class="orbit orbit--hero is-alive" data-orbit aria-live="polite">
-          <svg class="orbit-progress" viewBox="0 0 100 100" aria-hidden="true">
-            <circle class="orbit-progress-track" cx="50" cy="50" r="42"></circle>
-            <circle class="orbit-progress-fill" data-orbit-year cx="50" cy="50" r="42"></circle>
-          </svg>
-          <div class="orbit-ring" aria-hidden="true"></div>
+          <div class="orbit-spin" data-orbit-spin>
+            <svg class="orbit-progress" viewBox="0 0 100 100" aria-hidden="true">
+              <circle class="orbit-progress-track" cx="50" cy="50" r="42"></circle>
+              <circle class="orbit-progress-fill" data-orbit-year cx="50" cy="50" r="42"></circle>
+            </svg>
+            <div class="orbit-ring" aria-hidden="true"></div>
+            <div class="orbit-nodes" data-orbit-nodes></div>
+          </div>
           <div class="orbit-traveler-rail" data-orbit-traveler aria-hidden="true">
             <i class="orbit-traveler"></i>
           </div>
-          <div class="orbit-nodes" data-orbit-nodes></div>
           <div class="orbit-center">
             <strong data-orbit-count>3 / 15</strong>
             <span data-lang="en">songs out</span>

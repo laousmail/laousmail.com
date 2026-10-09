@@ -186,17 +186,37 @@
     })
   }
 
+  function setPreviewMutePrompt(visible) {
+    const prompt = $('[data-preview-mute-prompt]')
+    if (!prompt) return
+    prompt.hidden = !visible
+  }
+
+  function unmutePreviewAudio() {
+    const audio = $('[data-preview-audio]')
+    if (!audio) return
+    audio.muted = false
+    audio.volume = 1
+    if (audio.paused && audio.src) {
+      const play = audio.play()
+      if (play?.catch) play.catch(() => {})
+    }
+    setPreviewMutePrompt(false)
+  }
+
   function closePreviewModal() {
     const modal = $('[data-preview-modal]')
     const audio = $('[data-preview-audio]')
     if (audio) {
       audio.pause()
+      audio.muted = true
       audio.removeAttribute('src')
       audio.load()
     }
     previewRelease = null
     document.body.classList.remove('preview-open')
     $('[data-preview-wave]')?.classList.remove('is-playing')
+    setPreviewMutePrompt(false)
     if (modal?.open) modal.close()
   }
 
@@ -218,14 +238,19 @@
     syncPlatformButtons(r)
 
     if (r.preview && isSafeHttps(r.preview)) {
+      // Always start muted so cards + orbit dots open the same quiet preview.
+      audio.muted = true
+      audio.volume = 1
       audio.src = r.preview
       audio.currentTime = 0
       const play = audio.play()
       if (play?.catch) play.catch(() => {})
       $('[data-preview-wave]')?.classList.add('is-playing')
+      setPreviewMutePrompt(true)
     } else {
       audio.removeAttribute('src')
       $('[data-preview-wave]')?.classList.remove('is-playing')
+      setPreviewMutePrompt(false)
     }
 
     document.body.classList.add('preview-open')
@@ -239,6 +264,7 @@
 
     $('[data-open-preview]')?.addEventListener('click', () => openPreviewModal(activeTrack))
     $('[data-preview-close]')?.addEventListener('click', closePreviewModal)
+    $('[data-preview-unmute]')?.addEventListener('click', unmutePreviewAudio)
     $$('[data-listen-on]').forEach((btn) => {
       btn.addEventListener('click', () => openListenDestination(btn.getAttribute('data-listen-on')))
     })

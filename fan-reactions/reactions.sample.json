@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "updatedAt": "2026-10-09T00:00:00.000Z",
+  "notes": "SAMPLE / EMPTY dataset. Do not invent testimonials. Import real Instagram or TikTok exports with scripts/import-fan-reactions.mjs, then curate fan-reactions/reactions.json.",
+  "reactions": []
+}

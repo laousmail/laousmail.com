@@ -1391,4 +1391,7 @@
   initYear()
   initLiveComments()
   initUiHints()
+  if (typeof window.initFanReactions === 'function') {
+    window.initFanReactions()
+  }
 })()

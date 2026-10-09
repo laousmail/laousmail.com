@@ -16,24 +16,20 @@ Static HTML / CSS / JS. GitHub Pages compatible. No build step.
 | `site.css` | Design + motion |
 | `artist.js` | Lang, theme, menu, releases render, form |
 | `releases.js` | Song + journey data (edit here to add releases) |
-| `comments.js` | Live TikTok-style comments (paste more anytime) |
-| `fan-reactions.js` | Editorial Fan Reactions section |
-| `fan-reactions/` | Curated JSON dataset, schema, import docs |
+| `fan-reactions.js` | Social video comments section |
+| `fan-reactions/` | Instagram / TikTok comment exports (JSON) |
 | `config.js` | Fan signup endpoint (no secrets) |
 | `privacy.html` | Short privacy note |
 
-## Comments backend + Spotify preview
+## Spotify preview
 
-- Comments rail posts to a **Cloudflare Worker + KV** API (`comments-api/`). Shared across visitors.
-- Config: `config.js` → `LAOUSMAIL_COMMENTS_API.endpoint`.
-- Seed/fallback list still lives in `comments.js` if the API is briefly unreachable.
-- **Claim the temporary Worker** — see `comments-api/CLAIM.md` (time-limited).
 - First click on a song opens a popup with the 30s preview, then **Spotify / YouTube / Apple Music**.
 - Links + preview URLs live in `releases.js`.
+- There is **no on-site comment form**. Reactions come from social video comments only.
 
 ## Fan Reactions
 
-Curated Instagram / TikTok comments (local JSON only). See [`fan-reactions/README.md`](fan-reactions/README.md).
+Unfiltered comments from Instagram / TikTok videos (local JSON). Visitors cannot post here. See [`fan-reactions/README.md`](fan-reactions/README.md).
 
 ```bash
 node scripts/import-fan-reactions.mjs \

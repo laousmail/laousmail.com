@@ -1,6 +1,8 @@
 # Fan Reactions
 
-Local, curated fan comments for the **Fan Reactions** section on [laousmail.com](https://laousmail.com).
+Comments under LAOUSMAIL videos on Instagram / TikTok, shown on [laousmail.com](https://laousmail.com).
+
+They are **unfiltered social comments**. Visitors **cannot** leave a comment on the site.
 
 No paid APIs, databases, or scraping. The site loads `fan-reactions/reactions.json` only.
 

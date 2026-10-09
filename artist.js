@@ -63,6 +63,7 @@
     setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark')
     renderReleases()
     renderOrbit()
+    renderStudio()
   }
 
   function initLang() {
@@ -326,6 +327,115 @@
     return (now - start) / (end - start)
   }
 
+  function daysLeftIn2026() {
+    const end = Date.UTC(2026, 11, 31, 23, 59, 59, 999)
+    const now = Date.now()
+    if (now >= end) return 0
+    return Math.max(0, Math.ceil((end - now) / 86400000))
+  }
+
+  function renderDaysLeft() {
+    const root = $('[data-days-left]')
+    const countEl = $('[data-days-left-count]')
+    if (!root || !countEl) return
+    const days = daysLeftIn2026()
+    const yearPct = yearProgressThrough2026()
+    const L = lang()
+    countEl.textContent = String(days)
+    root.setAttribute(
+      'aria-label',
+      L === 'fr'
+        ? `${days} jours restants en 2026`
+        : `${days} days left in 2026`,
+    )
+    const pctEl = $('[data-orbit-year-pct]')
+    if (pctEl) {
+      const pct = Math.round(yearPct * 100)
+      pctEl.textContent =
+        L === 'fr' ? `${pct}% de l’année déjà passée` : `${pct}% of the year already gone`
+    }
+  }
+
+  const STUDIO_STEP_LABELS = {
+    writing: { en: 'Writing', fr: 'Écriture' },
+    recording: { en: 'Recording', fr: 'Enregistrement' },
+    mixing: { en: 'Mixing', fr: 'Mixage' },
+    mastering: { en: 'Mastering', fr: 'Mastering' },
+  }
+
+  function renderStudio() {
+    const data = window.LAOUSMAIL_IN_PRODUCTION
+    const root = $('[data-making]')
+    if (!root || !data || !data.title) {
+      if (root) root.hidden = true
+      return
+    }
+    root.hidden = false
+    const L = lang()
+    const steps = Array.isArray(data.steps) && data.steps.length
+      ? data.steps
+      : ['writing', 'recording', 'mixing', 'mastering']
+    const step = String(data.step || steps[0]).toLowerCase()
+    const stepIndex = Math.max(0, steps.indexOf(step))
+    const within = Math.min(1, Math.max(0, Number(data.stepProgress) || 0))
+    const overall = ((stepIndex + within) / steps.length) * 100
+
+    const num = $('[data-studio-number]')
+    if (num) num.textContent = String(data.number || stepIndex + 1).padStart(2, '0')
+
+    const title = $('[data-studio-title]')
+    if (title) title.textContent = data.title
+
+    const translation = $('[data-studio-translation]')
+    if (translation) {
+      const t = data.translation?.[L] || data.translation?.en || ''
+      translation.textContent = t ? `“${t}”` : ''
+      translation.hidden = !t
+    }
+
+    const langEl = $('[data-studio-lang]')
+    if (langEl) {
+      langEl.textContent = data.lang?.[L] || data.lang?.en || ''
+    }
+
+    const fill = $('[data-studio-bar-fill]')
+    if (fill) fill.style.width = `${Math.round(overall)}%`
+
+    const stepsRoot = $('[data-studio-steps]')
+    if (stepsRoot) {
+      stepsRoot.innerHTML = ''
+      steps.forEach((key, i) => {
+        const li = document.createElement('li')
+        li.className = 'studio-step'
+        if (i < stepIndex) li.classList.add('is-done')
+        if (i === stepIndex) li.classList.add('is-current')
+        li.setAttribute('data-step', key)
+        const label = STUDIO_STEP_LABELS[key]?.[L] || STUDIO_STEP_LABELS[key]?.en || key
+        li.innerHTML = `<span>${label}</span>`
+        stepsRoot.appendChild(li)
+      })
+    }
+
+    const note = $('[data-studio-note]')
+    if (note) {
+      note.textContent = data.note?.[L] || data.note?.en || ''
+    }
+
+    const updated = $('[data-studio-updated]')
+    if (updated && data.updated) {
+      updated.setAttribute('datetime', data.updated)
+      try {
+        updated.textContent = new Intl.DateTimeFormat(L === 'fr' ? 'fr-CA' : 'en-CA', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        }).format(new Date(`${data.updated}T12:00:00`))
+      } catch {
+        updated.textContent = data.updated
+      }
+    }
+  }
+
   function renderOrbit() {
     const orbit = $('[data-orbit]')
     const nodesRoot = $('[data-orbit-nodes]')
@@ -340,15 +450,20 @@
 
     if (countEl) countEl.textContent = `${out} / ${goal}`
 
-    const pctEl = $('[data-orbit-year-pct]')
-    if (pctEl) {
-      const pct = Math.round(yearPct * 100)
-      pctEl.textContent =
-        L === 'fr' ? `${pct}% de l’année 2026` : `${pct}% of 2026`
-    }
+    renderDaysLeft()
 
-    // Bright arc = songs released (circle filling). Traveler = where we are in 2026.
+    // Bright arc follows released dots: from first song through the last lit node.
+    // One song → small tick; 3 songs → arc ends on the 3rd dot (not past it).
+    // All songs out → full ring.
     const songPct = goal ? out / goal : 0
+    const arcPct =
+      !goal || out <= 0
+        ? 0
+        : out >= goal
+          ? 1
+          : out === 1
+            ? 0.035
+            : (out - 1) / goal
     const yearRing = $('[data-orbit-year]')
     if (yearRing) {
       const radius = 42
@@ -357,13 +472,14 @@
       yearRing.style.strokeDashoffset = `${circ}`
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          yearRing.style.strokeDashoffset = `${circ * (1 - songPct)}`
+          yearRing.style.strokeDashoffset = `${circ * (1 - arcPct)}`
         })
       })
     }
 
     orbit.style.setProperty('--year-progress', String(yearPct))
     orbit.style.setProperty('--song-progress', String(songPct))
+    orbit.style.setProperty('--arc-progress', String(arcPct))
 
     const traveler = $('[data-orbit-traveler]')
     if (traveler) {
@@ -512,7 +628,83 @@
     )
   }
 
-  /* ——— Fan form (real provider endpoint) ——— */
+  /* ——— Fan form (MailerLite / Formspree / custom) ——— */
+  async function mailerLiteSubscribe(endpoint, emailValue) {
+    const body = new FormData()
+    body.set('fields[email]', emailValue)
+    body.set('ml-submit', '1')
+    body.set('anticsrf', 'true')
+
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        body,
+        headers: { Accept: 'application/json' },
+        mode: 'cors',
+      })
+      let data = null
+      try {
+        data = await res.json()
+      } catch {
+        data = null
+      }
+      if (data && data.success === true) return data
+      if (data && data.success === false) {
+        const msg =
+          data?.errors?.fields?.email?.[0] ||
+          data?.errors?.email?.[0] ||
+          data?.message ||
+          'MailerLite rejected the signup'
+        throw new Error(msg)
+      }
+      if (res.ok) return data || { success: true }
+      throw new Error(`HTTP ${res.status}`)
+    } catch (err) {
+      const message = String(err?.message || '')
+      if (message.includes('MailerLite rejected') || message.includes('email')) throw err
+      return mailerLiteSubscribeJsonp(endpoint, emailValue)
+    }
+  }
+
+  function mailerLiteSubscribeJsonp(endpoint, emailValue) {
+    return new Promise((resolve, reject) => {
+      const cb = `__mlCb${Date.now().toString(36)}`
+      const params = new URLSearchParams()
+      params.set('fields[email]', emailValue)
+      params.set('ml-submit', '1')
+      params.set('anticsrf', 'true')
+      params.set('callback', cb)
+      const joiner = endpoint.includes('?') ? '&' : '?'
+      const script = document.createElement('script')
+      const timer = window.setTimeout(() => {
+        cleanup()
+        reject(new Error('timeout'))
+      }, 12000)
+
+      function cleanup() {
+        window.clearTimeout(timer)
+        try {
+          delete window[cb]
+        } catch {
+          window[cb] = undefined
+        }
+        script.remove()
+      }
+
+      window[cb] = (res) => {
+        cleanup()
+        if (res && res.success === true) resolve(res)
+        else reject(new Error(res?.message || 'MailerLite signup failed'))
+      }
+      script.onerror = () => {
+        cleanup()
+        reject(new Error('network'))
+      }
+      script.src = `${endpoint}${joiner}${params.toString()}`
+      document.body.appendChild(script)
+    })
+  }
+
   function initJoinForm() {
     const form = $('#join-form')
     if (!form) return
@@ -581,21 +773,28 @@
         return
       }
 
+      const provider = String(cfg.provider || '').toLowerCase()
+      const emailValue = email.value.trim()
+
       submitBtn && (submitBtn.disabled = true)
       try {
-        const body = new FormData()
-        body.set('email', email.value.trim())
-        body.set('consent', '1')
-        body.set('source', 'laousmail.com')
-        body.set('interest', 'songs+show')
+        if (provider === 'mailerlite') {
+          await mailerLiteSubscribe(endpoint, emailValue)
+        } else {
+          const body = new FormData()
+          body.set('email', emailValue)
+          body.set('consent', '1')
+          body.set('source', 'laousmail.com')
+          body.set('interest', 'songs+show')
 
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          body,
-          headers: { Accept: 'application/json' },
-        })
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            body,
+            headers: { Accept: 'application/json' },
+          })
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+          if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        }
 
         if (fields) fields.hidden = true
         if (success) success.hidden = false
@@ -631,10 +830,24 @@
     const apiCfg = window.LAOUSMAIL_COMMENTS_API || {}
     const apiEndpoint = String(apiCfg.endpoint || '').trim()
     const pollMs = Math.max(8000, Number(apiCfg.pollMs) || 20000)
-    const seed = Array.isArray(window.LAOUSMAIL_COMMENTS) ? window.LAOUSMAIL_COMMENTS.slice() : []
+    function shuffle(list) {
+      const arr = list.slice()
+      for (let i = arr.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1))
+        const tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+      }
+      return arr
+    }
+
+    /** Seed pool shuffled once per page load so visitors see a fresh order. */
+    const seed = shuffle(Array.isArray(window.LAOUSMAIL_COMMENTS) ? window.LAOUSMAIL_COMMENTS.slice() : [])
     let remoteComments = []
     let localComments = []
     let apiOnline = false
+    let displayPool = null
+    let livePoolSig = ''
 
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
@@ -661,16 +874,53 @@
       return `${item.id || ''}|${item.handle || ''}|${item.text || ''}|${item.ts || ''}`
     }
 
-    function pool() {
+    function textKey(item) {
+      return String(item.text || '')
+        .trim()
+        .toLowerCase()
+    }
+
+    /**
+     * Merge live comments with the ~100 seed pool, then shuffle for this load.
+     * Sparse remote/local still yields a full visible set from the seed pool.
+     */
+    function rebuildDisplayPool() {
       const seen = new Set()
-      const out = []
-      for (const item of remoteComments.concat(localComments).concat(seed)) {
+      const seenText = new Set()
+      const live = []
+      for (const item of remoteComments.concat(localComments)) {
         const key = commentKey(item)
-        if (seen.has(key)) continue
+        const t = textKey(item)
+        if (!t || seen.has(key) || seenText.has(t)) continue
         seen.add(key)
-        out.push(item)
+        seenText.add(t)
+        live.push(item)
       }
-      return out
+
+      const fromSeed = []
+      for (const item of seed) {
+        const key = commentKey(item)
+        const t = textKey(item)
+        if (!t || seen.has(key) || seenText.has(t)) continue
+        seen.add(key)
+        seenText.add(t)
+        fromSeed.push(item)
+      }
+
+      // Live comments + full seed pool (seed fills when remote is sparse), then shuffle.
+      const merged = live.concat(fromSeed)
+      displayPool = shuffle(merged)
+      idx = 0
+      return displayPool
+    }
+
+    function pool() {
+      const nextLiveSig = remoteComments.concat(localComments).map(commentKey).join('\n')
+      if (!displayPool || livePoolSig !== nextLiveSig) {
+        livePoolSig = nextLiveSig
+        return rebuildDisplayPool()
+      }
+      return displayPool
     }
 
     function persistLocal() {
@@ -1101,6 +1351,7 @@
   initPreviewModal()
   renderReleases()
   renderOrbit()
+  renderStudio()
   initOrbitObserve()
   observeReveals()
   initMenu()

@@ -57,3 +57,28 @@ window.LAOUSMAIL_JOURNEY = {
   goal: 15,
   year: 2026,
 }
+
+/**
+ * Song currently in the studio. Update `step` + `note` as you move.
+ * Steps (in order): writing → recording → mixing → mastering
+ * Optional: set `stepProgress` 0–1 for how far through the current step.
+ */
+window.LAOUSMAIL_IN_PRODUCTION = {
+  number: 4,
+  title: 'D kem i hemlegh',
+  translation: {
+    en: 'It’s you who I love',
+    fr: 'C’est toi que j’aime',
+  },
+  lang: { en: 'Kabyle · Amazigh', fr: 'Kabyle · Amazigh' },
+  /** Current studio step */
+  step: 'recording',
+  /** 0–1 progress inside the current step (vocals done, still tracking instruments) */
+  stepProgress: 0.55,
+  steps: ['writing', 'recording', 'mixing', 'mastering'],
+  note: {
+    en: 'Vocals are done. Recording bass and acoustic guitars, rearranging drums.',
+    fr: 'Voix terminées. Enregistrement de la basse et des guitares acoustiques, réarrangement de la batterie.',
+  },
+  updated: '2026-10-09',
+}

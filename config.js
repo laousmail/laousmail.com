@@ -1,24 +1,15 @@
 /**
- * Fan signup — real list integration (GitHub Pages safe).
+ * Fan signup — MailerLite (GitHub Pages safe, no API key in the browser).
  *
- * Leave `endpoint` empty to show a clear “not connected yet” state.
- * Never put private API keys here.
- *
- * Formspree example:
- *   endpoint: 'https://formspree.io/f/xxxxxxxx'
- *   provider: 'formspree'
- *
- * Buttondown example (public form endpoint):
- *   endpoint: 'https://buttondown.com/api/emails/embed-subscribe/YOUR_USERNAME'
- *   provider: 'buttondown'
- *
- * Custom HTTPS endpoint that accepts POST JSON or form-urlencoded:
- *   endpoint: 'https://your-worker.example.com/subscribe'
- *   provider: 'custom'
+ * Account: 1893739 · Embedded form slug: Mw8lp9
+ * Public subscribe uses the numeric form id from MailerLite.
  */
 window.LAOUSMAIL_FORM = {
-  endpoint: '',
-  provider: 'formspree',
+  endpoint: 'https://assets.mailerlite.com/jsonp/1893739/forms/169942944091997773/subscribe',
+  provider: 'mailerlite',
+  accountId: '1893739',
+  formSlug: 'Mw8lp9',
+  formId: '169942944091997773',
   /** Optional honeypot field name (leave empty string on the form input named `website`) */
   honeypot: 'website',
 }
@@ -29,7 +20,7 @@ window.LAOUSMAIL_FORM = {
  * (see comments-api/README.md) so the URL stays yours.
  */
 window.LAOUSMAIL_COMMENTS_API = {
-  endpoint: 'https://laousmail-comments.island-wasp.workers.dev',
+  endpoint: 'https://laousmail-comments.cubic-device.workers.dev',
   /** Poll interval for new comments from other visitors (ms) */
   pollMs: 20000,
 }

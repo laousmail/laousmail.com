@@ -512,7 +512,83 @@
     )
   }
 
-  /* ——— Fan form (real provider endpoint) ——— */
+  /* ——— Fan form (MailerLite / Formspree / custom) ——— */
+  async function mailerLiteSubscribe(endpoint, emailValue) {
+    const body = new FormData()
+    body.set('fields[email]', emailValue)
+    body.set('ml-submit', '1')
+    body.set('anticsrf', 'true')
+
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        body,
+        headers: { Accept: 'application/json' },
+        mode: 'cors',
+      })
+      let data = null
+      try {
+        data = await res.json()
+      } catch {
+        data = null
+      }
+      if (data && data.success === true) return data
+      if (data && data.success === false) {
+        const msg =
+          data?.errors?.fields?.email?.[0] ||
+          data?.errors?.email?.[0] ||
+          data?.message ||
+          'MailerLite rejected the signup'
+        throw new Error(msg)
+      }
+      if (res.ok) return data || { success: true }
+      throw new Error(`HTTP ${res.status}`)
+    } catch (err) {
+      const message = String(err?.message || '')
+      if (message.includes('MailerLite rejected') || message.includes('email')) throw err
+      return mailerLiteSubscribeJsonp(endpoint, emailValue)
+    }
+  }
+
+  function mailerLiteSubscribeJsonp(endpoint, emailValue) {
+    return new Promise((resolve, reject) => {
+      const cb = `__mlCb${Date.now().toString(36)}`
+      const params = new URLSearchParams()
+      params.set('fields[email]', emailValue)
+      params.set('ml-submit', '1')
+      params.set('anticsrf', 'true')
+      params.set('callback', cb)
+      const joiner = endpoint.includes('?') ? '&' : '?'
+      const script = document.createElement('script')
+      const timer = window.setTimeout(() => {
+        cleanup()
+        reject(new Error('timeout'))
+      }, 12000)
+
+      function cleanup() {
+        window.clearTimeout(timer)
+        try {
+          delete window[cb]
+        } catch {
+          window[cb] = undefined
+        }
+        script.remove()
+      }
+
+      window[cb] = (res) => {
+        cleanup()
+        if (res && res.success === true) resolve(res)
+        else reject(new Error(res?.message || 'MailerLite signup failed'))
+      }
+      script.onerror = () => {
+        cleanup()
+        reject(new Error('network'))
+      }
+      script.src = `${endpoint}${joiner}${params.toString()}`
+      document.body.appendChild(script)
+    })
+  }
+
   function initJoinForm() {
     const form = $('#join-form')
     if (!form) return
@@ -581,21 +657,28 @@
         return
       }
 
+      const provider = String(cfg.provider || '').toLowerCase()
+      const emailValue = email.value.trim()
+
       submitBtn && (submitBtn.disabled = true)
       try {
-        const body = new FormData()
-        body.set('email', email.value.trim())
-        body.set('consent', '1')
-        body.set('source', 'laousmail.com')
-        body.set('interest', 'songs+show')
+        if (provider === 'mailerlite') {
+          await mailerLiteSubscribe(endpoint, emailValue)
+        } else {
+          const body = new FormData()
+          body.set('email', emailValue)
+          body.set('consent', '1')
+          body.set('source', 'laousmail.com')
+          body.set('interest', 'songs+show')
 
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          body,
-          headers: { Accept: 'application/json' },
-        })
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            body,
+            headers: { Accept: 'application/json' },
+          })
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+          if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        }
 
         if (fields) fields.hidden = true
         if (success) success.hidden = false

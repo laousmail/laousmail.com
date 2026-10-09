@@ -1,24 +1,21 @@
 /**
- * Fan signup — real list integration (GitHub Pages safe).
+ * Fan signup — MailerLite (GitHub Pages safe, no API key in the browser).
  *
- * Leave `endpoint` empty to show a clear “not connected yet” state.
- * Never put private API keys here.
+ * Setup:
+ * 1. In MailerLite: Forms → create an Embedded form for “Ceux qui écoutent”.
+ * 2. Open the form’s HTML embed / network tab and copy the subscribe action URL:
+ *      https://assets.mailerlite.com/jsonp/ACCOUNT_ID/forms/FORM_ID/subscribe
+ * 3. Paste that URL into `endpoint` below and keep provider: 'mailerlite'.
  *
- * Formspree example:
- *   endpoint: 'https://formspree.io/f/xxxxxxxx'
- *   provider: 'formspree'
+ * Never put a private MailerLite API token in this file.
  *
- * Buttondown example (public form endpoint):
- *   endpoint: 'https://buttondown.com/api/emails/embed-subscribe/YOUR_USERNAME'
- *   provider: 'buttondown'
- *
- * Custom HTTPS endpoint that accepts POST JSON or form-urlencoded:
- *   endpoint: 'https://your-worker.example.com/subscribe'
- *   provider: 'custom'
+ * Other providers (optional):
+ *   Formspree:  endpoint: 'https://formspree.io/f/xxxxxxxx', provider: 'formspree'
+ *   Buttondown: endpoint: 'https://buttondown.com/api/emails/embed-subscribe/USER', provider: 'buttondown'
  */
 window.LAOUSMAIL_FORM = {
   endpoint: '',
-  provider: 'formspree',
+  provider: 'mailerlite',
   /** Optional honeypot field name (leave empty string on the form input named `website`) */
   honeypot: 'website',
 }

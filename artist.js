@@ -452,8 +452,18 @@
 
     renderDaysLeft()
 
-    // Bright arc = songs released (circle filling). Traveler = where we are in 2026.
+    // Bright arc follows released dots: from first song through the last lit node.
+    // One song → small tick; 3 songs → arc ends on the 3rd dot (not past it).
+    // All songs out → full ring.
     const songPct = goal ? out / goal : 0
+    const arcPct =
+      !goal || out <= 0
+        ? 0
+        : out >= goal
+          ? 1
+          : out === 1
+            ? 0.035
+            : (out - 1) / goal
     const yearRing = $('[data-orbit-year]')
     if (yearRing) {
       const radius = 42
@@ -462,13 +472,14 @@
       yearRing.style.strokeDashoffset = `${circ}`
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          yearRing.style.strokeDashoffset = `${circ * (1 - songPct)}`
+          yearRing.style.strokeDashoffset = `${circ * (1 - arcPct)}`
         })
       })
     }
 
     orbit.style.setProperty('--year-progress', String(yearPct))
     orbit.style.setProperty('--song-progress', String(songPct))
+    orbit.style.setProperty('--arc-progress', String(arcPct))
 
     const traveler = $('[data-orbit-traveler]')
     if (traveler) {

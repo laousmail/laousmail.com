@@ -1306,6 +1306,8 @@ body.preview-open {
 .orbit--hero {
   overflow: visible;
   filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.35));
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .orbit-progress {
@@ -1340,11 +1342,14 @@ body.preview-open {
   border-radius: 50%;
   border: 1px dashed color-mix(in srgb, var(--accent) 35%, var(--line));
   box-shadow: 0 0 40px color-mix(in srgb, var(--signal) 14%, transparent);
-  animation: orbitRingPulse 5.5s var(--ease) infinite;
+  opacity: 0.75;
 }
 
 .orbit.is-alive .orbit-ring {
-  animation: orbitSpin 64s linear infinite, orbitRingPulse 5.5s var(--ease) infinite;
+  /* Same duration as nodes — mismatched spin + scale pulse looked like shaking */
+  animation: orbitSpin 56s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .orbit-traveler-rail {
@@ -1385,7 +1390,7 @@ body.preview-open {
   backdrop-filter: blur(8px);
   padding: 0.6rem;
   z-index: 2;
-  animation: centerBreath 4.8s var(--ease) infinite;
+  /* No scale pulse — it made the whole circle look like it was shaking */
 }
 
 .orbit-center strong {
@@ -1431,10 +1436,15 @@ body.preview-open {
 
 .orbit.is-alive .orbit-nodes {
   animation: orbitSpin 56s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .orbit.is-alive .orbit-progress {
   animation: orbitProgressSpin 56s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 @keyframes orbitProgressSpin {
@@ -1474,8 +1484,7 @@ body.preview-open {
 
 .orbit-node.lit.in {
   transform: translate(-50%, -50%) scale(1.15);
-  animation: litPulse 2.4s ease-in-out infinite;
-  animation-delay: calc(var(--i, 0) * 0.15s);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--signal) 65%, transparent);
 }
 
 .orbit-node:hover,
@@ -1502,20 +1511,22 @@ body.preview-open {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
   pointer-events: none;
   line-height: 1.2;
-  transform: translateY(-50%);
-  transform-origin: -0.7rem 50%;
+  transform: translate3d(0, -50%, 0);
+  transform-origin: -0.55rem 50%;
+  backface-visibility: hidden;
 }
 
 .orbit.is-alive .orbit-node-label {
   animation: labelCounterSpin 56s linear infinite;
+  will-change: transform;
 }
 
 @keyframes labelCounterSpin {
   from {
-    transform: translateY(-50%) rotate(0deg);
+    transform: translate3d(0, -50%, 0) rotate(0deg);
   }
   to {
-    transform: translateY(-50%) rotate(-360deg);
+    transform: translate3d(0, -50%, 0) rotate(-360deg);
   }
 }
 

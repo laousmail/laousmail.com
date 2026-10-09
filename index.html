@@ -493,9 +493,19 @@
       <span data-lang="en">Hear a taste here. Then choose where to play the full song.</span>
       <span data-lang="fr">Un avant-goût ici. Ensuite choisis où écouter la chanson complète.</span>
     </p>
-    <audio data-preview-audio preload="none" playsinline></audio>
+    <audio data-preview-audio preload="none" playsinline muted></audio>
     <div class="preview-wave" data-preview-wave aria-hidden="true">
       <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+    <div class="preview-mute-prompt" data-preview-mute-prompt hidden>
+      <p>
+        <span data-lang="en">Playing muted. Turn the volume up to listen.</span>
+        <span data-lang="fr">Lecture en sourdine. Monte le volume pour écouter.</span>
+      </p>
+      <button type="button" class="btn" data-preview-unmute>
+        <span data-lang="en">Turn sound on</span>
+        <span data-lang="fr">Activer le son</span>
+      </button>
     </div>
     <p class="preview-choose">
       <span data-lang="en">Listen on</span>

@@ -92,7 +92,7 @@
 </head>
 <body>
 <div class="pointer-glow" aria-hidden="true"></div>
-<aside class="live-rail" data-live-rail aria-label="Comments">
+<aside class="live-rail" data-live-rail data-hint="comments" aria-label="Comments">
   <div class="live-rail-head">
     <strong data-lang="en">Comments</strong>
     <strong data-lang="fr">Commentaires</strong>
@@ -100,9 +100,23 @@
       <span data-lang="en">From my videos · unfiltered</span>
       <span data-lang="fr">Sous mes vidéos · non filtrés</span>
     </span>
+    <button type="button" class="live-rail-help" data-live-help aria-expanded="false" aria-controls="live-warn-detail" title="About these comments">
+      <span aria-hidden="true">?</span>
+      <span class="visually-hidden"><span data-lang="en">Why these comments</span><span data-lang="fr">Pourquoi ces commentaires</span></span>
+    </button>
     <button type="button" class="live-rail-min-btn" data-live-minimize aria-expanded="true" title="Hide">
       <span data-lang="en">Hide</span><span data-lang="fr">Réduire</span>
     </button>
+  </div>
+  <div class="live-rail-warn" data-live-warn>
+    <p class="live-rail-warn-line">
+      <span data-lang="en">Some comments may be insulting or use bad language.</span>
+      <span data-lang="fr">Certains commentaires peuvent être insultants ou vulgaires.</span>
+    </p>
+    <div class="live-rail-warn-detail" id="live-warn-detail" data-live-warn-detail hidden>
+      <p data-lang="en">laousmail shows this to be transparent about the hate and the love. Love is much better than hate. And this is only going to grow.</p>
+      <p data-lang="fr">laousmail affiche ceci pour rester transparent sur la haine et l’amour. L’amour vaut bien mieux que la haine. Et ça ne fera que grandir.</p>
+    </div>
   </div>
   <div class="live-comments" data-live-comments tabindex="0" role="log" aria-live="polite" aria-relevant="additions"></div>
 </aside>
@@ -133,10 +147,13 @@
   </div>
 
   <div class="tools">
-    <div class="lang" role="group" aria-label="Language">
+    <div class="lang hintable" role="group" aria-label="Language" data-hint="lang">
       <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
       <button type="button" data-lang-btn="fr" aria-pressed="false">FR</button>
     </div>
+    <button type="button" class="tips-replay" data-hints-replay title="Show tips">
+      <span data-lang="en">Tips</span><span data-lang="fr">Astuces</span>
+    </button>
     <button class="mode" type="button" data-theme-toggle aria-label="Theme">
       <svg class="mode-icon mode-icon-moon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M21 13.5A9 9 0 1 1 10.5 3a7 7 0 0 0 10.5 10.5z"/></svg>
       <svg class="mode-icon mode-icon-sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path stroke-linecap="round" d="M12 2.8v2.2M12 19v2.2M2.8 12h2.2M19 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M5.2 18.8l1.6-1.6M17.2 6.8l1.6-1.6"/></svg>
@@ -379,7 +396,7 @@
   </section>
 
   <!-- LIVE -->
-  <section class="sec live" id="live">
+  <section class="sec live hintable" id="live" data-hint="live">
     <div class="live-atmosphere" aria-hidden="true"><i></i><i></i></div>
     <p class="eyebrow reveal">
       <span data-lang="en">Live</span><span data-lang="fr">Live</span>

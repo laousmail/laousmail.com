@@ -1985,7 +1985,7 @@ body.live-rail-min {
 .live-toast {
   position: relative;
   width: 100%;
-  padding: 0.55rem 0.7rem;
+  padding: 0.5rem 0.65rem;
   border-radius: 0.75rem;
   background: color-mix(in srgb, var(--bg) 42%, transparent);
   color: var(--ink);
@@ -1996,6 +1996,36 @@ body.live-rail-min {
   transform: translateY(10px);
   transition: opacity 0.35s var(--ease), transform 0.4s var(--ease);
   contain: layout paint;
+}
+
+.live-bubble-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.live-avatar {
+  flex: 0 0 auto;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background: color-mix(in srgb, var(--line) 35%, transparent);
+  border: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+}
+
+.live-avatar.is-fallback {
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, var(--bg));
+}
+
+.live-bubble-body {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .live-bubble.is-fresh {
@@ -2024,6 +2054,9 @@ body.live-rail-min {
   font-size: 0.72rem;
   color: var(--accent);
   margin-bottom: 0.12rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .live-text {

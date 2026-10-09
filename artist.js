@@ -566,8 +566,8 @@
       if (!endpoint) {
         showError(
           lang() === 'fr'
-            ? 'La liste n’est pas encore connectée. Reviens bientôt — ou écris à @laousmail sur Instagram.'
-            : 'The list isn’t connected yet. Check back soon — or message @laousmail on Instagram.',
+            ? 'La liste n’est pas encore connectée. Reviens bientôt, ou écris à @laousmail sur Instagram.'
+            : 'The list isn’t connected yet. Check back soon, or message @laousmail on Instagram.',
         )
         return
       }
@@ -602,8 +602,8 @@
       } catch {
         showError(
           lang() === 'fr'
-            ? 'Ça n’a pas fonctionné. Réessaie dans un moment — ou écris à @laousmail sur Instagram.'
-            : 'That didn’t work. Try again in a moment — or message @laousmail on Instagram.',
+            ? 'Ça n’a pas fonctionné. Réessaie dans un moment, ou écris à @laousmail sur Instagram.'
+            : 'That didn’t work. Try again in a moment, or message @laousmail on Instagram.',
         )
       } finally {
         submitBtn && (submitBtn.disabled = false)
@@ -998,16 +998,16 @@
 
     const copy = {
       orbit: {
-        en: 'Each lit point is a released song — tap a name to preview it. The circle fills by end of 2026.',
-        fr: 'Chaque point allumé est une chanson sortie — touche un nom pour l’extrait. Le cercle se remplit fin 2026.',
+        en: 'Each lit point is a released song. Tap a name to preview it. The circle fills by end of 2026.',
+        fr: 'Chaque point allumé est une chanson sortie. Touche un nom pour l’extrait. Le cercle se remplit fin 2026.',
       },
       preview: {
         en: 'Tap a song for a 30s preview, then pick where to listen.',
         fr: 'Touche une chanson pour 30s d’extrait, puis choisis où écouter.',
       },
       platforms: {
-        en: 'Choose Spotify, YouTube, or Apple Music — opens that app.',
-        fr: 'Choisis Spotify, YouTube ou Apple Music — ça ouvre l’app.',
+        en: 'Choose Spotify, YouTube, or Apple Music. Opens that app.',
+        fr: 'Choisis Spotify, YouTube ou Apple Music. Ça ouvre l’app.',
       },
     }
 

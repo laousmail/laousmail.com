@@ -1045,7 +1045,6 @@
     let timer = 0
     let unseen = 0
     let started = false
-    let stickToBottom = true
 
     try {
       if (localStorage.getItem('laousmail-live-minimized') === '1') minimized = true
@@ -1054,7 +1053,14 @@
     }
 
     function isNearBottom() {
-      return layer.scrollHeight - layer.scrollTop - layer.clientHeight <= NEAR_BOTTOM_PX
+      const maxScroll = layer.scrollHeight - layer.clientHeight
+      if (maxScroll <= 4) return true
+      const threshold = Math.min(NEAR_BOTTOM_PX, Math.max(28, maxScroll * 0.2))
+      return maxScroll - layer.scrollTop <= threshold
+    }
+
+    function pinToBottom() {
+      layer.scrollTop = layer.scrollHeight
     }
 
     function updateFab() {
@@ -1088,10 +1094,7 @@
 
     function setMinimized(next) {
       minimized = !!next
-      if (!minimized) {
-        unseen = 0
-        stickToBottom = true
-      }
+      if (!minimized) unseen = 0
       if (minimized) {
         window.clearTimeout(timer)
         layer.innerHTML = ''
@@ -1152,22 +1155,18 @@
 
     function showBubble(item) {
       if (!item) return
+      const pinBottom = isNearBottom()
       const bubble = buildBubble(item)
       layer.appendChild(bubble)
       void bubble.offsetWidth
       bubble.classList.add('in')
 
-      if (stickToBottom) {
-        layer.scrollTo({
-          top: layer.scrollHeight,
-          behavior: reduce ? 'auto' : 'smooth',
-        })
-      }
+      if (pinBottom) pinToBottom()
 
       const life = reduce ? 16000 : 14000 + Math.random() * 4000
       window.setTimeout(() => {
         if (!bubble.isConnected) return
-        if (!stickToBottom) return
+        if (!isNearBottom()) return
         if (layer.children.length <= 14) return
         bubble.classList.add('out')
         window.setTimeout(() => {
@@ -1228,14 +1227,6 @@
       }
       return out
     }
-
-    layer.addEventListener(
-      'scroll',
-      () => {
-        stickToBottom = isNearBottom()
-      },
-      { passive: true },
-    )
 
     helpBtn?.addEventListener('click', () => {
       setHelpOpen(!!warnDetail?.hidden)

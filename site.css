@@ -2122,7 +2122,7 @@ body.live-rail-min {
   padding-right: 0.15rem;
   mask-image: linear-gradient(180deg, transparent, #000 8%, #000 100%);
   pointer-events: auto;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   scrollbar-width: thin;

@@ -2407,43 +2407,62 @@ body.live-rail-min .live-toast-layer {
 @media (max-width: 900px) {
   .nav-desktop,
   .pill {
-    display: none;
+    display: none !important;
   }
 
   .nav {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    display: flex;
+    flex-wrap: nowrap;
     align-items: center;
-    column-gap: 0.45rem;
+    gap: 0.4rem;
+    min-height: 3.4rem;
+    padding-block: 0.45rem;
   }
 
   .brand {
-    grid-column: 1;
-    margin-right: 0.25rem;
+    flex: 0 0 auto;
+    order: 1;
+    margin-right: 0;
+  }
+
+  .brand img {
+    width: 36px;
+    height: 36px;
   }
 
   .tools {
-    grid-column: 2;
-    margin-left: 0 !important;
-    gap: 0.35rem;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: auto !important;
     flex: 0 0 auto;
-    justify-self: end;
+    order: 2;
   }
 
   .nav-open {
     display: grid;
-    grid-column: 3;
     margin-left: 0;
-    justify-self: end;
+    flex: 0 0 auto;
+    order: 3;
+    width: 40px;
+    height: 40px;
   }
 
   .lang button {
-    padding: 0.35rem 0.55rem;
+    padding: 0.32rem 0.5rem;
   }
 
   .mode {
     width: 28px;
     height: 28px;
+  }
+
+  .live-toggle {
+    padding: 0.32rem 0.55rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
   }
 
   .orbit {

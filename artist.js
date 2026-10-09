@@ -854,6 +854,7 @@
   function initLiveComments() {
     const rail = $('[data-live-rail]')
     const layer = $('[data-live-comments]')
+    const toggle = $('[data-live-toggle]')
     const minBtn = $('[data-live-minimize]')
     const fab = $('[data-live-fab]')
     const fabCount = $('[data-live-fab-count]')
@@ -980,6 +981,8 @@
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     try {
+      const saved = localStorage.getItem('laousmail-live-comments')
+      if (saved === 'off') on = false
       const minSaved = localStorage.getItem('laousmail-live-minimized')
       if (minSaved === '1') minimized = true
     } catch {
@@ -1006,6 +1009,11 @@
     }
 
     function setChrome() {
+      if (toggle) {
+        toggle.setAttribute('aria-pressed', on ? 'true' : 'false')
+        toggle.classList.toggle('is-off', !on)
+        toggle.hidden = false
+      }
       rail.hidden = !(on && !minimized)
       rail.setAttribute('aria-hidden', on && !minimized ? 'false' : 'true')
       document.body.classList.toggle('live-rail-on', on && !minimized)
@@ -1019,6 +1027,40 @@
       }
       updateFab()
       syncComposePlaceholders()
+    }
+
+    function startLive() {
+      on = true
+      setChrome()
+      try {
+        localStorage.setItem('laousmail-live-comments', 'on')
+      } catch {
+        /* private mode */
+      }
+      if (!minimized) {
+        spawn()
+        window.setTimeout(spawn, 500)
+        schedule()
+      }
+      schedulePoll()
+      fetchRemoteComments()
+    }
+
+    function stopLive() {
+      on = false
+      minimized = false
+      unseen = 0
+      window.clearTimeout(timer)
+      window.clearTimeout(pollTimer)
+      layer.innerHTML = ''
+      if (toasts) toasts.innerHTML = ''
+      setChrome()
+      try {
+        localStorage.setItem('laousmail-live-comments', 'off')
+        localStorage.setItem('laousmail-live-minimized', '0')
+      } catch {
+        /* private mode */
+      }
     }
 
     function ctaCopy() {
@@ -1258,6 +1300,7 @@
       textInput?.focus()
     })
 
+    toggle?.addEventListener('click', () => (on ? stopLive() : startLive()))
     minBtn?.addEventListener('click', () => setMinimized(!minimized))
     fab?.addEventListener('click', () => setMinimized(false))
 
@@ -1277,6 +1320,7 @@
     })
 
     setChrome()
+    if (!on) return
     fetchRemoteComments().finally(() => {
       if (on && !minimized) {
         spawn()

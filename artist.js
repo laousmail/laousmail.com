@@ -830,10 +830,24 @@
     const apiCfg = window.LAOUSMAIL_COMMENTS_API || {}
     const apiEndpoint = String(apiCfg.endpoint || '').trim()
     const pollMs = Math.max(8000, Number(apiCfg.pollMs) || 20000)
-    const seed = Array.isArray(window.LAOUSMAIL_COMMENTS) ? window.LAOUSMAIL_COMMENTS.slice() : []
+    function shuffle(list) {
+      const arr = list.slice()
+      for (let i = arr.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1))
+        const tmp = arr[i]
+        arr[i] = arr[j]
+        arr[j] = tmp
+      }
+      return arr
+    }
+
+    /** Seed pool shuffled once per page load so visitors see a fresh order. */
+    const seed = shuffle(Array.isArray(window.LAOUSMAIL_COMMENTS) ? window.LAOUSMAIL_COMMENTS.slice() : [])
     let remoteComments = []
     let localComments = []
     let apiOnline = false
+    let displayPool = null
+    let livePoolSig = ''
 
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
@@ -860,16 +874,53 @@
       return `${item.id || ''}|${item.handle || ''}|${item.text || ''}|${item.ts || ''}`
     }
 
-    function pool() {
+    function textKey(item) {
+      return String(item.text || '')
+        .trim()
+        .toLowerCase()
+    }
+
+    /**
+     * Merge live comments with the ~100 seed pool, then shuffle for this load.
+     * Sparse remote/local still yields a full visible set from the seed pool.
+     */
+    function rebuildDisplayPool() {
       const seen = new Set()
-      const out = []
-      for (const item of remoteComments.concat(localComments).concat(seed)) {
+      const seenText = new Set()
+      const live = []
+      for (const item of remoteComments.concat(localComments)) {
         const key = commentKey(item)
-        if (seen.has(key)) continue
+        const t = textKey(item)
+        if (!t || seen.has(key) || seenText.has(t)) continue
         seen.add(key)
-        out.push(item)
+        seenText.add(t)
+        live.push(item)
       }
-      return out
+
+      const fromSeed = []
+      for (const item of seed) {
+        const key = commentKey(item)
+        const t = textKey(item)
+        if (!t || seen.has(key) || seenText.has(t)) continue
+        seen.add(key)
+        seenText.add(t)
+        fromSeed.push(item)
+      }
+
+      // Live comments + full seed pool (seed fills when remote is sparse), then shuffle.
+      const merged = live.concat(fromSeed)
+      displayPool = shuffle(merged)
+      idx = 0
+      return displayPool
+    }
+
+    function pool() {
+      const nextLiveSig = remoteComments.concat(localComments).map(commentKey).join('\n')
+      if (!displayPool || livePoolSig !== nextLiveSig) {
+        livePoolSig = nextLiveSig
+        return rebuildDisplayPool()
+      }
+      return displayPool
     }
 
     function persistLocal() {

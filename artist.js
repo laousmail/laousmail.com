@@ -100,6 +100,15 @@
     }
   }
 
+  /** Local avatars/… paths or https image URLs only (no javascript:). */
+  function safeAvatarSrc(url) {
+    const raw = String(url || '').trim()
+    if (!raw) return ''
+    if (/^avatars\/[A-Za-z0-9._-]+\.(jpe?g|png|webp|gif)$/i.test(raw)) return raw
+    if (isSafeHttps(raw) && /\.(jpe?g|png|webp|gif)(\?|$)/i.test(raw)) return raw
+    return ''
+  }
+
   function releases() {
     return Array.isArray(window.LAOUSMAIL_RELEASES) ? window.LAOUSMAIL_RELEASES : []
   }
@@ -883,8 +892,10 @@
           localComments = parsed
             .filter((c) => c && typeof c.text === 'string' && c.text.trim())
             .map((c) => ({
-              handle: String(c.handle || '@fan').slice(0, 24),
-              text: String(c.text).slice(0, 160),
+              handle: String(c.handle || '@fan').slice(0, 32),
+              name: String(c.name || '').slice(0, 48),
+              avatar: safeAvatarSrc(c.avatar),
+              text: String(c.text).slice(0, 220),
               heart: !!c.heart,
               ts: Number(c.ts) || Date.now(),
               id: c.id || '',
@@ -1032,9 +1043,27 @@
       }
       const bubble = document.createElement('div')
       bubble.className = 'live-bubble'
-      bubble.innerHTML = `<span class="live-handle">${escapeHtml(
-        item.handle || '@fan',
-      )}</span><span class="live-text">${escapeHtml(item.text || '')}</span>`
+      const handle = item.handle || '@fan'
+      const name = String(item.name || '').trim()
+      const avatar = safeAvatarSrc(item.avatar)
+      const label = name || handle
+      const initial = (name || handle.replace(/^@/, '') || '?').trim().charAt(0).toUpperCase()
+      const avatarHtml = avatar
+        ? `<img class="live-avatar" src="${escapeHtml(avatar)}" alt="" width="32" height="32" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-fallback="${escapeHtml(initial)}" />`
+        : `<span class="live-avatar is-fallback" aria-hidden="true">${escapeHtml(initial)}</span>`
+      bubble.innerHTML = `<div class="live-bubble-row">${avatarHtml}<div class="live-bubble-body"><span class="live-handle" title="${escapeHtml(
+        handle,
+      )}">${escapeHtml(label)}</span><span class="live-text">${escapeHtml(
+        item.text || '',
+      )}</span></div></div>`
+      const img = bubble.querySelector('img.live-avatar')
+      img?.addEventListener('error', () => {
+        const fb = document.createElement('span')
+        fb.className = 'live-avatar is-fallback'
+        fb.setAttribute('aria-hidden', 'true')
+        fb.textContent = img.getAttribute('data-fallback') || '?'
+        img.replaceWith(fb)
+      })
       return bubble
     }
 
@@ -1112,8 +1141,10 @@
           .filter((c) => c && typeof c.text === 'string' && c.text.trim())
           .map((c) => ({
             id: c.id || '',
-            handle: String(c.handle || '@fan').slice(0, 24),
-            text: String(c.text).slice(0, 160),
+            handle: String(c.handle || '@fan').slice(0, 32),
+            name: String(c.name || '').slice(0, 48),
+            avatar: safeAvatarSrc(c.avatar),
+            text: String(c.text).slice(0, 220),
             heart: c.heart !== false,
             ts: Number(c.ts) || Date.now(),
             source: c.source || 'site',
@@ -1156,7 +1187,7 @@
     function normalizeHandle(value) {
       const raw = String(value || '').trim().replace(/\s+/g, '')
       if (!raw) return '@fan'
-      return (raw.startsWith('@') ? raw : `@${raw}`).slice(0, 24)
+      return (raw.startsWith('@') ? raw : `@${raw}`).slice(0, 32)
     }
 
     compose?.addEventListener('submit', async (event) => {

@@ -854,6 +854,8 @@
   function initLiveComments() {
     const rail = $('[data-live-rail]')
     const layer = $('[data-live-comments]')
+    const toggle = $('[data-live-toggle]')
+    const browseBtn = $('[data-live-browse]')
     const minBtn = $('[data-live-minimize]')
     const fab = $('[data-live-fab]')
     const fabCount = $('[data-live-fab-count]')
@@ -972,16 +974,22 @@
 
     let on = true
     let minimized = false
+    let browsing = false
     let timer = 0
     let pollTimer = 0
     let unseen = 0
     let idx = 0
     let spawnCount = 0
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const BROWSE_COUNT = 36
 
     try {
+      const saved = localStorage.getItem('laousmail-live-comments')
+      if (saved === 'off') on = false
       const minSaved = localStorage.getItem('laousmail-live-minimized')
       if (minSaved === '1') minimized = true
+      const browseSaved = localStorage.getItem('laousmail-live-browse')
+      if (browseSaved === '1') browsing = true
     } catch {
       /* private mode */
     }
@@ -1005,9 +1013,24 @@
       fab.hidden = !(on && minimized)
     }
 
+    function syncBrowseBtn() {
+      if (!browseBtn) return
+      browseBtn.setAttribute('aria-pressed', browsing ? 'true' : 'false')
+      browseBtn.title = browsing ? 'Back to live comments' : 'Scroll through comments'
+      browseBtn.innerHTML = browsing
+        ? '<span data-lang="en">Live</span><span data-lang="fr">Live</span>'
+        : '<span data-lang="en">Scroll</span><span data-lang="fr">Parcourir</span>'
+    }
+
     function setChrome() {
+      if (toggle) {
+        toggle.setAttribute('aria-pressed', on ? 'true' : 'false')
+        toggle.classList.toggle('is-off', !on)
+        toggle.hidden = false
+      }
       rail.hidden = !(on && !minimized)
       rail.setAttribute('aria-hidden', on && !minimized ? 'false' : 'true')
+      rail.classList.toggle('is-browse', browsing && on && !minimized)
       document.body.classList.toggle('live-rail-on', on && !minimized)
       document.body.classList.toggle('live-rail-min', on && minimized)
       document.body.classList.remove('live-dim')
@@ -1017,8 +1040,86 @@
           ? '<span data-lang="en">Open</span><span data-lang="fr">Ouvrir</span>'
           : '<span data-lang="en">Hide</span><span data-lang="fr">Réduire</span>'
       }
+      syncBrowseBtn()
       updateFab()
       syncComposePlaceholders()
+    }
+
+    function fillBrowseLayer() {
+      const list = pool().filter((item) => item && item.type !== 'cta')
+      const take = Math.min(BROWSE_COUNT, Math.max(list.length, 0))
+      const frag = document.createDocumentFragment()
+      for (let i = 0; i < take; i += 1) {
+        const bubble = buildBubble(list[i])
+        bubble.classList.add('in')
+        frag.appendChild(bubble)
+      }
+      layer.innerHTML = ''
+      layer.appendChild(frag)
+      layer.scrollTop = 0
+    }
+
+    function setBrowsing(next) {
+      browsing = !!next
+      try {
+        localStorage.setItem('laousmail-live-browse', browsing ? '1' : '0')
+      } catch {
+        /* private mode */
+      }
+      if (browsing) {
+        window.clearTimeout(timer)
+        fillBrowseLayer()
+        setChrome()
+        layer.focus?.({ preventScroll: true })
+      } else {
+        layer.innerHTML = ''
+        setChrome()
+        if (on && !minimized) {
+          spawn()
+          window.setTimeout(spawn, 500)
+          schedule()
+        }
+      }
+    }
+
+    function startLive() {
+      on = true
+      setChrome()
+      try {
+        localStorage.setItem('laousmail-live-comments', 'on')
+      } catch {
+        /* private mode */
+      }
+      if (!minimized) {
+        if (browsing) {
+          fillBrowseLayer()
+        } else {
+          spawn()
+          window.setTimeout(spawn, 500)
+          schedule()
+        }
+      }
+      schedulePoll()
+      fetchRemoteComments()
+    }
+
+    function stopLive() {
+      on = false
+      minimized = false
+      browsing = false
+      unseen = 0
+      window.clearTimeout(timer)
+      window.clearTimeout(pollTimer)
+      layer.innerHTML = ''
+      if (toasts) toasts.innerHTML = ''
+      setChrome()
+      try {
+        localStorage.setItem('laousmail-live-comments', 'off')
+        localStorage.setItem('laousmail-live-minimized', '0')
+        localStorage.setItem('laousmail-live-browse', '0')
+      } catch {
+        /* private mode */
+      }
     }
 
     function ctaCopy() {
@@ -1079,12 +1180,18 @@
 
     function showBubble(item, { sticky = false } = {}) {
       if (!item) return
+      if (browsing && !sticky) return
       const bubble = buildBubble(item)
       if (sticky) bubble.classList.add('is-fresh')
       layer.appendChild(bubble)
       layer.scrollTop = layer.scrollHeight
       void bubble.offsetWidth
       bubble.classList.add('in')
+
+      if (browsing) {
+        while (layer.children.length > BROWSE_COUNT + 2) layer.firstChild?.remove()
+        return
+      }
 
       const life = sticky
         ? reduce
@@ -1099,16 +1206,18 @@
             : 8000 + Math.random() * 3000
 
       window.setTimeout(() => {
-        if (!bubble.isConnected) return
+        if (!bubble.isConnected || browsing) return
         bubble.classList.add('out')
-        window.setTimeout(() => bubble.remove(), 500)
+        window.setTimeout(() => {
+          if (!browsing) bubble.remove()
+        }, 500)
       }, life)
 
       while (layer.children.length > 8) layer.firstChild?.remove()
     }
 
     function spawn() {
-      if (!on || document.hidden || minimized) return
+      if (!on || document.hidden || minimized || browsing) return
       if (document.body.classList.contains('menu-open') || document.body.classList.contains('preview-open')) {
         return
       }
@@ -1117,7 +1226,7 @@
 
     function schedule() {
       window.clearTimeout(timer)
-      if (!on || minimized) return
+      if (!on || minimized || browsing) return
       const gap = reduce ? 3400 : 1600 + Math.random() * 1800
       timer = window.setTimeout(() => {
         spawn()
@@ -1179,8 +1288,12 @@
         /* private mode */
       }
       if (on && !minimized) {
-        spawn()
-        schedule()
+        if (browsing) {
+          fillBrowseLayer()
+        } else {
+          spawn()
+          schedule()
+        }
       }
     }
 
@@ -1258,6 +1371,11 @@
       textInput?.focus()
     })
 
+    toggle?.addEventListener('click', () => (on ? stopLive() : startLive()))
+    browseBtn?.addEventListener('click', () => {
+      if (!on || minimized) return
+      setBrowsing(!browsing)
+    })
     minBtn?.addEventListener('click', () => setMinimized(!minimized))
     fab?.addEventListener('click', () => setMinimized(false))
 
@@ -1266,7 +1384,7 @@
         window.clearTimeout(timer)
         window.clearTimeout(pollTimer)
       } else if (on) {
-        if (!minimized) schedule()
+        if (!minimized && !browsing) schedule()
         schedulePoll()
         fetchRemoteComments()
       }
@@ -1277,11 +1395,16 @@
     })
 
     setChrome()
+    if (!on) return
     fetchRemoteComments().finally(() => {
       if (on && !minimized) {
-        spawn()
-        window.setTimeout(spawn, 500)
-        schedule()
+        if (browsing) {
+          fillBrowseLayer()
+        } else {
+          spawn()
+          window.setTimeout(spawn, 500)
+          schedule()
+        }
       }
       schedulePoll()
     })

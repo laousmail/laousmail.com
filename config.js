@@ -13,14 +13,3 @@ window.LAOUSMAIL_FORM = {
   /** Optional honeypot field name (leave empty string on the form input named `website`) */
   honeypot: 'website',
 }
-
-/**
- * Shared comments backend (Cloudflare Worker + KV).
- * Claim the temporary Worker into your Cloudflare account ASAP
- * (see comments-api/README.md) so the URL stays yours.
- */
-window.LAOUSMAIL_COMMENTS_API = {
-  endpoint: 'https://laousmail-comments.roomy-tub.workers.dev',
-  /** Poll interval for new comments from other visitors (ms) */
-  pollMs: 20000,
-}

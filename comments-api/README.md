@@ -11,7 +11,7 @@ Cloudflare Worker + KV backend for shared site comments.
 
 ## Deploy / claim
 
-**Live URL:** `https://laousmail-comments.cubic-device.workers.dev`
+**Live URL:** `https://laousmail-comments.roomy-tub.workers.dev`
 
 This Worker is on a **temporary Cloudflare preview account** until you claim it.
 

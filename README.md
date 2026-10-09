@@ -17,6 +17,8 @@ Static HTML / CSS / JS. GitHub Pages compatible. No build step.
 | `artist.js` | Lang, theme, menu, releases render, form |
 | `releases.js` | Song + journey data (edit here to add releases) |
 | `comments.js` | Live TikTok-style comments (paste more anytime) |
+| `fan-reactions.js` | Editorial Fan Reactions section |
+| `fan-reactions/` | Curated JSON dataset, schema, import docs |
 | `config.js` | Fan signup endpoint (no secrets) |
 | `privacy.html` | Short privacy note |
 
@@ -28,6 +30,17 @@ Static HTML / CSS / JS. GitHub Pages compatible. No build step.
 - **Claim the temporary Worker** — see `comments-api/CLAIM.md` (time-limited).
 - First click on a song opens a popup with the 30s preview, then **Spotify / YouTube / Apple Music**.
 - Links + preview URLs live in `releases.js`.
+
+## Fan Reactions
+
+Curated Instagram / TikTok comments (local JSON only). See [`fan-reactions/README.md`](fan-reactions/README.md).
+
+```bash
+node scripts/import-fan-reactions.mjs \
+  --input fan-reactions/source/instagram-export.csv \
+  --platform instagram \
+  --prefer-local-avatars
+```
 
 ## Local preview
 

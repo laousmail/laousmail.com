@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://laousmail.com/fan-reactions/schema.json",
+  "title": "LAOUSMAIL Fan Reactions",
+  "description": "Curated public fan comments for the Fan Reactions section. Use only real exported comments selected for display.",
+  "type": "object",
+  "required": ["version", "reactions"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Dataset format version."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this curated file was last edited."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal curation notes (not shown on the site)."
+    },
+    "reactions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/reaction" }
+    }
+  },
+  "$defs": {
+    "reaction": {
+      "type": "object",
+      "required": ["id", "platform", "username", "commentText", "featured"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable unique id (usually the export comment id)."
+        },
+        "platform": {
+          "type": "string",
+          "enum": ["instagram", "tiktok"]
+        },
+        "username": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Public @handle without requiring the @ prefix."
+        },
+        "displayName": {
+          "type": ["string", "null"],
+          "description": "Optional display name from the export."
+        },
+        "profileImageUrl": {
+          "type": ["string", "null"],
+          "description": "HTTPS profile image from the export, or a relative path to a permitted local asset (e.g. avatars/user.jpg). May expire if remote."
+        },
+        "commentText": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Plain-text comment body."
+        },
+        "postUrl": {
+          "type": ["string", "null"],
+          "description": "HTTPS URL of the original public post when known."
+        },
+        "createdAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "featured": {
+          "type": "boolean",
+          "description": "When true, prefer this reaction in the featured strip."
+        }
+      }
+    }
+  }
+}

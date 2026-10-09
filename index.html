@@ -97,6 +97,7 @@
     <a href="#music"><span data-lang="en">Music</span><span data-lang="fr">Musique</span></a>
     <a href="#journey"><span data-lang="en">Journey</span><span data-lang="fr">Parcours</span></a>
     <a href="#story"><span data-lang="en">Story</span><span data-lang="fr">Histoire</span></a>
+    <a href="#reactions"><span data-lang="en">Reactions</span><span data-lang="fr">Réactions</span></a>
     <a href="#live"><span data-lang="en">Live</span><span data-lang="fr">Live</span></a>
     <a href="#circle">Ceux qui écoutent</a>
   </div>
@@ -129,6 +130,7 @@
       <a href="#music" data-menu-link><span data-lang="en">Music</span><span data-lang="fr">Musique</span></a>
       <a href="#story" data-menu-link><span data-lang="en">Story</span><span data-lang="fr">Histoire</span></a>
       <a href="#live" data-menu-link><span data-lang="en">Live</span><span data-lang="fr">Live</span></a>
+      <a href="#reactions" data-menu-link><span data-lang="en">Reactions</span><span data-lang="fr">Réactions</span></a>
       <a href="#circle" data-menu-link>Ceux qui écoutent</a>
     </nav>
     <a class="btn menu-spotify" href="https://open.spotify.com/artist/60GjJwhvGe1eVg98jFPgMp" target="_blank" rel="noreferrer">Spotify</a>
@@ -373,6 +375,34 @@
     </div>
   </section>
 
+  <!-- FAN REACTIONS -->
+  <section class="sec fan-reactions" id="reactions" data-fan-reactions hidden>
+    <p class="eyebrow reveal">
+      <span data-lang="en">Fan reactions</span>
+      <span data-lang="fr">Réactions des fans</span>
+    </p>
+    <h2 class="reveal">
+      <span data-lang="en">Moments listeners left behind.</span>
+      <span data-lang="fr">Des moments laissés par ceux qui écoutent.</span>
+    </h2>
+    <p class="sub reveal">
+      <span data-lang="en">Real comments from Instagram and TikTok. A few notes from the orbit.</span>
+      <span data-lang="fr">De vrais commentaires Instagram et TikTok. Quelques notes depuis l’orbite.</span>
+    </p>
+
+    <div class="fr-shell reveal">
+      <div class="fr-controls" role="group" aria-label="Fan reactions">
+        <button type="button" class="fr-nav" data-fan-prev aria-label="Previous reactions">
+          <span aria-hidden="true">←</span>
+        </button>
+        <button type="button" class="fr-nav" data-fan-next aria-label="Next reactions">
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+      <div class="fr-track" data-fan-track tabindex="0" role="list"></div>
+    </div>
+  </section>
+
   <!-- CEUX QUI ÉCOUTENT -->
   <section class="sec circle" id="circle">
     <div class="circle-inner">
@@ -526,6 +556,7 @@
 <script src="config.js"></script>
 <script src="releases.js"></script>
 <script src="comments.js"></script>
+<script src="fan-reactions.js"></script>
 <script src="artist.js" defer></script>
 <!-- MailerLite Universal -->
 <script>

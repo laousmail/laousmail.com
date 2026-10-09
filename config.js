@@ -20,7 +20,7 @@ window.LAOUSMAIL_FORM = {
  * (see comments-api/README.md) so the URL stays yours.
  */
 window.LAOUSMAIL_COMMENTS_API = {
-  endpoint: 'https://laousmail-comments.island-wasp.workers.dev',
+  endpoint: 'https://laousmail-comments.cubic-device.workers.dev',
   /** Poll interval for new comments from other visitors (ms) */
   pollMs: 20000,
 }

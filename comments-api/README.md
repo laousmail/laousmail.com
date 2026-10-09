@@ -11,9 +11,9 @@ Cloudflare Worker + KV backend for shared site comments.
 
 ## Deploy / claim
 
-**Live URL:** `https://laousmail-comments.island-wasp.workers.dev`
+**Live URL:** `https://laousmail-comments.cubic-device.workers.dev`
 
-This Worker was first published to a **temporary Cloudflare preview account**.
+This Worker is on a **temporary Cloudflare preview account** until you claim it.
 
 1. Open [CLAIM.md](./CLAIM.md) and claim the preview account within **60 minutes**.
 2. Later deploys:

@@ -1727,7 +1727,7 @@ body.preview-open {
 .live-status {
   font-family: "Cormorant Garamond", Georgia, serif;
   font-size: clamp(1.5rem, 3.5vw, 2.1rem);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--accent);
   margin: 0 0 0.75rem;
 }

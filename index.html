@@ -51,11 +51,14 @@
       <span data-lang="en">From listeners</span>
       <span data-lang="fr">Des auditeurs</span>
     </span>
+    <button type="button" class="live-rail-browse-btn" data-live-browse aria-pressed="false" title="Scroll through comments">
+      <span data-lang="en">Scroll</span><span data-lang="fr">Parcourir</span>
+    </button>
     <button type="button" class="live-rail-min-btn" data-live-minimize aria-expanded="true" title="Hide">
       <span data-lang="en">Hide</span><span data-lang="fr">Réduire</span>
     </button>
   </div>
-  <div class="live-comments" data-live-comments></div>
+  <div class="live-comments" data-live-comments tabindex="0" role="log" aria-live="polite"></div>
   <form class="live-compose" data-live-compose>
     <label class="visually-hidden" for="live-handle">
       <span data-lang="en">Your name</span><span data-lang="fr">Ton nom</span>

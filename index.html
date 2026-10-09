@@ -121,8 +121,9 @@
       </button>
     </div>
     <nav class="menu-links" aria-label="Mobile">
+      <a href="#journey" data-menu-link><span data-lang="en">Orbit</span><span data-lang="fr">Orbite</span></a>
+      <a href="#making" data-menu-link><span data-lang="en">In the studio</span><span data-lang="fr">En studio</span></a>
       <a href="#music" data-menu-link><span data-lang="en">Music</span><span data-lang="fr">Musique</span></a>
-      <a href="#journey" data-menu-link><span data-lang="en">Journey</span><span data-lang="fr">Parcours</span></a>
       <a href="#story" data-menu-link><span data-lang="en">Story</span><span data-lang="fr">Histoire</span></a>
       <a href="#live" data-menu-link><span data-lang="en">Live</span><span data-lang="fr">Live</span></a>
       <a href="#circle" data-menu-link>Ceux qui écoutent</a>
@@ -144,12 +145,12 @@
     <div class="hero-compose">
       <p class="identity reveal-hero" data-delay="0">LAOUSMAIL · MONTRÉAL</p>
       <h1 class="hero-title reveal-hero" data-delay="1">
-        <span data-lang="en">15 songs. One circle. Filling until the end of 2026.</span>
-        <span data-lang="fr">15 chansons. Un cercle. Qui se remplit jusqu’à fin 2026.</span>
+        <span data-lang="en">15 songs before the show.</span>
+        <span data-lang="fr">15 chansons avant le spectacle.</span>
       </h1>
       <p class="hero-lead reveal-hero" data-delay="2">
-        <span data-lang="en">Each release lights a point. Watch the year move; the orbit will be full by December 2026.</span>
-        <span data-lang="fr">Chaque sortie allume un point. Regarde l’année avancer; l’orbite sera pleine en décembre 2026.</span>
+        <span data-lang="en">One circle. Filling through 2026. Follow each song as it lights up, then meet me on stage.</span>
+        <span data-lang="fr">Un cercle. Qui se remplit en 2026. Suis chaque chanson qui s’allume, puis retrouve-moi sur scène.</span>
       </p>
 
       <div class="hero-orbit-wrap reveal-hero hintable" data-delay="3" id="journey" data-hint="orbit">
@@ -165,28 +166,79 @@
           <div class="orbit-nodes" data-orbit-nodes></div>
           <div class="orbit-center">
             <strong data-orbit-count>3 / 15</strong>
-            <span data-lang="en">songs</span>
-            <span data-lang="fr">chansons</span>
+            <span data-lang="en">songs out</span>
+            <span data-lang="fr">sorties</span>
             <em data-orbit-destiny>
-              <span data-lang="en">Filling until end of 2026</span>
-              <span data-lang="fr">Se remplit jusqu’à fin 2026</span>
+              <span data-lang="en">Toward the live show</span>
+              <span data-lang="fr">Vers le spectacle</span>
             </em>
-            <small data-orbit-year-pct></small>
           </div>
         </div>
       </div>
 
-      <div class="cta-row reveal-hero" data-delay="5">
-        <a class="btn" href="#music">
-          <span data-lang="en">Listen to the music</span>
-          <span data-lang="fr">Écouter la musique</span>
+      <div class="days-left reveal-hero" data-delay="4" data-days-left aria-live="polite">
+        <strong data-days-left-count>—</strong>
+        <span data-lang="en">days left in 2026</span>
+        <span data-lang="fr">jours restants en 2026</span>
+        <small data-orbit-year-pct></small>
+      </div>
+
+      <p class="hero-challenge reveal-hero" data-delay="5">
+        <span data-lang="en">This is the challenge: finish the body of work before the year ends, then turn it into a live show. Stay close and watch song 4 take shape in the studio.</span>
+        <span data-lang="fr">Le défi: finir le corpus avant la fin de l’année, puis en faire un spectacle. Reste proche et regarde la chanson 4 prendre forme en studio.</span>
+      </p>
+
+      <div class="cta-row reveal-hero" data-delay="6">
+        <a class="btn" href="#making">
+          <span data-lang="en">See what’s in the studio</span>
+          <span data-lang="fr">Voir ce qui se passe en studio</span>
         </a>
-        <a class="btn ghost" href="#live">
-          <span data-lang="en">Be there for the show</span>
-          <span data-lang="fr">Être là pour le spectacle</span>
+        <a class="btn ghost" href="#circle">
+          <span data-lang="en">Follow the challenge</span>
+          <span data-lang="fr">Suivre le défi</span>
         </a>
       </div>
     </div>
+  </section>
+
+  <!-- CURRENTLY FINISHING / STUDIO -->
+  <section class="sec making" id="making" data-making>
+    <p class="eyebrow reveal">
+      <span data-lang="en">In the studio</span><span data-lang="fr">En studio</span>
+    </p>
+    <h2 class="reveal">
+      <span data-lang="en">Currently finishing</span>
+      <span data-lang="fr">En train de finir</span>
+    </h2>
+    <p class="sub reveal">
+      <span data-lang="en">One song at a time. Writing, recording, mixing, mastering. Updated as the work moves.</span>
+      <span data-lang="fr">Une chanson à la fois. Écriture, enregistrement, mixage, mastering. Mis à jour au fil du travail.</span>
+    </p>
+
+    <article class="studio-track reveal" data-studio-track>
+      <header class="studio-track-head">
+        <span class="studio-num" data-studio-number>04</span>
+        <div class="studio-titles">
+          <h3 data-studio-title>D kem i hemlegh</h3>
+          <p class="studio-translation" data-studio-translation></p>
+          <p class="studio-lang" data-studio-lang></p>
+        </div>
+      </header>
+
+      <div class="studio-progress" data-studio-progress>
+        <div class="studio-bar" aria-hidden="true">
+          <i data-studio-bar-fill></i>
+        </div>
+        <ol class="studio-steps" data-studio-steps></ol>
+      </div>
+
+      <p class="studio-note" data-studio-note></p>
+      <p class="studio-updated">
+        <span data-lang="en">Last update</span>
+        <span data-lang="fr">Dernière mise à jour</span>
+        <time data-studio-updated></time>
+      </p>
+    </article>
   </section>
 
   <!-- MUSIC -->

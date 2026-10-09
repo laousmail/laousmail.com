@@ -1,20 +1,15 @@
 /**
  * Fan signup — MailerLite (GitHub Pages safe, no API key in the browser).
  *
- * Account: 1893739 (Universal script is loaded on the site).
- *
- * Still needed: an Embedded form subscribe URL.
- * 1. MailerLite → Forms → Embedded → create “Ceux qui écoutent”
- * 2. Copy the form HTML / data-form id, or the action URL:
- *      https://assets.mailerlite.com/jsonp/1893739/forms/FORM_ID/subscribe
- * 3. Paste that URL into `endpoint` below.
- *
- * Never put a private MailerLite API token in this file.
+ * Account: 1893739 · Embedded form slug: Mw8lp9
+ * Public subscribe uses the numeric form id from MailerLite.
  */
 window.LAOUSMAIL_FORM = {
-  endpoint: '',
+  endpoint: 'https://assets.mailerlite.com/jsonp/1893739/forms/169942944091997773/subscribe',
   provider: 'mailerlite',
   accountId: '1893739',
+  formSlug: 'Mw8lp9',
+  formId: '169942944091997773',
   /** Optional honeypot field name (leave empty string on the form input named `website`) */
   honeypot: 'website',
 }

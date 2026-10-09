@@ -63,6 +63,7 @@
     setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark')
     renderReleases()
     renderOrbit()
+    renderStudio()
   }
 
   function initLang() {
@@ -326,6 +327,115 @@
     return (now - start) / (end - start)
   }
 
+  function daysLeftIn2026() {
+    const end = Date.UTC(2026, 11, 31, 23, 59, 59, 999)
+    const now = Date.now()
+    if (now >= end) return 0
+    return Math.max(0, Math.ceil((end - now) / 86400000))
+  }
+
+  function renderDaysLeft() {
+    const root = $('[data-days-left]')
+    const countEl = $('[data-days-left-count]')
+    if (!root || !countEl) return
+    const days = daysLeftIn2026()
+    const yearPct = yearProgressThrough2026()
+    const L = lang()
+    countEl.textContent = String(days)
+    root.setAttribute(
+      'aria-label',
+      L === 'fr'
+        ? `${days} jours restants en 2026`
+        : `${days} days left in 2026`,
+    )
+    const pctEl = $('[data-orbit-year-pct]')
+    if (pctEl) {
+      const pct = Math.round(yearPct * 100)
+      pctEl.textContent =
+        L === 'fr' ? `${pct}% de l’année déjà passée` : `${pct}% of the year already gone`
+    }
+  }
+
+  const STUDIO_STEP_LABELS = {
+    writing: { en: 'Writing', fr: 'Écriture' },
+    recording: { en: 'Recording', fr: 'Enregistrement' },
+    mixing: { en: 'Mixing', fr: 'Mixage' },
+    mastering: { en: 'Mastering', fr: 'Mastering' },
+  }
+
+  function renderStudio() {
+    const data = window.LAOUSMAIL_IN_PRODUCTION
+    const root = $('[data-making]')
+    if (!root || !data || !data.title) {
+      if (root) root.hidden = true
+      return
+    }
+    root.hidden = false
+    const L = lang()
+    const steps = Array.isArray(data.steps) && data.steps.length
+      ? data.steps
+      : ['writing', 'recording', 'mixing', 'mastering']
+    const step = String(data.step || steps[0]).toLowerCase()
+    const stepIndex = Math.max(0, steps.indexOf(step))
+    const within = Math.min(1, Math.max(0, Number(data.stepProgress) || 0))
+    const overall = ((stepIndex + within) / steps.length) * 100
+
+    const num = $('[data-studio-number]')
+    if (num) num.textContent = String(data.number || stepIndex + 1).padStart(2, '0')
+
+    const title = $('[data-studio-title]')
+    if (title) title.textContent = data.title
+
+    const translation = $('[data-studio-translation]')
+    if (translation) {
+      const t = data.translation?.[L] || data.translation?.en || ''
+      translation.textContent = t ? `“${t}”` : ''
+      translation.hidden = !t
+    }
+
+    const langEl = $('[data-studio-lang]')
+    if (langEl) {
+      langEl.textContent = data.lang?.[L] || data.lang?.en || ''
+    }
+
+    const fill = $('[data-studio-bar-fill]')
+    if (fill) fill.style.width = `${Math.round(overall)}%`
+
+    const stepsRoot = $('[data-studio-steps]')
+    if (stepsRoot) {
+      stepsRoot.innerHTML = ''
+      steps.forEach((key, i) => {
+        const li = document.createElement('li')
+        li.className = 'studio-step'
+        if (i < stepIndex) li.classList.add('is-done')
+        if (i === stepIndex) li.classList.add('is-current')
+        li.setAttribute('data-step', key)
+        const label = STUDIO_STEP_LABELS[key]?.[L] || STUDIO_STEP_LABELS[key]?.en || key
+        li.innerHTML = `<span>${label}</span>`
+        stepsRoot.appendChild(li)
+      })
+    }
+
+    const note = $('[data-studio-note]')
+    if (note) {
+      note.textContent = data.note?.[L] || data.note?.en || ''
+    }
+
+    const updated = $('[data-studio-updated]')
+    if (updated && data.updated) {
+      updated.setAttribute('datetime', data.updated)
+      try {
+        updated.textContent = new Intl.DateTimeFormat(L === 'fr' ? 'fr-CA' : 'en-CA', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        }).format(new Date(`${data.updated}T12:00:00`))
+      } catch {
+        updated.textContent = data.updated
+      }
+    }
+  }
+
   function renderOrbit() {
     const orbit = $('[data-orbit]')
     const nodesRoot = $('[data-orbit-nodes]')
@@ -340,12 +450,7 @@
 
     if (countEl) countEl.textContent = `${out} / ${goal}`
 
-    const pctEl = $('[data-orbit-year-pct]')
-    if (pctEl) {
-      const pct = Math.round(yearPct * 100)
-      pctEl.textContent =
-        L === 'fr' ? `${pct}% de l’année 2026` : `${pct}% of 2026`
-    }
+    renderDaysLeft()
 
     // Bright arc = songs released (circle filling). Traveler = where we are in 2026.
     const songPct = goal ? out / goal : 0
@@ -1184,6 +1289,7 @@
   initPreviewModal()
   renderReleases()
   renderOrbit()
+  renderStudio()
   initOrbitObserve()
   observeReveals()
   initMenu()

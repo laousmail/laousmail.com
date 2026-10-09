@@ -61,3 +61,14 @@ GitHub Pages from `main` (root). Custom domain in `CNAME`: `laousmail.com`.
 ## Update a release
 
 Edit `releases.js` — Music cards and the 15-song orbit update from the same list.
+
+## Update the song in the studio
+
+Edit `window.LAOUSMAIL_IN_PRODUCTION` in `releases.js`:
+
+```js
+step: 'recording',       // writing | recording | mixing | mastering
+stepProgress: 0.55,      // 0–1 inside the current step
+note: { en: '...', fr: '...' },
+updated: '2026-10-09',
+```

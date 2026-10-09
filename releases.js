@@ -13,8 +13,8 @@ window.LAOUSMAIL_RELEASES = [
     preview: 'https://p.scdn.co/mp3-preview/8d18c610a179a37a0853551a4410484a4bbb2d67',
     lang: { en: 'Kabyle · Amazigh', fr: 'Kabyle · Amazigh' },
     description: {
-      en: 'A first signal in the body of work — voice and guitar carrying a room that already feels lived-in.',
-      fr: 'Un premier signal dans le corpus — voix et guitare qui portent une pièce déjà habitée.',
+      en: 'A first signal in the body of work: voice and guitar carrying a room that already feels lived-in.',
+      fr: 'Un premier signal dans le corpus: voix et guitare qui portent une pièce déjà habitée.',
     },
   },
   {
@@ -45,10 +45,10 @@ window.LAOUSMAIL_RELEASES = [
     youtube: 'https://www.youtube.com/watch?v=OU2L3q_Mvh8',
     appleMusic: 'https://music.apple.com/us/album/tafat/6814510056?i=6814510057',
     preview: 'https://p.scdn.co/mp3-preview/e1a5cf56d304cbade8049f41c3635384ca7ecc78',
-    lang: { en: 'Kabyle · Amazigh — “light”', fr: 'Kabyle · Amazigh — « lumière »' },
+    lang: { en: 'Kabyle · Amazigh (“light”)', fr: 'Kabyle · Amazigh (« lumière »)' },
     description: {
-      en: 'Light as a word and a direction — the work opening outward.',
-      fr: 'La lumière comme mot et comme direction — l’œuvre qui s’ouvre.',
+      en: 'Light as a word and a direction: the work opening outward.',
+      fr: 'La lumière comme mot et comme direction: l’œuvre qui s’ouvre.',
     },
   },
 ]

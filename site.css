@@ -1335,14 +1335,27 @@ body.preview-open {
   50% { transform: scaleY(1); }
 }
 
-/* Living 15-song orbit (hero) */
+/* Living 15-song orbit (hero)
+   One shared --orbit-rot drives the spin and label counter-spin so song
+   titles stay horizontal even when nodes are recreated mid-orbit. */
+@property --orbit-rot {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
 .orbit {
   --year-progress: 0;
   --song-progress: 0;
+  --orbit-rot: 0deg;
   position: relative;
   width: min(100%, 22.5rem);
   aspect-ratio: 1;
   margin: 0 auto;
+}
+
+.orbit.is-alive {
+  animation: orbitRotVar 56s linear infinite;
 }
 
 .orbit--hero {
@@ -1355,15 +1368,14 @@ body.preview-open {
 .orbit-spin {
   position: absolute;
   inset: 0;
+  transform: rotate(var(--orbit-rot, 0deg));
   transform-origin: 50% 50%;
   z-index: 1;
+  backface-visibility: hidden;
 }
 
 .orbit.is-alive .orbit-spin {
-  animation: orbitSpin 56s linear infinite;
   will-change: transform;
-  backface-visibility: hidden;
-  transform: translateZ(0);
 }
 
 .orbit-progress {
@@ -1539,27 +1551,18 @@ body.preview-open {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
   pointer-events: none;
   line-height: 1.2;
-  transform: translate3d(0, -50%, 0);
-  transform-origin: -0.55rem 50%;
+  /* Counter-rotate with the shared orbit angle so titles stay horizontal */
+  transform: translate3d(0, -50%, 0) rotate(calc(-1 * var(--orbit-rot, 0deg)));
+  transform-origin: 50% 50%;
   backface-visibility: hidden;
 }
 
 .orbit.is-alive .orbit-node-label {
-  animation: labelCounterSpin 56s linear infinite;
   will-change: transform;
 }
 
-@keyframes labelCounterSpin {
-  from {
-    transform: translate3d(0, -50%, 0) rotate(0deg);
-  }
-  to {
-    transform: translate3d(0, -50%, 0) rotate(-360deg);
-  }
-}
-
-@keyframes orbitSpin {
-  to { transform: rotate(360deg); }
+@keyframes orbitRotVar {
+  to { --orbit-rot: 360deg; }
 }
 
 @keyframes orbitRingPulse {
@@ -2343,6 +2346,7 @@ body.live-rail-min .live-toast-layer {
   .preview-panel,
   .preview-pulse,
   .preview-wave.is-playing i,
+  .orbit.is-alive,
   .orbit-spin,
   .orbit-ring,
   .orbit-nodes,

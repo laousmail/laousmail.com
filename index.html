@@ -43,6 +43,25 @@
 </head>
 <body>
 <div class="pointer-glow" aria-hidden="true"></div>
+<aside class="live-rail" data-live-rail aria-label="Comments">
+  <div class="live-rail-head">
+    <strong data-lang="en">Comments</strong>
+    <strong data-lang="fr">Commentaires</strong>
+    <span class="live-rail-sub">
+      <span data-lang="en">From my videos · unfiltered</span>
+      <span data-lang="fr">Sous mes vidéos · non filtrés</span>
+    </span>
+    <button type="button" class="live-rail-min-btn" data-live-minimize aria-expanded="true" title="Hide">
+      <span data-lang="en">Hide</span><span data-lang="fr">Réduire</span>
+    </button>
+  </div>
+  <div class="live-comments" data-live-comments tabindex="0" role="log" aria-live="polite" aria-relevant="additions"></div>
+</aside>
+<button type="button" class="live-fab" data-live-fab hidden aria-label="Show comments">
+  <span data-lang="en">Comments</span>
+  <span data-lang="fr">Commentaires</span>
+  <span data-live-fab-count hidden>0</span>
+</button>
 <a class="skip" href="#music"><span data-lang="en">Skip to content</span><span data-lang="fr">Aller au contenu</span></a>
 
 <header class="nav">
@@ -59,7 +78,6 @@
     <a href="#music"><span data-lang="en">Music</span><span data-lang="fr">Musique</span></a>
     <a href="#journey"><span data-lang="en">Journey</span><span data-lang="fr">Parcours</span></a>
     <a href="#story"><span data-lang="en">Story</span><span data-lang="fr">Histoire</span></a>
-    <a href="#reactions"><span data-lang="en">Reactions</span><span data-lang="fr">Réactions</span></a>
     <a href="#live"><span data-lang="en">Live</span><span data-lang="fr">Live</span></a>
     <a href="#circle">Ceux qui écoutent</a>
   </div>
@@ -92,7 +110,6 @@
       <a href="#music" data-menu-link><span data-lang="en">Music</span><span data-lang="fr">Musique</span></a>
       <a href="#story" data-menu-link><span data-lang="en">Story</span><span data-lang="fr">Histoire</span></a>
       <a href="#live" data-menu-link><span data-lang="en">Live</span><span data-lang="fr">Live</span></a>
-      <a href="#reactions" data-menu-link><span data-lang="en">Reactions</span><span data-lang="fr">Réactions</span></a>
       <a href="#circle" data-menu-link>Ceux qui écoutent</a>
     </nav>
     <a class="btn menu-spotify" href="https://open.spotify.com/artist/60GjJwhvGe1eVg98jFPgMp" target="_blank" rel="noreferrer">Spotify</a>
@@ -337,34 +354,6 @@
     </div>
   </section>
 
-  <!-- FAN REACTIONS -->
-  <section class="sec fan-reactions" id="reactions" data-fan-reactions hidden>
-    <p class="eyebrow reveal">
-      <span data-lang="en">From the videos</span>
-      <span data-lang="fr">Depuis les vidéos</span>
-    </p>
-    <h2 class="reveal">
-      <span data-lang="en">Comments from Instagram and TikTok.</span>
-      <span data-lang="fr">Commentaires Instagram et TikTok.</span>
-    </h2>
-    <p class="sub reveal">
-      <span data-lang="en">Pulled from comments under my videos on social media. Unfiltered. You cannot leave a comment here.</span>
-      <span data-lang="fr">Issus des commentaires sous mes vidéos sur les réseaux. Non filtrés. Tu ne peux pas laisser de commentaire ici.</span>
-    </p>
-
-    <div class="fr-shell reveal">
-      <div class="fr-controls" role="group" aria-label="Fan reactions">
-        <button type="button" class="fr-nav" data-fan-prev aria-label="Previous reactions">
-          <span aria-hidden="true">←</span>
-        </button>
-        <button type="button" class="fr-nav" data-fan-next aria-label="Next reactions">
-          <span aria-hidden="true">→</span>
-        </button>
-      </div>
-      <div class="fr-track" data-fan-track tabindex="0" role="list"></div>
-    </div>
-  </section>
-
   <!-- CEUX QUI ÉCOUTENT -->
   <section class="sec circle" id="circle">
     <div class="circle-inner">
@@ -517,7 +506,6 @@
 
 <script src="config.js"></script>
 <script src="releases.js"></script>
-<script src="fan-reactions.js"></script>
 <script src="artist.js" defer></script>
 <!-- MailerLite Universal -->
 <script>

@@ -100,6 +100,25 @@
     }
   }
 
+  /** Local avatars/… paths or https image URLs only (no javascript:). */
+  function safeAvatarSrc(url) {
+    const raw = String(url || '').trim()
+    if (!raw) return ''
+    if (/^avatars\/[A-Za-z0-9._-]+\.(jpe?g|png|webp|gif)$/i.test(raw)) return raw
+    if (isSafeHttps(raw) && /\.(jpe?g|png|webp|gif)(\?|$)/i.test(raw)) return raw
+    return ''
+  }
+
+  function shuffle(list) {
+    const arr = list.slice()
+    for (let i = arr.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1))
+      const tmp = arr[i]
+      arr[i] = arr[j]
+      arr[j] = tmp
+    }
+    return arr
+  }
 
   function releases() {
     return Array.isArray(window.LAOUSMAIL_RELEASES) ? window.LAOUSMAIL_RELEASES : []
@@ -958,6 +977,223 @@
     window.setTimeout(next, reduce ? 900 : 1600)
   }
 
+  /* ——— Live social feed: shuffled Instagram/TikTok comments, no compose ——— */
+  function initLiveSocialFeed() {
+    const rail = $('[data-live-rail]')
+    const layer = $('[data-live-comments]')
+    const minBtn = $('[data-live-minimize]')
+    const fab = $('[data-live-fab]')
+    const fabCount = $('[data-live-fab-count]')
+    if (!rail || !layer) return
+
+    const DATA_URL = 'fan-reactions/reactions.json'
+    const SPAWN_MS = 500
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    let pool = []
+    let idx = 0
+    let minimized = false
+    let timer = 0
+    let unseen = 0
+    let started = false
+
+    try {
+      if (localStorage.getItem('laousmail-live-minimized') === '1') minimized = true
+    } catch {
+      /* private mode */
+    }
+
+    function updateFab() {
+      if (!fab) return
+      if (fabCount) {
+        const n = Math.min(unseen, 99)
+        fabCount.textContent = String(n)
+        fabCount.hidden = n < 1
+      }
+      fab.classList.toggle('has-new', unseen > 0)
+      fab.hidden = !minimized
+    }
+
+    function setChrome() {
+      rail.hidden = minimized
+      rail.setAttribute('aria-hidden', minimized ? 'true' : 'false')
+      document.body.classList.toggle('live-rail-on', !minimized)
+      document.body.classList.toggle('live-rail-min', minimized)
+      if (minBtn) {
+        minBtn.setAttribute('aria-expanded', minimized ? 'false' : 'true')
+        minBtn.innerHTML = minimized
+          ? '<span data-lang="en">Open</span><span data-lang="fr">Ouvrir</span>'
+          : '<span data-lang="en">Hide</span><span data-lang="fr">Réduire</span>'
+      }
+      updateFab()
+    }
+
+    function setMinimized(next) {
+      minimized = !!next
+      if (!minimized) unseen = 0
+      if (minimized) {
+        window.clearTimeout(timer)
+        layer.innerHTML = ''
+      }
+      setChrome()
+      try {
+        localStorage.setItem('laousmail-live-minimized', minimized ? '1' : '0')
+      } catch {
+        /* private mode */
+      }
+      if (!minimized && started) {
+        spawn()
+        schedule()
+      }
+    }
+
+    function buildBubble(item) {
+      const bubble = document.createElement('div')
+      bubble.className = 'live-bubble'
+      const handle = item.handle || '@fan'
+      const name = String(item.name || '').trim()
+      const avatar = safeAvatarSrc(item.avatar)
+      const label = name || handle
+      const initial = (name || handle.replace(/^@/, '') || '?').trim().charAt(0).toUpperCase()
+      const avatarHtml = avatar
+        ? `<img class="live-avatar" src="${escapeHtml(avatar)}" alt="" width="32" height="32" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-fallback="${escapeHtml(initial)}" />`
+        : `<span class="live-avatar is-fallback" aria-hidden="true">${escapeHtml(initial)}</span>`
+      bubble.innerHTML = `<div class="live-bubble-row">${avatarHtml}<div class="live-bubble-body"><span class="live-handle" title="${escapeHtml(
+        handle,
+      )}">${escapeHtml(label)}</span><span class="live-text">${escapeHtml(item.text || '')}</span></div></div>`
+      const img = bubble.querySelector('img.live-avatar')
+      img?.addEventListener('error', () => {
+        const fb = document.createElement('span')
+        fb.className = 'live-avatar is-fallback'
+        fb.setAttribute('aria-hidden', 'true')
+        fb.textContent = img.getAttribute('data-fallback') || '?'
+        img.replaceWith(fb)
+      })
+      return bubble
+    }
+
+    function nextItem() {
+      if (!pool.length) return null
+      const item = pool[idx % pool.length]
+      idx += 1
+      if (idx >= pool.length) {
+        pool = shuffle(pool)
+        idx = 0
+      }
+      return item
+    }
+
+    function showBubble(item) {
+      if (!item) return
+      const bubble = buildBubble(item)
+      layer.appendChild(bubble)
+      layer.scrollTop = layer.scrollHeight
+      void bubble.offsetWidth
+      bubble.classList.add('in')
+
+      const life = reduce ? 10000 : 8000 + Math.random() * 3000
+      window.setTimeout(() => {
+        if (!bubble.isConnected) return
+        bubble.classList.add('out')
+        window.setTimeout(() => bubble.remove(), 500)
+      }, life)
+
+      while (layer.children.length > 8) layer.firstChild?.remove()
+    }
+
+    function spawn() {
+      if (!started || document.hidden) return
+      if (document.body.classList.contains('menu-open') || document.body.classList.contains('preview-open')) {
+        return
+      }
+      const item = nextItem()
+      if (!item) return
+      if (minimized) {
+        unseen += 1
+        updateFab()
+        return
+      }
+      showBubble(item)
+    }
+
+    function schedule() {
+      window.clearTimeout(timer)
+      if (!started) return
+      timer = window.setTimeout(() => {
+        spawn()
+        schedule()
+      }, SPAWN_MS)
+    }
+
+    function normalize(list) {
+      if (!Array.isArray(list)) return []
+      const out = []
+      const seen = new Set()
+      for (const raw of list) {
+        if (!raw || typeof raw !== 'object') continue
+        const id = String(raw.id || '').trim()
+        const username = String(raw.username || '')
+          .trim()
+          .replace(/^@/, '')
+        const commentText = String(raw.commentText || '')
+          .replace(/\s+/g, ' ')
+          .trim()
+        if (!id || !username || !commentText) continue
+        if (seen.has(id)) continue
+        seen.add(id)
+        out.push({
+          id,
+          handle: `@${username}`.slice(0, 40),
+          name: String(raw.displayName || '').trim().slice(0, 48),
+          avatar: safeAvatarSrc(raw.profileImageUrl),
+          text: commentText.slice(0, 500),
+        })
+      }
+      return out
+    }
+
+    minBtn?.addEventListener('click', () => setMinimized(!minimized))
+    fab?.addEventListener('click', () => setMinimized(false))
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        window.clearTimeout(timer)
+      } else if (started) {
+        schedule()
+      }
+    })
+
+    setChrome()
+
+    fetch(DATA_URL, { headers: { Accept: 'application/json' }, cache: 'no-store' })
+      .then((res) => {
+        if (!res.ok) throw new Error(`status ${res.status}`)
+        return res.json()
+      })
+      .then((data) => {
+        pool = shuffle(normalize(data?.reactions))
+        if (!pool.length) {
+          rail.hidden = true
+          document.body.classList.remove('live-rail-on', 'live-rail-min')
+          if (fab) fab.hidden = true
+          return
+        }
+        started = true
+        setChrome()
+        if (!minimized) {
+          spawn()
+          schedule()
+        } else {
+          schedule()
+        }
+      })
+      .catch(() => {
+        rail.hidden = true
+        document.body.classList.remove('live-rail-on', 'live-rail-min')
+        if (fab) fab.hidden = true
+      })
+  }
+
   initTheme()
   initLang()
   initPreviewModal()
@@ -971,7 +1207,5 @@
   initJoinForm()
   initYear()
   initUiHints()
-  if (typeof window.initFanReactions === 'function') {
-    window.initFanReactions()
-  }
+  initLiveSocialFeed()
 })()

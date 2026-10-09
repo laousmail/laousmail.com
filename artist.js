@@ -869,7 +869,7 @@
     if (!tip || !tipText) return
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const key = 'laousmail-hints-v2'
+    const key = 'laousmail-hints-v3'
     let seen = {}
     try {
       seen = JSON.parse(localStorage.getItem(key) || '{}') || {}
@@ -882,6 +882,18 @@
         en: 'Each lit point is a released song. Tap a name to preview it. The circle fills by end of 2026.',
         fr: 'Chaque point allumé est une chanson sortie. Touche un nom pour l’extrait. Le cercle se remplit fin 2026.',
       },
+      comments: {
+        en: 'Real comments from the videos land here every few moments. Scroll to read older ones. Hide anytime, then reopen from Comments.',
+        fr: 'De vrais commentaires sous les vidéos arrivent ici au fil des secondes. Fais défiler pour lire les plus anciens. Réduis quand tu veux, puis rouvre via Commentaires.',
+      },
+      lang: {
+        en: 'Switch EN or FR anytime in the top bar.',
+        fr: 'Passe en EN ou FR à tout moment dans la barre du haut.',
+      },
+      live: {
+        en: 'Live is about the first show with this original music. Leave your email to hear first.',
+        fr: 'Live parle du premier spectacle avec cette musique originale. Laisse ton email pour être prévenu·e en premier.',
+      },
       preview: {
         en: 'Tap a song for a 30s preview, then pick where to listen.',
         fr: 'Touche une chanson pour 30s d’extrait, puis choisis où écouter.',
@@ -892,17 +904,22 @@
       },
     }
 
-    const queue = ['orbit', 'preview']
+    const defaultQueue = ['orbit', 'comments', 'lang', 'preview']
+    let queue = defaultQueue.slice()
     let active = null
     let timer = 0
 
-    function mark(id) {
-      seen[id] = 1
+    function persist() {
       try {
         localStorage.setItem(key, JSON.stringify(seen))
       } catch {
         /* private mode */
       }
+    }
+
+    function mark(id) {
+      seen[id] = 1
+      persist()
     }
 
     function clearPulse() {
@@ -916,9 +933,13 @@
     }
 
     function showTip(id) {
-      const target = $(`[data-hint="${id}"]`)
+      let target = $(`[data-hint="${id}"]`)
       const text = copy[id]
-      if (!target || !text || seen[id]) return false
+      if (!text || seen[id]) return false
+      if (id === 'comments' && (!target || target.hidden)) {
+        target = $('[data-live-fab]') || target
+      }
+      if (!target || target.hidden) return false
       active = id
       tipText.textContent = text[lang()] || text.en
       tip.hidden = false
@@ -946,6 +967,16 @@
       }
     }
 
+    function replay() {
+      window.clearTimeout(timer)
+      hideTip()
+      seen = {}
+      persist()
+      queue = defaultQueue.slice()
+      if (!seen.live) queue.push('live')
+      timer = window.setTimeout(next, reduce ? 400 : 600)
+    }
+
     tipOk?.addEventListener('click', () => {
       if (active) mark(active)
       hideTip()
@@ -953,13 +984,9 @@
       timer = window.setTimeout(next, 500)
     })
 
+    $('[data-hints-replay]')?.addEventListener('click', replay)
+
     // Platforms hint when preview opens
-    const modal = $('[data-preview-modal]')
-    modal?.addEventListener('close', () => {
-      /* no-op */
-    })
-    const openPreview = $('[data-open-preview]')
-    // After first preview open, teach platforms once
     document.addEventListener(
       'click',
       (e) => {
@@ -974,6 +1001,24 @@
       true,
     )
 
+    // Live section tip once the visitor reaches it
+    const liveSec = $('[data-hint="live"]')
+    if (liveSec && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting || seen.live) continue
+            queue.push('live')
+            if (!active) next()
+            io.disconnect()
+            break
+          }
+        },
+        { threshold: 0.35 },
+      )
+      io.observe(liveSec)
+    }
+
     window.setTimeout(next, reduce ? 900 : 1600)
   }
 
@@ -982,12 +1027,16 @@
     const rail = $('[data-live-rail]')
     const layer = $('[data-live-comments]')
     const minBtn = $('[data-live-minimize]')
+    const helpBtn = $('[data-live-help]')
+    const warnDetail = $('[data-live-warn-detail]')
     const fab = $('[data-live-fab]')
     const fabCount = $('[data-live-fab-count]')
     if (!rail || !layer) return
 
     const DATA_URL = 'fan-reactions/reactions.json'
-    const SPAWN_MS = 500
+    const SPAWN_MS = 800
+    const NEAR_BOTTOM_PX = 80
+    const MAX_KEEP = 40
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     let pool = []
@@ -1001,6 +1050,17 @@
       if (localStorage.getItem('laousmail-live-minimized') === '1') minimized = true
     } catch {
       /* private mode */
+    }
+
+    function isNearBottom() {
+      const maxScroll = layer.scrollHeight - layer.clientHeight
+      if (maxScroll <= 4) return true
+      const threshold = Math.min(NEAR_BOTTOM_PX, Math.max(28, maxScroll * 0.2))
+      return maxScroll - layer.scrollTop <= threshold
+    }
+
+    function pinToBottom() {
+      layer.scrollTop = layer.scrollHeight
     }
 
     function updateFab() {
@@ -1025,6 +1085,10 @@
           ? '<span data-lang="en">Open</span><span data-lang="fr">Ouvrir</span>'
           : '<span data-lang="en">Hide</span><span data-lang="fr">Réduire</span>'
       }
+      if (minimized && warnDetail && helpBtn) {
+        warnDetail.hidden = true
+        helpBtn.setAttribute('aria-expanded', 'false')
+      }
       updateFab()
     }
 
@@ -1045,6 +1109,12 @@
         spawn()
         schedule()
       }
+    }
+
+    function setHelpOpen(open) {
+      if (!warnDetail || !helpBtn) return
+      warnDetail.hidden = !open
+      helpBtn.setAttribute('aria-expanded', open ? 'true' : 'false')
     }
 
     function buildBubble(item) {
@@ -1085,20 +1155,26 @@
 
     function showBubble(item) {
       if (!item) return
+      const pinBottom = isNearBottom()
       const bubble = buildBubble(item)
       layer.appendChild(bubble)
-      layer.scrollTop = layer.scrollHeight
       void bubble.offsetWidth
       bubble.classList.add('in')
 
-      const life = reduce ? 10000 : 8000 + Math.random() * 3000
+      if (pinBottom) pinToBottom()
+
+      const life = reduce ? 16000 : 14000 + Math.random() * 4000
       window.setTimeout(() => {
         if (!bubble.isConnected) return
+        if (!isNearBottom()) return
+        if (layer.children.length <= 14) return
         bubble.classList.add('out')
-        window.setTimeout(() => bubble.remove(), 500)
+        window.setTimeout(() => {
+          if (bubble.isConnected) bubble.remove()
+        }, 500)
       }, life)
 
-      while (layer.children.length > 8) layer.firstChild?.remove()
+      while (layer.children.length > MAX_KEEP) layer.firstChild?.remove()
     }
 
     function spawn() {
@@ -1151,6 +1227,10 @@
       }
       return out
     }
+
+    helpBtn?.addEventListener('click', () => {
+      setHelpOpen(!!warnDetail?.hidden)
+    })
 
     minBtn?.addEventListener('click', () => setMinimized(!minimized))
     fab?.addEventListener('click', () => setMinimized(false))

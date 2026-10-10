@@ -72,13 +72,13 @@ window.LAOUSMAIL_IN_PRODUCTION = {
   },
   lang: { en: 'Kabyle · Amazigh', fr: 'Kabyle · Amazigh' },
   /** Current studio step */
-  step: 'recording',
-  /** 0–1 progress inside the current step (vocals done, still tracking instruments) */
-  stepProgress: 0.55,
+  step: 'mixing',
+  /** 0–1 progress inside the current step */
+  stepProgress: 0.82,
   steps: ['writing', 'recording', 'mixing', 'mastering'],
   note: {
-    en: 'Vocals are done. Recording bass and acoustic guitars, rearranging drums.',
-    fr: 'Voix terminées. Enregistrement de la basse et des guitares acoustiques, réarrangement de la batterie.',
+    en: 'Antoine, my roommate, just played a sick solo on it. Now I am finishing up the mixing so it sounds polished and worth my audience’s time.',
+    fr: 'Antoine, mon coloc, vient d’y poser un solo malade. Je termine le mixage pour que ça sonne poli et digne du temps de mon public.',
   },
-  updated: '2026-10-09',
+  updated: '2026-10-10',
 }

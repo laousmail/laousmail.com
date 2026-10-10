@@ -445,7 +445,10 @@
     }
 
     const fill = $('[data-studio-bar-fill]')
-    if (fill) fill.style.width = `${Math.round(overall)}%`
+    if (fill) {
+      fill.style.width = `${Math.round(overall)}%`
+      fill.classList.toggle('is-almost-green', stepIndex >= 2 || overall >= 60)
+    }
 
     const stepsRoot = $('[data-studio-steps]')
     if (stepsRoot) {
@@ -567,6 +570,44 @@
 
       nodesRoot.appendChild(node)
     })
+
+    // Lonely in-studio dot (next song only). Does not change released nodes.
+    const brewing = window.LAOUSMAIL_IN_PRODUCTION
+    if (brewing && brewing.title && Number(brewing.number) > out && Number(brewing.number) <= goal) {
+      const bi = Number(brewing.number) - 1
+      const angle = (Math.PI * 2 * bi) / goal - Math.PI / 2
+      const x = cx + radius * Math.cos(angle)
+      const y = cy + radius * Math.sin(angle)
+      const node = document.createElement('button')
+      node.type = 'button'
+      node.className = 'orbit-node brewing'
+      node.style.left = `${x}%`
+      node.style.top = `${y}%`
+      node.style.setProperty('--i', String(bi))
+      node.setAttribute('data-orbit-brewing', '1')
+      node.setAttribute(
+        'aria-label',
+        L === 'fr'
+          ? `${brewing.title}: en studio`
+          : `${brewing.title}: in the studio`,
+      )
+      node.title = brewing.title
+
+      const label = document.createElement('span')
+      label.className = 'orbit-node-label'
+      label.textContent = brewing.title
+      node.appendChild(label)
+
+      node.addEventListener('click', (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        const making = $('[data-making]') || document.getElementById('making')
+        if (making) making.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+
+      nodesRoot.appendChild(node)
+      window.setTimeout(() => node.classList.add('in'), 180 + out * 110)
+    }
 
     $$('.orbit-node.lit', nodesRoot).forEach((n, i) => {
       n.classList.remove('in')

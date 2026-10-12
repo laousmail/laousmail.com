@@ -1,42 +1,22 @@
 # laousmail.com
 
-Artist website for **LAOUSMAIL** — singer / songwriter · Montréal.
-
-This is **not** a studio or services site. No pricing, no “work with me”, no EclipseTone business funnel.
+Artist website for **laousmail** · singer / songwriter · Montréal.
 
 **Live:** https://laousmail.com/
 
-## Stack
+Static HTML / CSS / JS. GitHub Pages from `main`. No build step. No private API keys in frontend files.
 
-Static HTML / CSS / JS. GitHub Pages compatible. No build step.
+## What’s in the repo
 
-| File | Role |
+| Path | Role |
 |------|------|
-| `index.html` | Page structure |
-| `site.css` | Design + motion |
-| `artist.js` | Lang, theme, menu, releases render, form |
-| `releases.js` | Song + journey data (edit here to add releases) |
-| `fan-reactions.js` | Social video comments section |
-| `fan-reactions/` | Instagram / TikTok comment exports (JSON) |
-| `config.js` | Fan signup endpoint (no secrets) |
-| `privacy.html` | Short privacy note |
-
-## Spotify preview
-
-- First click on a song opens a popup with the 30s preview, then **Spotify / YouTube / Apple Music**.
-- Links + preview URLs live in `releases.js`.
-- There is **no on-site comment form**. Reactions come from social video comments only.
-
-## Fan Reactions
-
-Unfiltered comments from Instagram / TikTok videos (local JSON). Visitors cannot post here. See [`fan-reactions/README.md`](fan-reactions/README.md).
-
-```bash
-node scripts/import-fan-reactions.mjs \
-  --input fan-reactions/source/instagram-export.csv \
-  --platform instagram \
-  --prefer-local-avatars
-```
+| `index.html` | Page structure and SEO |
+| `site.css` | Design and motion |
+| `artist.js` | Language, theme, orbit, studio, live feed, signup |
+| `releases.js` | Released songs, journey goal, song currently in the studio |
+| `fan-reactions/` | Social video comments shown in the live feed (JSON) |
+| `config.js` | Public fan signup endpoint only (no secrets) |
+| `privacy.html` | Privacy note |
 
 ## Local preview
 
@@ -44,40 +24,19 @@ node scripts/import-fan-reactions.mjs \
 npx --yes serve .
 ```
 
-## Fan email list (MailerLite)
+## Updating content
 
-1. In MailerLite, create an **Embedded form** for the list (e.g. “Ceux qui écoutent”).
-2. Copy the form’s public subscribe URL (looks like):
-   `https://assets.mailerlite.com/jsonp/ACCOUNT_ID/forms/FORM_ID/subscribe`
-3. Set it in `config.js`:
+- **New release:** add the track in `releases.js`. Music cards and the orbit update together.
+- **Song in the studio:** edit `window.LAOUSMAIL_IN_PRODUCTION` in `releases.js` (`step`, `stepProgress`, `note`, `updated`).
+- **Social comments feed:** see [`fan-reactions/README.md`](fan-reactions/README.md). Import from your exports, curate `reactions.json`, then commit.
 
-```js
-window.LAOUSMAIL_FORM = {
-  endpoint: 'https://assets.mailerlite.com/jsonp/ACCOUNT_ID/forms/FORM_ID/subscribe',
-  provider: 'mailerlite',
-  honeypot: 'website',
-}
-```
+## Fan signup
 
-Never put a private MailerLite API token in frontend files.
+The “Ceux qui écoutent” form posts to a public MailerLite subscribe URL set in `config.js`.
 
-Until `endpoint` is set, the form shows a clear “not connected yet” message — it does **not** fake success via localStorage.
+- Only use the public embedded-form subscribe endpoint.
+- Never put a private MailerLite API token (or any private credential) in this repo or in browser-facing files.
 
 ## Deploy
 
-GitHub Pages from `main` (root). Custom domain in `CNAME`: `laousmail.com`.
-
-## Update a release
-
-Edit `releases.js` — Music cards and the 15-song orbit update from the same list.
-
-## Update the song in the studio
-
-Edit `window.LAOUSMAIL_IN_PRODUCTION` in `releases.js`:
-
-```js
-step: 'recording',       // writing | recording | mixing | mastering
-stepProgress: 0.55,      // 0–1 inside the current step
-note: { en: '...', fr: '...' },
-updated: '2026-10-09',
-```
+Push to `main`. GitHub Pages serves the site root. Custom domain is set via `CNAME`.

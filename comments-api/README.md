@@ -1,34 +1,12 @@
-# LAOUSMAIL comments API
+# Comments API (legacy / optional)
 
-Cloudflare Worker + KV backend for shared site comments.
+Optional Cloudflare Worker used historically for on-site comments. The public site no longer exposes an interactive comment form; reactions on laousmail.com come from curated social exports under `fan-reactions/`.
 
-## Endpoints
+## Security
 
-| Method | Path | Body | Result |
-|--------|------|------|--------|
-| `GET` | `/` | — | `{ comments: [...] }` |
-| `POST` | `/` | `{ handle, text }` | `{ ok: true, comment }` |
+- Do not commit Cloudflare claim links, API tokens, account passwords, or `.env` files.
+- Do not publish temporary preview claim URLs in this repo.
+- Keep Worker credentials and deploy config in your Cloudflare dashboard / local authenticated CLI session, not in public docs.
+- Frontend files must never hold write credentials for any comments backend.
 
-## Deploy / claim
-
-**Live URL:** `https://laousmail-comments.roomy-tub.workers.dev`
-
-This Worker is on a **temporary Cloudflare preview account** until you claim it.
-
-1. Open [CLAIM.md](./CLAIM.md) and claim the preview account within **60 minutes**.
-2. Later deploys:
-
-```bash
-cd comments-api
-npx wrangler login
-npx wrangler deploy
-```
-
-Update `config.js` → `LAOUSMAIL_COMMENTS.endpoint` if the Worker URL changes.
-
-## Local
-
-```bash
-cd comments-api
-npx wrangler dev
-```
+If you still maintain this Worker privately, manage deploy and secrets outside the public site docs.

@@ -654,26 +654,9 @@ html[lang="fr"] [data-lang="en"] {
   max-width: 40rem;
 }
 
-.studio-band {
-  margin: 1.35rem 0 0;
-  overflow: hidden;
-  border-radius: 0.35rem;
-  aspect-ratio: 21 / 9;
-  max-height: 11.5rem;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--line) 80%, transparent);
-}
-
-.studio-band img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 45%;
-  display: block;
-}
-
 .studio-track {
-  margin-top: 1.25rem;
-  padding: 1.2rem 0 0;
+  margin-top: 1.5rem;
+  padding: 1.35rem 0 0;
   border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
 }
 

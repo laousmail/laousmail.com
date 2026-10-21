@@ -21,13 +21,13 @@
 <meta property="og:url" content="https://laousmail.com/" />
 <meta property="og:title" content="laousmail: original music · Montréal" />
 <meta property="og:description" content="Fifteen songs written long ago from lived experience and admired friends. Finishing them now so the world finally hears what he’s been building, then the first show with original music." />
-<meta property="og:image" content="https://laousmail.com/media/portrait-park.webp" />
-<meta property="og:image:alt" content="laousmail outdoors in Montréal" />
+<meta property="og:image" content="https://laousmail.com/media/portrait-guitar.webp" />
+<meta property="og:image:alt" content="laousmail with guitar in Montréal" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="laousmail: original music · Montréal" />
 <meta name="twitter:description" content="Young artists must create more than cover songs. 15 originals. Amazigh roots. Montréal. First show with original music ahead." />
-<meta name="twitter:image" content="https://laousmail.com/media/portrait-park.webp" />
-<meta name="twitter:image:alt" content="laousmail outdoors in Montréal" />
+<meta name="twitter:image" content="https://laousmail.com/media/portrait-guitar.webp" />
+<meta name="twitter:image:alt" content="laousmail with guitar in Montréal" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Outfit:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
@@ -43,7 +43,7 @@
       "name": "laousmail",
       "alternateName": ["SMA!L", "Smail Laouchedi"],
       "url": "https://laousmail.com/",
-      "image": "https://laousmail.com/media/portrait-park.webp",
+      "image": "https://laousmail.com/media/portrait-guitar.webp",
       "description": "Montréal singer-songwriter with Amazigh roots. Fifteen original songs written from personal experience and from artists he admires, finishing a body of work he has been building for years, ahead of his first show with original music.",
       "genre": ["R&B", "Soul", "Amazigh", "Kabyle"],
       "foundingLocation": { "@type": "Place", "name": "Montréal", "addressCountry": "CA" },
@@ -65,6 +65,7 @@
       "name": "Smail Laouchedi",
       "alternateName": "laousmail",
       "url": "https://laousmail.com/",
+      "image": "https://laousmail.com/media/portrait-circle.webp",
       "jobTitle": "Singer-songwriter",
       "homeLocation": { "@type": "Place", "name": "Montréal" },
       "knowsAbout": ["original music", "Amazigh culture", "R&B", "soul", "Kabyle song"],
@@ -171,7 +172,7 @@
 
 <header class="nav">
   <a class="brand" href="#top" aria-label="laousmail">
-    <img src="media/logo-smail.webp" alt="laousmail" width="40" height="40" />
+    <img src="media/portrait-circle.webp" alt="laousmail" width="40" height="40" />
     <span class="brand-name">laousmail</span>
   </a>
 
@@ -310,30 +311,35 @@
       <span data-lang="fr">Une chanson à la fois. Écriture, enregistrement, mixage, mastering. Mis à jour au fil du travail.</span>
     </p>
 
-    <article class="studio-track reveal" data-studio-track>
-      <header class="studio-track-head">
-        <span class="studio-num" data-studio-number>04</span>
-        <div class="studio-titles">
-          <h3 data-studio-title>D kem</h3>
-          <p class="studio-translation" data-studio-translation></p>
-          <p class="studio-lang" data-studio-lang></p>
-        </div>
-      </header>
+    <div class="studio-layout">
+      <figure class="studio-photo reveal">
+        <img src="media/portrait-studio.webp" alt="laousmail between sessions" width="900" height="1200" loading="lazy" decoding="async" />
+      </figure>
+      <article class="studio-track reveal" data-studio-track>
+        <header class="studio-track-head">
+          <span class="studio-num" data-studio-number>04</span>
+          <div class="studio-titles">
+            <h3 data-studio-title>D kem</h3>
+            <p class="studio-translation" data-studio-translation></p>
+            <p class="studio-lang" data-studio-lang></p>
+          </div>
+        </header>
 
-      <div class="studio-progress" data-studio-progress>
-        <div class="studio-bar" aria-hidden="true">
-          <i data-studio-bar-fill></i>
+        <div class="studio-progress" data-studio-progress>
+          <div class="studio-bar" aria-hidden="true">
+            <i data-studio-bar-fill></i>
+          </div>
+          <ol class="studio-steps" data-studio-steps></ol>
         </div>
-        <ol class="studio-steps" data-studio-steps></ol>
-      </div>
 
-      <p class="studio-note" data-studio-note></p>
-      <p class="studio-updated">
-        <span data-lang="en">Last update</span>
-        <span data-lang="fr">Dernière mise à jour</span>
-        <time data-studio-updated></time>
-      </p>
-    </article>
+        <p class="studio-note" data-studio-note></p>
+        <p class="studio-updated">
+          <span data-lang="en">Last update</span>
+          <span data-lang="fr">Dernière mise à jour</span>
+          <time data-studio-updated></time>
+        </p>
+      </article>
+    </div>
   </section>
 
   <!-- MUSIC -->
@@ -410,7 +416,7 @@
         </p>
       </article>
       <div class="story-photo reveal">
-        <img src="media/portrait-park.webp" alt="laousmail outdoors in Montréal, singer and songwriter" width="900" height="1125" loading="lazy" decoding="async" />
+        <img src="media/portrait-guitar.webp" alt="laousmail with guitar in Montréal" width="900" height="1344" loading="lazy" decoding="async" />
       </div>
       <article class="story-block reveal">
         <span class="story-num">03</span>
@@ -470,6 +476,7 @@
   <!-- CEUX QUI ÉCOUTENT -->
   <section class="sec circle" id="circle">
     <div class="circle-inner">
+      <img class="circle-portrait reveal" src="media/portrait-circle.webp" alt="laousmail" width="160" height="160" loading="lazy" decoding="async" />
       <div class="eclipse reveal" aria-hidden="true">
         <strong>Ceux qui écoutent</strong>
         <svg viewBox="0 0 32 32" fill="none"><path d="M16 3v26M6 10l10 6 10-6M6 22l10-6 10 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -530,6 +537,7 @@
       <span data-lang="en">Find the music where you already are.</span>
       <span data-lang="fr">Retrouve la musique là où tu es déjà.</span>
     </h2>
+    <img class="social-brand reveal" src="media/brand-smail.webp" alt="SMA!L" width="640" height="350" loading="lazy" decoding="async" />
     <ul class="social-list reveal">
       <li><a href="https://open.spotify.com/artist/60GjJwhvGe1eVg98jFPgMp" target="_blank" rel="noreferrer">Spotify</a></li>
       <li><a href="https://instagram.com/laousmail" target="_blank" rel="noreferrer">Instagram</a></li>
@@ -605,6 +613,7 @@
 
 <footer class="foot">
   <div class="foot-brand">
+    <img class="foot-wordmark" src="media/brand-smail.webp" alt="SMA!L" width="220" height="120" loading="lazy" decoding="async" />
     <strong>laousmail</strong>
     <span>Montréal</span>
   </div>

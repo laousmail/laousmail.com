@@ -1757,6 +1757,200 @@ body.preview-open {
   max-width: 36rem;
 }
 
+/* EclipseTone studio / production */
+.eclipse-studio {
+  position: relative;
+  max-width: none;
+  width: 100%;
+  overflow: hidden;
+  padding-block: clamp(3.5rem, 8vw, 5.5rem);
+  background:
+    radial-gradient(90% 70% at 12% 0%, color-mix(in srgb, var(--hot) 18%, transparent), transparent 58%),
+    radial-gradient(70% 60% at 88% 100%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 55%),
+    linear-gradient(180deg, color-mix(in srgb, var(--bg2) 92%, #000), var(--bg));
+  border-block: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+}
+
+.eclipse-studio > *:not(.eclipse-studio-glow) {
+  position: relative;
+  z-index: 1;
+  max-width: 46rem;
+  margin-inline: auto;
+}
+
+.eclipse-studio-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, transparent 40%, color-mix(in srgb, var(--accent) 6%, transparent) 50%, transparent 60%);
+  opacity: 0.9;
+}
+
+.eclipse-mark {
+  margin: 0 0 0.55rem;
+  font-family: "Syne", sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.4rem, 7vw, 4.2rem);
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+  color: var(--accent);
+  text-transform: none;
+}
+
+.eclipse-studio h2 {
+  max-width: 18ch;
+}
+
+.eclipse-stats {
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 1.25rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.15rem 1.35rem;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
+}
+
+@media (min-width: 720px) {
+  .eclipse-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.eclipse-stats li {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.eclipse-stats strong {
+  font-family: "Syne", sans-serif;
+  font-size: clamp(1.7rem, 3.5vw, 2.15rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.eclipse-stats span {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mute);
+  line-height: 1.35;
+}
+
+.eclipse-offer {
+  margin-top: 2.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--line) 85%, transparent);
+}
+
+.eclipse-offer-lead {
+  margin: 0 0 1.25rem;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(1.35rem, 2.8vw, 1.75rem);
+  font-weight: 600;
+  color: var(--ink);
+  max-width: 28rem;
+}
+
+.eclipse-services {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+
+.eclipse-services li {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.95rem 0;
+  border-top: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+}
+
+.eclipse-services li:last-child {
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+}
+
+.eclipse-services strong {
+  font-family: "Syne", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.eclipse-services span {
+  color: var(--mute);
+  font-size: 0.98rem;
+  line-height: 1.5;
+  max-width: 36rem;
+}
+
+.eclipse-steps {
+  list-style: none;
+  margin: 2.1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 780px) {
+  .eclipse-steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+.eclipse-steps li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem 0.9rem;
+  align-items: start;
+}
+
+.eclipse-step-num {
+  font-family: "Syne", sans-serif;
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  color: var(--hot);
+  padding-top: 0.2rem;
+}
+
+.eclipse-steps strong {
+  display: block;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.3rem;
+}
+
+.eclipse-steps p {
+  margin: 0;
+  color: var(--mute);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.eclipse-proof {
+  margin: 2rem 0 0;
+  max-width: 34rem;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(1.25rem, 2.6vw, 1.55rem);
+  font-weight: 600;
+  font-style: italic;
+  color: color-mix(in srgb, var(--ink) 88%, var(--mute));
+  line-height: 1.4;
+}
+
+.eclipse-studio .cta-row {
+  margin-top: 1.75rem;
+}
+
 /* Live */
 .live {
   max-width: none;

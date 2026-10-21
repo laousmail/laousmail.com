@@ -187,11 +187,14 @@ html[lang="fr"] [data-lang="en"] {
   flex: 0 0 auto;
 }
 
-.brand img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
+.brand img,
+.brand-mark {
+  width: auto;
+  height: 2.15rem;
+  max-width: 7.25rem;
+  border-radius: 0.2rem;
+  object-fit: contain;
+  object-position: left center;
 }
 
 .brand-name {
@@ -648,49 +651,30 @@ html[lang="fr"] [data-lang="en"] {
 
 /* ——— Studio / currently finishing ——— */
 .making {
-  max-width: 48rem;
+  max-width: 40rem;
 }
 
-.studio-layout {
-  display: grid;
-  gap: 1.35rem;
-  margin-top: 1.5rem;
-  align-items: start;
-}
-
-@media (min-width: 720px) {
-  .studio-layout {
-    grid-template-columns: minmax(11rem, 0.78fr) 1.22fr;
-    gap: 1.75rem 2rem;
-  }
-}
-
-.studio-photo {
-  margin: 0;
+.studio-band {
+  margin: 1.35rem 0 0;
   overflow: hidden;
   border-radius: 0.35rem;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 21 / 9;
+  max-height: 11.5rem;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--line) 80%, transparent);
 }
 
-.studio-photo img {
+.studio-band img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 18%;
+  object-position: center 45%;
   display: block;
 }
 
 .studio-track {
-  padding: 0;
-  border-top: 0;
-}
-
-@media (max-width: 719px) {
-  .studio-track {
-    padding-top: 0.35rem;
-    border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
-  }
+  margin-top: 1.25rem;
+  padding: 1.2rem 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
 }
 
 .studio-track-head {
@@ -1749,6 +1733,9 @@ body.preview-open {
   border-radius: 0.35rem;
   overflow: hidden;
   aspect-ratio: 4 / 5;
+  max-width: 18rem;
+  justify-self: end;
+  width: 100%;
   box-shadow: 0 0 0 1px var(--line);
 }
 
@@ -1857,16 +1844,16 @@ body.preview-open {
 }
 
 .circle-portrait {
-  width: 5.5rem;
-  height: 5.5rem;
+  width: 4.25rem;
+  height: 4.25rem;
   border-radius: 50%;
   object-fit: cover;
   object-position: center 20%;
-  margin: 0 auto 1.1rem;
+  margin: 0 auto 1rem;
   display: block;
   box-shadow:
     0 0 0 2px color-mix(in srgb, var(--accent) 55%, transparent),
-    0 0 28px color-mix(in srgb, var(--hot) 22%, transparent);
+    0 0 22px color-mix(in srgb, var(--hot) 20%, transparent);
 }
 
 .circle-inner {
@@ -1992,15 +1979,6 @@ body.preview-open {
 }
 
 /* Social */
-.social-brand {
-  display: block;
-  width: min(100%, 22rem);
-  height: auto;
-  margin: 0.35rem 0 1.35rem;
-  border-radius: 0.35rem;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--line) 70%, transparent);
-}
-
 .social-list {
   list-style: none;
   padding: 0;
@@ -2606,9 +2584,11 @@ body.live-rail-min .live-toast-layer {
     margin-right: 0;
   }
 
-  .brand img {
-    width: 36px;
-    height: 36px;
+  .brand img,
+  .brand-mark {
+    width: auto;
+    height: 1.85rem;
+    max-width: 5.75rem;
   }
 
   .tools {

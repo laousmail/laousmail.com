@@ -74,11 +74,11 @@ window.LAOUSMAIL_IN_PRODUCTION = {
   /** Current studio step */
   step: 'mixing',
   /** 0–1 progress inside the current step */
-  stepProgress: 0.82,
+  stepProgress: 0.88,
   steps: ['writing', 'recording', 'mixing', 'mastering'],
   note: {
-    en: 'Antoine, my roommate, just played a sick solo on it. Now I am finishing up the mixing so it sounds polished and worth my audience’s time.',
-    fr: 'Antoine, mon coloc, vient d’y poser un solo malade. Je termine le mixage pour que ça sonne poli et digne du temps de mon public.',
+    en: 'I re-recorded everything because I did not like how it sounded. The groove was not good enough, and when something is not good enough, I do not release it. Right now I am doing the final touches on the arrangement, adding the back vocals and everything else so it becomes mature, then I will release it. Sorry for being late.',
+    fr: 'J’ai tout réenregistré parce que je n’aimais pas le son. Le groove n’était pas assez bon, et quand quelque chose n’est pas assez bon, je ne le sors pas. En ce moment je fais les dernières touches sur l’arrangement, j’ajoute les chœurs et le reste pour que ça mûrisse, puis je le sors. Désolé pour le retard.',
   },
-  updated: '2026-10-10',
+  updated: '2026-10-21',
 }

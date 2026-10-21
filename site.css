@@ -557,16 +557,6 @@ html[lang="fr"] [data-lang="en"] {
   gap: 0.35rem;
 }
 
-.identity {
-  font-family: "Syne", sans-serif;
-  font-size: clamp(1.05rem, 2.8vw, 1.35rem);
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  color: var(--accent);
-  margin: 0 0 0.55rem;
-  text-shadow: 0 2px 24px color-mix(in srgb, var(--bg) 55%, transparent);
-}
-
 .hero-title {
   font-family: "Cormorant Garamond", Georgia, serif;
   font-weight: 700;

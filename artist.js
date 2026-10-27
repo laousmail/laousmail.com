@@ -4,7 +4,9 @@
 
   const $ = (sel, root = document) => root.querySelector(sel)
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel))
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
+  /* ——— Theme ——— */
   function preferredTheme() {
     try {
       const saved = localStorage.getItem(THEME_KEY) || localStorage.getItem('eclipsetone-theme')
@@ -23,8 +25,8 @@
     } catch {
       /* private mode */
     }
-    $$('[data-theme-toggle]').forEach((btn) => {
-      const fr = document.documentElement.lang === 'fr'
+    const fr = lang() === 'fr'
+    $$('.mode[data-theme-toggle]').forEach((btn) => {
       const label =
         next === 'dark'
           ? fr
@@ -34,7 +36,6 @@
             ? 'Passer en mode sombre'
             : 'Switch to dark mode'
       btn.setAttribute('aria-label', label)
-      btn.setAttribute('aria-pressed', next === 'dark' ? 'true' : 'false')
     })
   }
 
@@ -49,8 +50,17 @@
     })
   }
 
-  function setLang(lang) {
-    const next = lang === 'fr' ? 'fr' : 'en'
+  /* ——— Language ——— */
+  function lang() {
+    return document.documentElement.lang === 'fr' ? 'fr' : 'en'
+  }
+
+  function t(en, fr) {
+    return lang() === 'fr' ? fr : en
+  }
+
+  function setLang(next) {
+    next = next === 'fr' ? 'fr' : 'en'
     document.documentElement.lang = next
     try {
       localStorage.setItem(LANG_KEY, next)
@@ -60,10 +70,8 @@
     $$('[data-lang-btn]').forEach((btn) => {
       btn.setAttribute('aria-pressed', btn.getAttribute('data-lang-btn') === next ? 'true' : 'false')
     })
-    setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark')
-    renderReleases()
-    renderOrbit()
-    renderStudio()
+    setTheme(document.documentElement.getAttribute('data-theme'))
+    renderAll()
   }
 
   function initLang() {
@@ -74,16 +82,13 @@
     } catch {
       /* private mode */
     }
-    setLang(start)
     $$('[data-lang-btn]').forEach((btn) => {
       btn.addEventListener('click', () => setLang(btn.getAttribute('data-lang-btn')))
     })
+    setLang(start)
   }
 
-  function lang() {
-    return document.documentElement.lang === 'fr' ? 'fr' : 'en'
-  }
-
+  /* ——— Helpers ——— */
   function escapeHtml(value) {
     return String(value)
       .replaceAll('&', '&amp;')
@@ -109,17 +114,9 @@
     return ''
   }
 
-  function shuffle(list) {
-    const arr = list.slice()
-    for (let i = arr.length - 1; i > 0; i -= 1) {
-      const j = Math.floor(Math.random() * (i + 1))
-      const tmp = arr[i]
-      arr[i] = arr[j]
-      arr[j] = tmp
-    }
-    return arr
-  }
+  const pad = (n) => String(n).padStart(2, '0')
 
+  /* ——— Data ——— */
   function releases() {
     return Array.isArray(window.LAOUSMAIL_RELEASES) ? window.LAOUSMAIL_RELEASES : []
   }
@@ -128,495 +125,661 @@
     return Number(window.LAOUSMAIL_JOURNEY?.goal) || 15
   }
 
-  let activeTrack = 0
-  let previewRelease = null
-
-  function artFor(r) {
-    return (r?.artworkRemote && isSafeHttps(r.artworkRemote) && r.artworkRemote) || r?.artwork || ''
+  /** The song in the studio, only if it is the next one not yet out. */
+  function brewing() {
+    const b = window.LAOUSMAIL_IN_PRODUCTION
+    if (!b || !b.title) return null
+    const n = Number(b.number)
+    if (!(n > releases().length && n <= journeyGoal())) return null
+    return b
   }
 
-  function syncStage(index) {
-    const list = releases()
-    const r = list[index]
-    if (!r) return
-    activeTrack = index
-    const art = artFor(r)
-    const stageArt = $('[data-stage-art]')
-    const stageTitle = $('[data-stage-title]')
-    if (stageArt && art) stageArt.src = art
-    if (stageTitle) stageTitle.textContent = r.title || ''
-    $$('[data-track-tab]').forEach((btn) => {
-      const on = Number(btn.getAttribute('data-track-tab')) === index
-      btn.setAttribute('aria-selected', on ? 'true' : 'false')
-      btn.classList.toggle('is-active', on)
-    })
-    $$('[data-play-track]').forEach((btn) => {
-      btn.classList.toggle('is-playing', Number(btn.getAttribute('data-play-track')) === index)
-    })
-  }
-
-  function openExternal(url) {
-    if (!url || !isSafeHttps(url)) return
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }
-
-  function openSpotifyDestination(r) {
-    const webUrl =
-      (r?.spotify && isSafeHttps(r.spotify) && r.spotify) ||
-      (r?.spotifyId ? `https://open.spotify.com/track/${encodeURIComponent(r.spotifyId)}` : '')
-    if (!webUrl) return
-    if (r?.spotifyId) {
-      const appUrl = `spotify:track:${r.spotifyId}`
-      const started = Date.now()
-      window.location.href = appUrl
-      window.setTimeout(() => {
-        if (document.hidden || Date.now() - started > 1600) return
-        openExternal(webUrl)
-      }, 850)
-      return
-    }
-    openExternal(webUrl)
-  }
-
-  function openListenDestination(platform) {
-    const r = previewRelease
-    if (!r) return
-    if (platform === 'spotify') {
-      openSpotifyDestination(r)
-      return
-    }
-    if (platform === 'youtube') {
-      openExternal(r.youtube)
-      return
-    }
-    if (platform === 'apple') {
-      openExternal(r.appleMusic)
-    }
-  }
-
-  function syncPlatformButtons(r) {
-    $$('[data-listen-on]').forEach((btn) => {
-      const platform = btn.getAttribute('data-listen-on')
-      const available =
-        (platform === 'spotify' && !!(r?.spotifyId || (r?.spotify && isSafeHttps(r.spotify)))) ||
-        (platform === 'youtube' && !!(r?.youtube && isSafeHttps(r.youtube))) ||
-        (platform === 'apple' && !!(r?.appleMusic && isSafeHttps(r.appleMusic)))
-      btn.disabled = !available
-      btn.hidden = !available
-    })
-  }
-
-  function setPreviewMutePrompt(visible) {
-    const prompt = $('[data-preview-mute-prompt]')
-    if (!prompt) return
-    prompt.hidden = !visible
-  }
-
-  function unmutePreviewAudio() {
-    const audio = $('[data-preview-audio]')
-    if (!audio) return
-    audio.muted = false
-    audio.volume = 1
-    if (audio.paused && audio.src) {
-      const play = audio.play()
-      if (play?.catch) play.catch(() => {})
-    }
-    setPreviewMutePrompt(false)
-  }
-
-  function closePreviewModal() {
-    const modal = $('[data-preview-modal]')
-    const audio = $('[data-preview-audio]')
-    if (audio) {
-      audio.pause()
-      audio.muted = true
-      audio.removeAttribute('src')
-      audio.load()
-    }
-    previewRelease = null
-    document.body.classList.remove('preview-open')
-    $('[data-preview-wave]')?.classList.remove('is-playing')
-    setPreviewMutePrompt(false)
-    if (modal?.open) modal.close()
-  }
-
-  function openPreviewModal(index) {
-    const list = releases()
-    const r = list[index]
-    const modal = $('[data-preview-modal]')
-    const audio = $('[data-preview-audio]')
-    if (!r || !modal || !audio) return
-
-    syncStage(index)
-    previewRelease = r
-
-    const art = artFor(r)
-    const artEl = $('[data-preview-art]')
-    const titleEl = $('[data-preview-title]')
-    if (artEl) artEl.src = art
-    if (titleEl) titleEl.textContent = r.title || ''
-    syncPlatformButtons(r)
-
-    if (r.preview && isSafeHttps(r.preview)) {
-      // Always start muted so cards + orbit dots open the same quiet preview.
-      audio.muted = true
-      audio.volume = 1
-      audio.src = r.preview
-      audio.currentTime = 0
-      const play = audio.play()
-      if (play?.catch) play.catch(() => {})
-      $('[data-preview-wave]')?.classList.add('is-playing')
-      setPreviewMutePrompt(true)
-    } else {
-      audio.removeAttribute('src')
-      $('[data-preview-wave]')?.classList.remove('is-playing')
-      setPreviewMutePrompt(false)
-    }
-
-    document.body.classList.add('preview-open')
-    if (typeof modal.showModal === 'function') modal.showModal()
-    else modal.setAttribute('open', '')
-  }
-
-  function initPreviewModal() {
-    const modal = $('[data-preview-modal]')
-    if (!modal) return
-
-    $('[data-open-preview]')?.addEventListener('click', () => openPreviewModal(activeTrack))
-    $('[data-preview-close]')?.addEventListener('click', closePreviewModal)
-    $('[data-preview-unmute]')?.addEventListener('click', unmutePreviewAudio)
-    $$('[data-listen-on]').forEach((btn) => {
-      btn.addEventListener('click', () => openListenDestination(btn.getAttribute('data-listen-on')))
-    })
-
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closePreviewModal()
-    })
-    modal.addEventListener('cancel', (e) => {
-      e.preventDefault()
-      closePreviewModal()
-    })
-
-    const audio = $('[data-preview-audio]')
-    audio?.addEventListener('ended', () => {
-      $('[data-preview-wave]')?.classList.remove('is-playing')
-    })
-    audio?.addEventListener('pause', () => {
-      if (audio.ended || audio.currentTime === 0) return
-      $('[data-preview-wave]')?.classList.remove('is-playing')
-    })
-    audio?.addEventListener('play', () => {
-      $('[data-preview-wave]')?.classList.add('is-playing')
-    })
-  }
-
-  function renderPlayerTabs() {
-    const tabs = $('[data-player-tabs]')
-    if (!tabs) return
-    tabs.innerHTML = releases()
-      .map((r, i) => {
-        const label = r.title || String(i + 1)
-        return `<button type="button" role="tab" class="player-tab${i === 0 ? ' is-active' : ''}" data-track-tab="${i}" aria-selected="${i === 0 ? 'true' : 'false'}">${escapeHtml(label)}</button>`
-      })
-      .join('')
-    tabs.querySelectorAll('[data-track-tab]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const i = Number(btn.getAttribute('data-track-tab'))
-        syncStage(i)
-        openPreviewModal(i)
-      })
-    })
-    syncStage(activeTrack)
-  }
-
-  function renderReleases() {
-    const root = $('[data-releases]')
-    if (!root) return
-    const L = lang()
-    root.innerHTML = releases()
-      .map((r, i) => {
-        const art = artFor(r)
-        const desc = r.description?.[L] || r.description?.en || ''
-        const meta = r.lang?.[L] || r.lang?.en || ''
-        const n = String(r.number).padStart(2, '0')
-        const listen = L === 'fr' ? 'Écouter l’extrait' : 'Play preview'
-        return `<button type="button" class="release reveal${i === 0 ? ' is-playing' : ''}" data-play-track="${i}">
-          <div class="release-art">
-            <img src="${escapeHtml(art)}" alt="" width="640" height="640" loading="lazy" decoding="async" />
-            <i class="release-wave" aria-hidden="true"></i>
-          </div>
-          <div class="release-meta">
-            <div class="release-num">${n} · ${escapeHtml(String(r.year || ''))}</div>
-            <h3>${escapeHtml(r.title || '')}</h3>
-            ${meta ? `<div class="release-lang">${escapeHtml(meta)}</div>` : ''}
-            ${desc ? `<p>${escapeHtml(desc)}</p>` : ''}
-            <span class="release-go">${listen}</span>
-          </div>
-        </button>`
-      })
-      .join('')
-    root.querySelectorAll('[data-play-track]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        openPreviewModal(Number(btn.getAttribute('data-play-track')))
-      })
-    })
-    renderPlayerTabs()
-    observeReveals(root)
-  }
-
-  function yearProgressThrough2026() {
-    const start = Date.UTC(2026, 0, 1)
-    const end = Date.UTC(2026, 11, 31, 23, 59, 59, 999)
-    const now = Date.now()
-    if (now <= start) return 0
-    if (now >= end) return 1
-    return (now - start) / (end - start)
-  }
-
-  function daysLeftIn2026() {
-    const end = Date.UTC(2026, 11, 31, 23, 59, 59, 999)
-    const now = Date.now()
-    if (now >= end) return 0
-    return Math.max(0, Math.ceil((end - now) / 86400000))
-  }
-
-  function renderDaysLeft() {
-    const root = $('[data-days-left]')
-    const countEl = $('[data-days-left-count]')
-    if (!root || !countEl) return
-    const days = daysLeftIn2026()
-    const yearPct = yearProgressThrough2026()
-    const L = lang()
-    countEl.textContent = String(days)
-    root.setAttribute(
-      'aria-label',
-      L === 'fr'
-        ? `${days} jours restants en 2026`
-        : `${days} days left in 2026`,
-    )
-    const pctEl = $('[data-orbit-year-pct]')
-    if (pctEl) {
-      const pct = Math.round(yearPct * 100)
-      pctEl.textContent =
-        L === 'fr' ? `${pct}% de l’année déjà passée` : `${pct}% of the year already gone`
-    }
-  }
-
-  const STUDIO_STEP_LABELS = {
+  const STEP_LABELS = {
     writing: { en: 'Writing', fr: 'Écriture' },
     recording: { en: 'Recording', fr: 'Enregistrement' },
     mixing: { en: 'Mixing', fr: 'Mixage' },
     mastering: { en: 'Mastering', fr: 'Mastering' },
   }
 
-  function renderStudio() {
-    const data = window.LAOUSMAIL_IN_PRODUCTION
-    const root = $('[data-making]')
-    if (!root || !data || !data.title) {
-      if (root) root.hidden = true
+  function studioState(b = brewing()) {
+    if (!b) return null
+    const steps = Array.isArray(b.steps) && b.steps.length ? b.steps : Object.keys(STEP_LABELS)
+    const stepIndex = Math.max(0, steps.indexOf(String(b.step || steps[0]).toLowerCase()))
+    const within = Math.min(1, Math.max(0, Number(b.stepProgress) || 0))
+    return { steps, stepIndex, within, overall: (stepIndex + within) / steps.length }
+  }
+
+  function stepLabel(key) {
+    return STEP_LABELS[key]?.[lang()] || STEP_LABELS[key]?.en || key
+  }
+
+  function artFor(r) {
+    return (r?.artworkRemote && isSafeHttps(r.artworkRemote) && r.artworkRemote) || r?.artwork || ''
+  }
+
+  /** Falls back to the local artwork when the remote cover can't load. */
+  function withArtFallback(img, r) {
+    img.addEventListener(
+      'error',
+      () => {
+        if (r?.artwork && !img.src.endsWith(r.artwork)) img.src = r.artwork
+      },
+      { once: true },
+    )
+  }
+
+  function platformLinks(r) {
+    return [
+      ['Spotify', r.spotify],
+      ['YouTube', r.youtube],
+      ['Apple Music', r.appleMusic],
+    ].filter(([, url]) => url && isSafeHttps(url))
+  }
+
+  /* ——— Player: one audio element shared by orbit, track list and mini-player ——— */
+  const audio = $('[data-audio]')
+  let current = -1
+
+  function isPlaying() {
+    return !!audio && current >= 0 && !audio.paused && !audio.ended
+  }
+
+  function play(index) {
+    const r = releases()[index]
+    if (!audio || !r) return
+    if (index === current && audio.src) {
+      if (audio.paused) audio.play().catch(() => {})
       return
     }
-    root.hidden = false
-    const L = lang()
-    const steps = Array.isArray(data.steps) && data.steps.length
-      ? data.steps
-      : ['writing', 'recording', 'mixing', 'mastering']
-    const step = String(data.step || steps[0]).toLowerCase()
-    const stepIndex = Math.max(0, steps.indexOf(step))
-    const within = Math.min(1, Math.max(0, Number(data.stepProgress) || 0))
-    const overall = ((stepIndex + within) / steps.length) * 100
-
-    const num = $('[data-studio-number]')
-    if (num) num.textContent = String(data.number || stepIndex + 1).padStart(2, '0')
-
-    const title = $('[data-studio-title]')
-    if (title) title.textContent = data.title
-
-    const translation = $('[data-studio-translation]')
-    if (translation) {
-      const t = data.translation?.[L] || data.translation?.en || ''
-      translation.textContent = t ? `“${t}”` : ''
-      translation.hidden = !t
+    current = index
+    renderPlayer()
+    if (r.preview && isSafeHttps(r.preview)) {
+      audio.src = r.preview
+      audio.currentTime = 0
+      // A tap is a user gesture, so the preview plays with sound straight away.
+      audio.play().catch(() => markPreviewMissing())
+    } else {
+      audio.removeAttribute('src')
+      markPreviewMissing()
     }
+    syncPlaying()
+  }
 
-    const langEl = $('[data-studio-lang]')
-    if (langEl) {
-      langEl.textContent = data.lang?.[L] || data.lang?.en || ''
+  function togglePlay() {
+    if (!audio || current < 0) return
+    if (audio.paused) audio.play().catch(() => markPreviewMissing())
+    else audio.pause()
+  }
+
+  function closePlayer() {
+    if (audio) {
+      audio.pause()
+      audio.removeAttribute('src')
+      audio.load()
     }
+    current = -1
+    renderPlayer()
+    syncPlaying()
+  }
 
-    const fill = $('[data-studio-bar-fill]')
-    if (fill) {
-      fill.style.width = `${Math.round(overall)}%`
-      fill.classList.toggle('is-almost-green', stepIndex >= 2 || overall >= 60)
-    }
+  function markPreviewMissing() {
+    const sub = $('[data-player] .player-sub')
+    if (sub) sub.textContent = t('Preview unavailable · listen below', 'Extrait indisponible · écoute ci-dessous')
+    syncPlaying()
+  }
 
-    const stepsRoot = $('[data-studio-steps]')
-    if (stepsRoot) {
-      stepsRoot.innerHTML = ''
-      steps.forEach((key, i) => {
-        const li = document.createElement('li')
-        li.className = 'studio-step'
-        if (i < stepIndex) li.classList.add('is-done')
-        if (i === stepIndex) li.classList.add('is-current')
-        li.setAttribute('data-step', key)
-        const label = STUDIO_STEP_LABELS[key]?.[L] || STUDIO_STEP_LABELS[key]?.en || key
-        li.innerHTML = `<span>${label}</span>`
-        stepsRoot.appendChild(li)
+  function renderPlayer() {
+    const box = $('[data-player]')
+    if (!box) return
+    const r = releases()[current]
+    box.hidden = !r
+    document.body.classList.toggle('player-on', !!r)
+    if (!r) return
+    const art = $('[data-player-art]', box)
+    art.src = artFor(r)
+    withArtFallback(art, r)
+    $('[data-player-title]', box).textContent = r.title
+    $('.player-sub', box).textContent = t('30s preview', 'Extrait 30s')
+    $('[data-player-links]', box).innerHTML = platformLinks(r)
+      .map(([name, url]) => `<a class="chip" href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${name}</a>`)
+      .join('')
+    $('[data-player-progress]', box).style.width = '0%'
+  }
+
+  function syncPlaying() {
+    const playing = isPlaying()
+    $('[data-player]')?.classList.toggle('is-playing', playing)
+    const toggle = $('[data-player-toggle]')
+    toggle?.setAttribute('aria-label', playing ? t('Pause', 'Pause') : t('Play', 'Lecture'))
+
+    $$('[data-track]').forEach((row) => {
+      const on = Number(row.getAttribute('data-track')) === current && playing
+      row.classList.toggle('is-playing', on)
+      $$('[data-play]', row).forEach((b) => {
+        b.classList.toggle('is-playing', on)
+        b.setAttribute('aria-label', `${on ? t('Pause', 'Pause') : t('Play', 'Écouter')} ${row.dataset.title}`)
       })
-    }
+    })
 
-    const note = $('[data-studio-note]')
-    if (note) {
-      note.textContent = data.note?.[L] || data.note?.en || ''
-    }
+    $$('[data-orbit-song]').forEach((n) => {
+      n.classList.toggle('is-active', Number(n.getAttribute('data-orbit-song')) === current)
+    })
 
-    const updated = $('[data-studio-updated]')
-    if (updated && data.updated) {
-      updated.setAttribute('datetime', data.updated)
-      try {
-        updated.textContent = new Intl.DateTimeFormat(L === 'fr' ? 'fr-CA' : 'en-CA', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        }).format(new Date(`${data.updated}T12:00:00`))
-      } catch {
-        updated.textContent = data.updated
+    const core = $('[data-orbit-core]')
+    core?.classList.toggle('is-playing', playing)
+    const corePlay = $('[data-core-play]')
+    if (corePlay) {
+      const latest = releases()[releases().length - 1]
+      corePlay.setAttribute(
+        'aria-label',
+        playing ? t('Pause', 'Pause') : `${t('Play', 'Écouter')} ${releases()[current]?.title || latest?.title || ''}`,
+      )
+    }
+    if (!hovering) showCore(current >= 0 ? current : null)
+  }
+
+  function initPlayer() {
+    if (!audio) return
+    audio.addEventListener('play', syncPlaying)
+    audio.addEventListener('pause', syncPlaying)
+    audio.addEventListener('ended', syncPlaying)
+    audio.addEventListener('error', () => {
+      if (current >= 0 && audio.getAttribute('src')) markPreviewMissing()
+    })
+    audio.addEventListener('timeupdate', () => {
+      const bar = $('[data-player-progress]')
+      if (bar && audio.duration) bar.style.width = `${(audio.currentTime / audio.duration) * 100}%`
+    })
+    $('[data-player-toggle]')?.addEventListener('click', togglePlay)
+    $('[data-player-close]')?.addEventListener('click', closePlayer)
+    $('[data-play-latest]')?.addEventListener('click', () => play(releases().length - 1))
+    $('[data-core-play]')?.addEventListener('click', () => {
+      if (current >= 0) togglePlay()
+      else play(releases().length - 1)
+    })
+  }
+
+  /* ——— Hero proof row ——— */
+  function renderProof() {
+    const list = releases()
+    const out = $('[data-proof-out]')
+    if (out) out.textContent = String(list.length)
+    const b = brewing()
+    const s = studioState(b)
+    const next = $('[data-proof-next]')
+    const step = $('[data-proof-step]')
+    if (next && step) {
+      next.closest('li').hidden = !b
+      if (b) {
+        next.textContent = pad(b.number)
+        step.textContent = t(`${stepLabel(s.steps[s.stepIndex]).toLowerCase()} now`, `en ${stepLabel(s.steps[s.stepIndex]).toLowerCase()}`)
       }
     }
+    const latest = list[list.length - 1]
+    const label = $('[data-play-latest-label]')
+    if (label && latest) label.textContent = `${t('Play', 'Écouter')} ${latest.title}`
+  }
+
+  /* ——— The orbit ——— */
+  const RADIUS = 42 // % of the stage; matches r=168 in the 400 viewBox
+  let hovering = false
+
+  function slotPosition(i, goal) {
+    const angle = (Math.PI * 2 * i) / goal - Math.PI / 2
+    return { x: 50 + RADIUS * Math.cos(angle), y: 50 + RADIUS * Math.sin(angle) }
+  }
+
+  function showCore(index) {
+    const core = $('[data-orbit-core]')
+    if (!core) return
+    const img = $('[data-core-img]', core)
+    const title = $('[data-core-title]', core)
+    const sub = $('[data-core-sub]', core)
+    const r = index == null ? null : releases()[index]
+    const src = r ? artFor(r) : 'media/portrait-circle.webp'
+    if (r) {
+      title.textContent = r.title
+      sub.textContent =
+        index === current && isPlaying()
+          ? t('Now playing', 'En écoute')
+          : `${t('Song', 'Chanson')} ${pad(r.number || index + 1)} · ${t('tap to play', 'touche pour écouter')}`
+    } else {
+      title.textContent = `${releases().length} / ${journeyGoal()}`
+      sub.textContent = t('songs out · toward the show', 'sorties · vers le spectacle')
+    }
+    if (img.getAttribute('src') === src) return
+    core.classList.add('is-swapping')
+    window.setTimeout(() => {
+      img.src = src
+      img.classList.toggle('is-face', !r)
+      if (r) withArtFallback(img, r)
+      core.classList.remove('is-swapping')
+    }, reduceMotion ? 0 : 180)
   }
 
   function renderOrbit() {
     const orbit = $('[data-orbit]')
     const nodesRoot = $('[data-orbit-nodes]')
-    const countEl = $('[data-orbit-count]')
     if (!orbit || !nodesRoot) return
 
     const goal = journeyGoal()
     const list = releases()
     const out = list.length
-    const yearPct = yearProgressThrough2026()
-    const L = lang()
+    const b = brewing()
+    const s = studioState(b)
 
-    if (countEl) countEl.textContent = `${out} / ${goal}`
-
-    renderDaysLeft()
-
-    // Bright arc follows released dots: from first song through the last lit node.
-    // One song → small tick; 3 songs → arc ends on the 3rd dot (not past it).
-    // All songs out → full ring.
-    const songPct = goal ? out / goal : 0
-    const arcPct =
-      !goal || out <= 0
-        ? 0
-        : out >= goal
-          ? 1
-          : out === 1
-            ? 0.035
-            : (out - 1) / goal
-    const yearRing = $('[data-orbit-year]')
-    if (yearRing) {
-      const radius = 42
-      const circ = 2 * Math.PI * radius
-      yearRing.style.strokeDasharray = `${circ}`
-      yearRing.style.strokeDashoffset = `${circ}`
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          yearRing.style.strokeDashoffset = `${circ * (1 - arcPct)}`
-        })
-      })
-    }
-
-    orbit.style.setProperty('--year-progress', String(yearPct))
-    orbit.style.setProperty('--song-progress', String(songPct))
-    orbit.style.setProperty('--arc-progress', String(arcPct))
-
-    const traveler = $('[data-orbit-traveler]')
-    if (traveler) {
-      // Year clock — moves around the ring toward Dec 31, 2026.
-      traveler.style.setProperty('--travel-angle', `${yearPct * 360}deg`)
-      traveler.title = L === 'fr' ? 'Position dans l’année 2026' : 'Place in the year 2026'
-    }
-
-    // Only place dots for songs released so far (no empty waiting nodes).
     nodesRoot.innerHTML = ''
-    const cx = 50
-    const cy = 50
-    const radius = 42
-    list.forEach((release, i) => {
-      const angle = (Math.PI * 2 * i) / goal - Math.PI / 2
-      const x = cx + radius * Math.cos(angle)
-      const y = cy + radius * Math.sin(angle)
+    for (let i = 0; i < goal; i += 1) {
+      const { x, y } = slotPosition(i, goal)
+      const li = document.createElement('li')
+      li.style.setProperty('--x', `${x}%`)
+      li.style.setProperty('--y', `${y}%`)
 
-      const node = document.createElement('button')
-      node.type = 'button'
-      node.className = 'orbit-node lit'
-      node.style.left = `${x}%`
-      node.style.top = `${y}%`
+      let node
+      if (i < out) {
+        const r = list[i]
+        node = document.createElement('button')
+        node.type = 'button'
+        node.className = 'node node-out'
+        node.setAttribute('data-orbit-song', String(i))
+        node.setAttribute('aria-label', `${t('Play', 'Écouter')} ${r.title}`)
+        const img = document.createElement('img')
+        img.src = artFor(r)
+        img.alt = ''
+        img.width = 64
+        img.height = 64
+        withArtFallback(img, r)
+        node.append(img)
+        const num = document.createElement('span')
+        num.className = 'node-num'
+        num.setAttribute('aria-hidden', 'true')
+        num.textContent = String(i + 1)
+        node.append(num)
+        node.addEventListener('click', () => (i === current ? togglePlay() : play(i)))
+        const peek = () => {
+          hovering = true
+          showCore(i)
+        }
+        const unpeek = () => {
+          hovering = false
+          showCore(current >= 0 ? current : null)
+        }
+        node.addEventListener('pointerenter', peek)
+        node.addEventListener('pointerleave', unpeek)
+        node.addEventListener('focus', peek)
+        node.addEventListener('blur', unpeek)
+      } else if (b && i === Number(b.number) - 1) {
+        node = document.createElement('a')
+        node.href = '#studio'
+        node.className = 'node node-studio'
+        node.style.setProperty('--p', String(s.overall))
+        node.textContent = pad(i + 1)
+        const label = `${b.title}: ${t('in the studio', 'en studio')} · ${stepLabel(s.steps[s.stepIndex]).toLowerCase()}`
+        node.setAttribute('aria-label', label)
+        const tip = document.createElement('span')
+        tip.className = 'node-tip'
+        tip.setAttribute('aria-hidden', 'true')
+        tip.textContent = label
+        if (x > 50) tip.classList.add('to-left')
+        node.append(tip)
+      } else {
+        node = document.createElement('span')
+        node.className = 'node node-future'
+        node.setAttribute('aria-label', `${t('Song', 'Chanson')} ${i + 1}: ${t('still to come', 'à venir')}`)
+        node.setAttribute('role', 'img')
+      }
       node.style.setProperty('--i', String(i))
-      node.setAttribute('data-orbit-song', String(i))
-      node.setAttribute('aria-label', release.title || `Song ${i + 1}`)
-      node.title = release.title || String(i + 1)
-
-      const label = document.createElement('span')
-      label.className = 'orbit-node-label'
-      label.textContent = release.title || String(i + 1)
-      node.appendChild(label)
-
-      node.addEventListener('click', (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        openPreviewModal(i)
-      })
-
-      nodesRoot.appendChild(node)
-    })
-
-    // Lonely in-studio dot (next song only). Does not change released nodes.
-    const brewing = window.LAOUSMAIL_IN_PRODUCTION
-    if (brewing && brewing.title && Number(brewing.number) > out && Number(brewing.number) <= goal) {
-      const bi = Number(brewing.number) - 1
-      const angle = (Math.PI * 2 * bi) / goal - Math.PI / 2
-      const x = cx + radius * Math.cos(angle)
-      const y = cy + radius * Math.sin(angle)
-      const node = document.createElement('button')
-      node.type = 'button'
-      node.className = 'orbit-node brewing'
-      node.style.left = `${x}%`
-      node.style.top = `${y}%`
-      node.style.setProperty('--i', String(bi))
-      node.setAttribute('data-orbit-brewing', '1')
-      node.setAttribute(
-        'aria-label',
-        L === 'fr'
-          ? `${brewing.title}: en studio`
-          : `${brewing.title}: in the studio`,
-      )
-      node.title = brewing.title
-
-      const label = document.createElement('span')
-      label.className = 'orbit-node-label'
-      label.textContent = brewing.title
-      node.appendChild(label)
-
-      node.addEventListener('click', (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        const making = $('[data-making]') || document.getElementById('making')
-        if (making) making.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      })
-
-      nodesRoot.appendChild(node)
-      window.setTimeout(() => node.classList.add('in'), 180 + out * 110)
+      li.append(node)
+      nodesRoot.append(li)
     }
 
-    $$('.orbit-node.lit', nodesRoot).forEach((n, i) => {
-      n.classList.remove('in')
-      window.setTimeout(() => n.classList.add('in'), 180 + i * 110)
+    // Lit arc runs from song 1 to the latest release; a thinner ember arc reaches the studio song.
+    const per = 1000 / goal
+    const arcLen = out <= 0 ? 0 : out >= goal ? 1000 : (out - 1) * per
+    const arc = $('[data-orbit-arc]')
+    const studioArc = $('[data-orbit-studio-arc]')
+    const draw = () => {
+      if (arc) arc.style.strokeDasharray = `${arcLen} 1000`
+      if (studioArc) {
+        if (b && out > 0) {
+          const start = (out - 1) * per
+          const len = (Number(b.number) - out) * per
+          studioArc.style.strokeDasharray = `0 ${start} ${len} 1000`
+        } else {
+          studioArc.style.strokeDasharray = '0 1000'
+        }
+      }
+    }
+    if (orbit.classList.contains('is-in')) draw()
+    else orbit._draw = draw
+
+    showCore(current >= 0 ? current : null)
+    syncPlaying()
+  }
+
+  function initOrbitObserve() {
+    const orbit = $('[data-orbit]')
+    if (!orbit) return
+    const go = () => {
+      orbit.classList.add('is-in')
+      requestAnimationFrame(() => orbit._draw?.())
+    }
+    if (reduceMotion || !('IntersectionObserver' in window)) return go()
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        io.disconnect()
+        go()
+      }
+    })
+    io.observe(orbit)
+  }
+
+  /* ——— Track list ——— */
+  function renderTracks() {
+    const root = $('[data-tracks]')
+    if (!root) return
+    const L = lang()
+    const list = releases()
+    const goal = journeyGoal()
+    const b = brewing()
+    const s = studioState(b)
+    root.innerHTML = list
+      .map((r, i) => {
+        const links = platformLinks(r)
+          .map(([name, url]) => `<a class="chip" href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${name}</a>`)
+          .join('')
+        const playIcons =
+          '<svg class="i-play" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>' +
+          '<svg class="i-pause" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>'
+        return `<li class="track" data-track="${i}" data-title="${escapeHtml(r.title)}">
+          <div class="track-art">
+            <img src="${escapeHtml(artFor(r))}" alt="" width="104" height="104" loading="lazy" decoding="async" data-art="${i}" />
+            <button type="button" class="track-play" data-play="${i}">${playIcons}</button>
+          </div>
+          <div>
+            <span class="track-num">${pad(r.number || i + 1)} · ${escapeHtml(r.year || '')}</span>
+            <h3>${escapeHtml(r.title)}</h3>
+            <p class="track-meta"><b>${escapeHtml(r.lang?.[L] || r.lang?.en || '')}</b> · ${escapeHtml(r.description?.[L] || r.description?.en || '')}</p>
+          </div>
+          <div class="track-actions">
+            <button type="button" class="play-btn" data-play="${i}">${playIcons}</button>
+            <div class="track-listen">${links}</div>
+          </div>
+        </li>`
+      })
+      .join('')
+
+    if (b) {
+      root.insertAdjacentHTML(
+        'beforeend',
+        `<li class="track track-studio">
+          <div class="track-art" aria-hidden="true">${pad(b.number)}</div>
+          <div>
+            <span class="track-num">${pad(b.number)} · ${escapeHtml(t('In the studio', 'En studio'))}</span>
+            <h3>${escapeHtml(b.title)}</h3>
+            <p class="track-meta">${escapeHtml(stepLabel(s.steps[s.stepIndex]))} · <a href="#studio">${escapeHtml(t('See where it is', 'Voir où elle en est'))}</a></p>
+          </div>
+        </li>`,
+      )
+    }
+    const done = list.length + (b ? 1 : 0)
+    if (done < goal) {
+      root.insertAdjacentHTML(
+        'beforeend',
+        `<li class="track-rest">${pad(done + 1)}–${goal} · ${escapeHtml(
+          t(`${goal - done} more songs still to come.`, `${goal - done} autres chansons à venir.`),
+        )}</li>`,
+      )
+    }
+
+    $$('img[data-art]', root).forEach((img) => withArtFallback(img, list[Number(img.dataset.art)]))
+    $$('[data-play]', root).forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const i = Number(btn.getAttribute('data-play'))
+        if (i === current) togglePlay()
+        else play(i)
+      })
+    })
+    syncPlaying()
+  }
+
+  /* ——— Studio: progress builds as you scroll ——— */
+  let studioShown = 1
+
+  function renderStudio() {
+    const root = $('[data-studio]')
+    const b = brewing() || window.LAOUSMAIL_IN_PRODUCTION
+    const s = studioState(b)
+    if (!root) return
+    if (!b || !b.title || !s) {
+      root.hidden = true
+      return
+    }
+    root.hidden = false
+    const L = lang()
+    $('[data-studio-number]').textContent = pad(b.number || s.stepIndex + 1)
+    $('[data-studio-title]').textContent = b.title
+    const tr = b.translation?.[L] || b.translation?.en || ''
+    $('[data-studio-translation]').textContent = tr ? `“${tr}”` : ''
+    $('[data-studio-lang]').textContent = b.lang?.[L] || b.lang?.en || ''
+    $('[data-studio-note]').textContent = b.note?.[L] || b.note?.en || ''
+    const updated = $('[data-studio-updated]')
+    if (updated && b.updated) {
+      updated.setAttribute('datetime', b.updated)
+      try {
+        updated.textContent = new Intl.DateTimeFormat(L === 'fr' ? 'fr-CA' : 'en-CA', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }).format(new Date(`${b.updated}T12:00:00`))
+      } catch {
+        updated.textContent = b.updated
+      }
+    }
+    const stepsRoot = $('[data-studio-steps]')
+    stepsRoot.innerHTML = s.steps
+      .map((key) => `<li data-step="${escapeHtml(key)}">${escapeHtml(stepLabel(key))}<small></small></li>`)
+      .join('')
+    paintStudio(studioShown)
+  }
+
+  /** f = 0…1: how much of the real progress to show (scroll-driven when pinned). */
+  function paintStudio(f) {
+    const root = $('[data-studio]')
+    const s = studioState(brewing() || window.LAOUSMAIL_IN_PRODUCTION)
+    if (!root || !s) return
+    studioShown = f
+    const shown = s.overall * f
+    root.style.setProperty('--p', f.toFixed(3))
+    $('[data-studio-fill]')?.style.setProperty('--fill', (shown * 100).toFixed(1))
+    const n = s.steps.length
+    $$('[data-studio-steps] li', root).forEach((li, i) => {
+      const local = Math.min(1, Math.max(0, shown * n - i))
+      const isCurrent = i === s.stepIndex && f > 0.98
+      const done = local >= 1 || (i < s.stepIndex && f > 0.98)
+      li.className = done ? 'is-done' : isCurrent || (local > 0 && local < 1) ? 'is-current' : ''
+      const small = $('small', li)
+      if (done) small.textContent = t('Done', 'Fait')
+      else if (local > 0) small.textContent = `${Math.round(local * 100)}%`
+      else small.textContent = t('Next', 'À venir')
     })
   }
 
-  function observeReveals(scope = document) {
-    const nodes = $$('.reveal', scope)
+  function initStudioScroll() {
+    const root = $('[data-studio]')
+    if (!root || reduceMotion) return
+    const tall = window.matchMedia('(min-height: 640px)')
+    let raf = 0
+
+    function update() {
+      raf = 0
+      if (!root.classList.contains('is-pinned')) return
+      const rect = root.getBoundingClientRect()
+      const travel = rect.height - window.innerHeight
+      const p = travel > 0 ? Math.min(1, Math.max(0, -rect.top / (travel * 0.8))) : 1
+      paintStudio(p)
+    }
+
+    function setMode() {
+      root.classList.toggle('is-pinned', tall.matches)
+      if (tall.matches) update()
+      else paintStudio(1)
+    }
+
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!raf) raf = requestAnimationFrame(update)
+      },
+      { passive: true },
+    )
+    tall.addEventListener?.('change', setMode)
+    setMode()
+  }
+
+  /* ——— What people say ——— */
+  let voices = []
+  let showAll = false
+
+  function normalizeVoices(list) {
+    if (!Array.isArray(list)) return []
+    const out = []
+    const seen = new Set()
+    for (const raw of list) {
+      if (!raw || typeof raw !== 'object') continue
+      const id = String(raw.id || '').trim()
+      const username = String(raw.username || '').trim().replace(/^@/, '')
+      const text = String(raw.commentText || '').replace(/\s+/g, ' ').trim()
+      if (!id || !username || !text || seen.has(id)) continue
+      seen.add(id)
+      out.push({
+        id,
+        name: (String(raw.displayName || '').trim() || `@${username}`).slice(0, 48),
+        avatar: safeAvatarSrc(raw.profileImageUrl),
+        text: text.slice(0, 500),
+        featured: !!raw.featured,
+      })
+    }
+    return out
+  }
+
+  function renderWall() {
+    const wall = $('[data-wall]')
+    const section = $('#voices')
+    if (!wall || !section) return
+    if (!voices.length) {
+      section.hidden = true
+      return
+    }
+    section.hidden = false
+    const featured = voices.filter((v) => v.featured)
+    const list = showAll || !featured.length ? voices : featured
+    wall.innerHTML = list
+      .map((v) => {
+        const initial = escapeHtml(v.name.replace(/^@/, '').charAt(0).toUpperCase() || '?')
+        const avatar = v.avatar
+          ? `<img class="voice-avatar" src="${escapeHtml(v.avatar)}" alt="" width="36" height="36" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-initial="${initial}" />`
+          : `<span class="voice-avatar is-fallback" aria-hidden="true">${initial}</span>`
+        return `<li class="voice">${avatar}<div><span class="voice-name" dir="auto">${escapeHtml(v.name)}</span><p class="voice-text" dir="auto">${escapeHtml(v.text)}</p></div></li>`
+      })
+      .join('')
+    $$('img.voice-avatar', wall).forEach((img) =>
+      img.addEventListener('error', () => {
+        const fb = document.createElement('span')
+        fb.className = 'voice-avatar is-fallback'
+        fb.setAttribute('aria-hidden', 'true')
+        fb.textContent = img.dataset.initial || '?'
+        img.replaceWith(fb)
+      }),
+    )
+    const toggle = $('[data-wall-toggle]')
+    const label = $('[data-wall-toggle-label]')
+    const hasMore = featured.length && voices.length > featured.length
+    if (toggle) toggle.hidden = !hasMore
+    if (toggle) toggle.setAttribute('aria-expanded', showAll ? 'true' : 'false')
+    if (label) {
+      label.textContent = showAll
+        ? t('Show the selection', 'Voir la sélection')
+        : t(`Show all ${voices.length}, unfiltered`, `Voir les ${voices.length}, non filtrés`)
+    }
+    const warn = $('[data-wall-warn]')
+    if (warn) warn.hidden = !showAll
+  }
+
+  function initWall() {
+    const toggle = $('[data-wall-toggle]')
+    toggle?.addEventListener('click', () => {
+      showAll = !showAll
+      renderWall()
+      if (!showAll) $('#voices')?.scrollIntoView({ block: 'start' })
+    })
+    fetch('fan-reactions/reactions.json', { headers: { Accept: 'application/json' } })
+      .then((res) => {
+        if (!res.ok) throw new Error(`status ${res.status}`)
+        return res.json()
+      })
+      .then((data) => {
+        voices = normalizeVoices(data?.reactions)
+        renderWall()
+      })
+      .catch(() => {
+        const section = $('#voices')
+        if (section) section.hidden = true
+      })
+  }
+
+  /* ——— Menu ——— */
+  function initMenu() {
+    const menu = $('[data-menu]')
+    const openBtn = $('[data-nav-open]')
+    if (!menu || !openBtn) return
+
+    const focusables = () => $$('a[href], button:not([disabled])', menu)
+
+    function open() {
+      menu.hidden = false
+      document.body.classList.add('menu-open')
+      openBtn.setAttribute('aria-expanded', 'true')
+      focusables()[0]?.focus()
+    }
+
+    function close(restoreFocus = true) {
+      menu.hidden = true
+      document.body.classList.remove('menu-open')
+      openBtn.setAttribute('aria-expanded', 'false')
+      if (restoreFocus) openBtn.focus()
+    }
+
+    openBtn.addEventListener('click', () => (menu.hidden ? open() : close()))
+    $$('[data-menu-link]', menu).forEach((a) => a.addEventListener('click', () => close(false)))
+    window.matchMedia('(min-width: 861px)').addEventListener?.('change', (e) => {
+      if (e.matches && !menu.hidden) close(false)
+    })
+
+    document.addEventListener('keydown', (e) => {
+      if (menu.hidden) return
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        close()
+        return
+      }
+      if (e.key !== 'Tab') return
+      const items = [openBtn, ...focusables()]
+      const first = items[0]
+      const last = items[items.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    })
+  }
+
+  /* ——— Reveal on scroll ——— */
+  function observeReveals() {
+    const nodes = $$('.reveal')
     if (!nodes.length) return
     if (!('IntersectionObserver' in window)) {
       nodes.forEach((n) => n.classList.add('in'))
@@ -631,88 +794,24 @@
           }
         }
       },
-      { threshold: 0.16, rootMargin: '0px 0px -6% 0px' },
+      { threshold: 0.12, rootMargin: '0px 0px -6% 0px' },
     )
     nodes.forEach((n) => observer.observe(n))
   }
 
-  function initOrbitObserve() {
-    const orbit = $('[data-orbit]')
-    if (!orbit) return
-    // Hero orbit is in-view on load — breathe life immediately.
-    orbit.classList.add('is-alive')
+  function renderAll() {
+    renderProof()
     renderOrbit()
-  }
-
-  /* ——— Mobile menu ——— */
-  function initMenu() {
-    const menu = $('[data-menu]')
-    const openBtn = $('[data-nav-open]')
-    const closeBtn = $('[data-nav-close]')
-    if (!menu || !openBtn) return
-
-    const focusables = () =>
-      $$('a[href], button:not([disabled])', menu).filter((el) => !el.hasAttribute('disabled'))
-
-    function open() {
-      menu.hidden = false
-      document.body.classList.add('menu-open')
-      openBtn.setAttribute('aria-expanded', 'true')
-      closeBtn?.focus()
+    renderTracks()
+    renderStudio()
+    renderWall()
+    if (current >= 0) {
+      const wasPlaying = isPlaying()
+      const box = $('[data-player]')
+      const sub = box && $('.player-sub', box)
+      if (sub) sub.textContent = t('30s preview', 'Extrait 30s')
+      if (!wasPlaying) syncPlaying()
     }
-
-    function close() {
-      menu.hidden = true
-      document.body.classList.remove('menu-open')
-      openBtn.setAttribute('aria-expanded', 'false')
-      openBtn.focus()
-    }
-
-    openBtn.addEventListener('click', open)
-    closeBtn?.addEventListener('click', close)
-    $$('[data-menu-link]', menu).forEach((a) => a.addEventListener('click', close))
-
-    document.addEventListener('keydown', (e) => {
-      if (menu.hidden) return
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        close()
-        return
-      }
-      if (e.key !== 'Tab') return
-      const items = focusables()
-      if (!items.length) return
-      const first = items[0]
-      const last = items[items.length - 1]
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault()
-        last.focus()
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault()
-        first.focus()
-      }
-    })
-  }
-
-  /* ——— Pointer glow (desktop only) ——— */
-  function initPointerGlow() {
-    const glow = $('.pointer-glow')
-    if (!glow) return
-    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    let raf = 0
-    window.addEventListener(
-      'pointermove',
-      (e) => {
-        if (raf) return
-        raf = requestAnimationFrame(() => {
-          document.documentElement.style.setProperty('--mx', `${e.clientX}px`)
-          document.documentElement.style.setProperty('--my', `${e.clientY}px`)
-          raf = 0
-        })
-      },
-      { passive: true },
-    )
   }
 
   /* ——— Fan form (MailerLite / Formspree / custom) ——— */
@@ -791,6 +890,7 @@
       document.body.appendChild(script)
     })
   }
+
 
   function initJoinForm() {
     const form = $('#join-form')
@@ -902,431 +1002,15 @@
     if (el) el.textContent = String(new Date().getFullYear())
   }
 
-  /* ——— First-visit UI hints with motion ——— */
-  function initUiHints() {
-    const tip = $('[data-ui-hint]')
-    const tipText = $('[data-ui-hint-text]')
-    const tipOk = $('[data-ui-hint-ok]')
-    if (!tip || !tipText) return
-
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const key = 'laousmail-hints-v3'
-    let seen = {}
-    try {
-      seen = JSON.parse(localStorage.getItem(key) || '{}') || {}
-    } catch {
-      seen = {}
-    }
-
-    const copy = {
-      orbit: {
-        en: 'Each lit point is a released song. Tap a name to preview it. The circle fills by end of 2026.',
-        fr: 'Chaque point allumé est une chanson sortie. Touche un nom pour l’extrait. Le cercle se remplit fin 2026.',
-      },
-      comments: {
-        en: 'Real comments from the videos land here every few moments. Scroll to read older ones. Hide anytime, then reopen from Comments.',
-        fr: 'De vrais commentaires sous les vidéos arrivent ici au fil des secondes. Fais défiler pour lire les plus anciens. Réduis quand tu veux, puis rouvre via Commentaires.',
-      },
-      lang: {
-        en: 'Switch EN or FR anytime in the top bar.',
-        fr: 'Passe en EN ou FR à tout moment dans la barre du haut.',
-      },
-      live: {
-        en: 'Live is about the first show with this original music. Leave your email to hear first.',
-        fr: 'Live parle du premier spectacle avec cette musique originale. Laisse ton email pour être prévenu·e en premier.',
-      },
-      preview: {
-        en: 'Tap a song for a 30s preview, then pick where to listen.',
-        fr: 'Touche une chanson pour 30s d’extrait, puis choisis où écouter.',
-      },
-      platforms: {
-        en: 'Choose Spotify, YouTube, or Apple Music. Opens that app.',
-        fr: 'Choisis Spotify, YouTube ou Apple Music. Ça ouvre l’app.',
-      },
-    }
-
-    const defaultQueue = ['orbit', 'comments', 'lang', 'preview']
-    let queue = defaultQueue.slice()
-    let active = null
-    let timer = 0
-
-    function persist() {
-      try {
-        localStorage.setItem(key, JSON.stringify(seen))
-      } catch {
-        /* private mode */
-      }
-    }
-
-    function mark(id) {
-      seen[id] = 1
-      persist()
-    }
-
-    function clearPulse() {
-      $$('.hint-pulse').forEach((el) => el.classList.remove('hint-pulse'))
-    }
-
-    function hideTip() {
-      tip.hidden = true
-      clearPulse()
-      active = null
-    }
-
-    function showTip(id) {
-      let target = $(`[data-hint="${id}"]`)
-      const text = copy[id]
-      if (!text || seen[id]) return false
-      if (id === 'comments' && (!target || target.hidden)) {
-        target = $('[data-live-fab]') || target
-      }
-      if (!target || target.hidden) return false
-      active = id
-      tipText.textContent = text[lang()] || text.en
-      tip.hidden = false
-      tip.classList.remove('ui-hint-in')
-      void tip.offsetWidth
-      tip.classList.add('ui-hint-in')
-      clearPulse()
-      target.classList.add('hint-pulse')
-      target.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' })
-      return true
-    }
-
-    function next() {
-      window.clearTimeout(timer)
-      while (queue.length) {
-        const id = queue.shift()
-        if (showTip(id)) {
-          timer = window.setTimeout(() => {
-            mark(id)
-            hideTip()
-            timer = window.setTimeout(next, 700)
-          }, reduce ? 5200 : 4200)
-          return
-        }
-      }
-    }
-
-    function replay() {
-      window.clearTimeout(timer)
-      hideTip()
-      seen = {}
-      persist()
-      queue = defaultQueue.slice()
-      if (!seen.live) queue.push('live')
-      timer = window.setTimeout(next, reduce ? 400 : 600)
-    }
-
-    tipOk?.addEventListener('click', () => {
-      if (active) mark(active)
-      hideTip()
-      window.clearTimeout(timer)
-      timer = window.setTimeout(next, 500)
-    })
-
-    $('[data-hints-replay]')?.addEventListener('click', replay)
-
-    // Platforms hint when preview opens
-    document.addEventListener(
-      'click',
-      (e) => {
-        if (!e.target.closest?.('[data-open-preview], [data-play-track], [data-track-tab]')) return
-        if (seen.platforms) return
-        window.setTimeout(() => {
-          if (!$('[data-preview-modal]')?.open) return
-          queue.unshift('platforms')
-          if (!active) next()
-        }, 600)
-      },
-      true,
-    )
-
-    // Live section tip once the visitor reaches it
-    const liveSec = $('[data-hint="live"]')
-    if (liveSec && 'IntersectionObserver' in window) {
-      const io = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (!entry.isIntersecting || seen.live) continue
-            queue.push('live')
-            if (!active) next()
-            io.disconnect()
-            break
-          }
-        },
-        { threshold: 0.35 },
-      )
-      io.observe(liveSec)
-    }
-
-    window.setTimeout(next, reduce ? 900 : 1600)
-  }
-
-  /* ——— Live social feed: shuffled Instagram/TikTok comments, no compose ——— */
-  function initLiveSocialFeed() {
-    const rail = $('[data-live-rail]')
-    const layer = $('[data-live-comments]')
-    const minBtn = $('[data-live-minimize]')
-    const helpBtn = $('[data-live-help]')
-    const warnDetail = $('[data-live-warn-detail]')
-    const fab = $('[data-live-fab]')
-    const fabCount = $('[data-live-fab-count]')
-    if (!rail || !layer) return
-
-    const DATA_URL = 'fan-reactions/reactions.json'
-    const SPAWN_MS = 800
-    const NEAR_BOTTOM_PX = 80
-    const MAX_KEEP = 40
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-    let pool = []
-    let idx = 0
-    let minimized = false
-    let timer = 0
-    let unseen = 0
-    let started = false
-
-    try {
-      if (localStorage.getItem('laousmail-live-minimized') === '1') minimized = true
-    } catch {
-      /* private mode */
-    }
-
-    function isNearBottom() {
-      const maxScroll = layer.scrollHeight - layer.clientHeight
-      if (maxScroll <= 4) return true
-      const threshold = Math.min(NEAR_BOTTOM_PX, Math.max(28, maxScroll * 0.2))
-      return maxScroll - layer.scrollTop <= threshold
-    }
-
-    function pinToBottom() {
-      layer.scrollTop = layer.scrollHeight
-    }
-
-    function updateFab() {
-      if (!fab) return
-      if (fabCount) {
-        const n = Math.min(unseen, 99)
-        fabCount.textContent = String(n)
-        fabCount.hidden = n < 1
-      }
-      fab.classList.toggle('has-new', unseen > 0)
-      fab.hidden = !minimized
-    }
-
-    function setChrome() {
-      rail.hidden = minimized
-      rail.setAttribute('aria-hidden', minimized ? 'true' : 'false')
-      document.body.classList.toggle('live-rail-on', !minimized)
-      document.body.classList.toggle('live-rail-min', minimized)
-      if (minBtn) {
-        minBtn.setAttribute('aria-expanded', minimized ? 'false' : 'true')
-        minBtn.innerHTML = minimized
-          ? '<span data-lang="en">Open</span><span data-lang="fr">Ouvrir</span>'
-          : '<span data-lang="en">Hide</span><span data-lang="fr">Réduire</span>'
-      }
-      if (minimized && warnDetail && helpBtn) {
-        warnDetail.hidden = true
-        helpBtn.setAttribute('aria-expanded', 'false')
-      }
-      updateFab()
-    }
-
-    function setMinimized(next) {
-      minimized = !!next
-      if (!minimized) unseen = 0
-      if (minimized) {
-        window.clearTimeout(timer)
-        layer.innerHTML = ''
-      }
-      setChrome()
-      try {
-        localStorage.setItem('laousmail-live-minimized', minimized ? '1' : '0')
-      } catch {
-        /* private mode */
-      }
-      if (!minimized && started) {
-        spawn()
-        schedule()
-      }
-    }
-
-    function setHelpOpen(open) {
-      if (!warnDetail || !helpBtn) return
-      warnDetail.hidden = !open
-      helpBtn.setAttribute('aria-expanded', open ? 'true' : 'false')
-    }
-
-    function buildBubble(item) {
-      const bubble = document.createElement('div')
-      bubble.className = 'live-bubble'
-      const handle = item.handle || '@fan'
-      const name = String(item.name || '').trim()
-      const avatar = safeAvatarSrc(item.avatar)
-      const label = name || handle
-      const initial = (name || handle.replace(/^@/, '') || '?').trim().charAt(0).toUpperCase()
-      const avatarHtml = avatar
-        ? `<img class="live-avatar" src="${escapeHtml(avatar)}" alt="" width="32" height="32" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-fallback="${escapeHtml(initial)}" />`
-        : `<span class="live-avatar is-fallback" aria-hidden="true">${escapeHtml(initial)}</span>`
-      bubble.innerHTML = `<div class="live-bubble-row">${avatarHtml}<div class="live-bubble-body"><span class="live-handle" title="${escapeHtml(
-        handle,
-      )}">${escapeHtml(label)}</span><span class="live-text">${escapeHtml(item.text || '')}</span></div></div>`
-      const img = bubble.querySelector('img.live-avatar')
-      img?.addEventListener('error', () => {
-        const fb = document.createElement('span')
-        fb.className = 'live-avatar is-fallback'
-        fb.setAttribute('aria-hidden', 'true')
-        fb.textContent = img.getAttribute('data-fallback') || '?'
-        img.replaceWith(fb)
-      })
-      return bubble
-    }
-
-    function nextItem() {
-      if (!pool.length) return null
-      const item = pool[idx % pool.length]
-      idx += 1
-      if (idx >= pool.length) {
-        pool = shuffle(pool)
-        idx = 0
-      }
-      return item
-    }
-
-    function showBubble(item) {
-      if (!item) return
-      const pinBottom = isNearBottom()
-      const bubble = buildBubble(item)
-      layer.appendChild(bubble)
-      void bubble.offsetWidth
-      bubble.classList.add('in')
-
-      if (pinBottom) pinToBottom()
-
-      const life = reduce ? 16000 : 14000 + Math.random() * 4000
-      window.setTimeout(() => {
-        if (!bubble.isConnected) return
-        if (!isNearBottom()) return
-        if (layer.children.length <= 14) return
-        bubble.classList.add('out')
-        window.setTimeout(() => {
-          if (bubble.isConnected) bubble.remove()
-        }, 500)
-      }, life)
-
-      while (layer.children.length > MAX_KEEP) layer.firstChild?.remove()
-    }
-
-    function spawn() {
-      if (!started || document.hidden) return
-      if (document.body.classList.contains('menu-open') || document.body.classList.contains('preview-open')) {
-        return
-      }
-      const item = nextItem()
-      if (!item) return
-      if (minimized) {
-        unseen += 1
-        updateFab()
-        return
-      }
-      showBubble(item)
-    }
-
-    function schedule() {
-      window.clearTimeout(timer)
-      if (!started) return
-      timer = window.setTimeout(() => {
-        spawn()
-        schedule()
-      }, SPAWN_MS)
-    }
-
-    function normalize(list) {
-      if (!Array.isArray(list)) return []
-      const out = []
-      const seen = new Set()
-      for (const raw of list) {
-        if (!raw || typeof raw !== 'object') continue
-        const id = String(raw.id || '').trim()
-        const username = String(raw.username || '')
-          .trim()
-          .replace(/^@/, '')
-        const commentText = String(raw.commentText || '')
-          .replace(/\s+/g, ' ')
-          .trim()
-        if (!id || !username || !commentText) continue
-        if (seen.has(id)) continue
-        seen.add(id)
-        out.push({
-          id,
-          handle: `@${username}`.slice(0, 40),
-          name: String(raw.displayName || '').trim().slice(0, 48),
-          avatar: safeAvatarSrc(raw.profileImageUrl),
-          text: commentText.slice(0, 500),
-        })
-      }
-      return out
-    }
-
-    helpBtn?.addEventListener('click', () => {
-      setHelpOpen(!!warnDetail?.hidden)
-    })
-
-    minBtn?.addEventListener('click', () => setMinimized(!minimized))
-    fab?.addEventListener('click', () => setMinimized(false))
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        window.clearTimeout(timer)
-      } else if (started) {
-        schedule()
-      }
-    })
-
-    setChrome()
-
-    fetch(DATA_URL, { headers: { Accept: 'application/json' }, cache: 'no-store' })
-      .then((res) => {
-        if (!res.ok) throw new Error(`status ${res.status}`)
-        return res.json()
-      })
-      .then((data) => {
-        pool = shuffle(normalize(data?.reactions))
-        if (!pool.length) {
-          rail.hidden = true
-          document.body.classList.remove('live-rail-on', 'live-rail-min')
-          if (fab) fab.hidden = true
-          return
-        }
-        started = true
-        setChrome()
-        if (!minimized) {
-          spawn()
-          schedule()
-        } else {
-          schedule()
-        }
-      })
-      .catch(() => {
-        rail.hidden = true
-        document.body.classList.remove('live-rail-on', 'live-rail-min')
-        if (fab) fab.hidden = true
-      })
-  }
 
   initTheme()
+  initPlayer()
   initLang()
-  initPreviewModal()
-  renderReleases()
-  renderOrbit()
-  renderStudio()
   initOrbitObserve()
+  initStudioScroll()
+  initWall()
   observeReveals()
   initMenu()
-  initPointerGlow()
   initJoinForm()
   initYear()
-  initUiHints()
-  initLiveSocialFeed()
 })()

@@ -430,7 +430,35 @@
   <!-- ECLIPSETONE: one compact band -->
   <section class="eclipse-band" aria-labelledby="eclipse-title">
     <div class="eclipse-band-inner reveal">
-      <span class="eclipse-dot" aria-hidden="true"></span>
+      <a class="et-logo" href="https://eclipsetone.com" target="_blank" rel="noreferrer" aria-label="EclipseTone">
+        <svg class="et-mark" viewBox="0 0 64 64" width="56" height="56" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="et-crescent" x1="0.2" y1="1" x2="0.35" y2="0">
+              <stop offset="0" stop-color="#9a3a14" />
+              <stop offset="0.45" stop-color="#d4682a" />
+              <stop offset="1" stop-color="#e8a05a" />
+            </linearGradient>
+          </defs>
+          <circle cx="32" cy="32" r="31" fill="#14110e" />
+          <circle cx="32" cy="32" r="30.2" fill="none" stroke="color-mix(in srgb, #efe6da 12%, transparent)" stroke-width="0.8" />
+          <!-- Crescent hugging the left side -->
+          <path
+            fill="url(#et-crescent)"
+            d="M28.2 6.8
+               C16.2 9.2 7.4 19.4 7.4 32
+               c0 12.6 8.8 22.8 20.8 25.2
+               C21.4 52.8 15.2 43.2 15.2 32
+               S21.4 11.2 28.2 6.8Z"
+          />
+          <!-- Stylized note: head + stem + flat flag (reads as tone) -->
+          <g fill="#efe6da">
+            <ellipse cx="36.2" cy="42.4" rx="7.2" ry="5.1" transform="rotate(-28 36.2 42.4)" />
+            <rect x="41.6" y="14.5" width="2.6" height="29.2" rx="0.6" />
+            <rect x="41.6" y="14.2" width="12.4" height="2.7" rx="0.7" />
+          </g>
+        </svg>
+        <span class="et-word" aria-hidden="true">eclipse tone</span>
+      </a>
       <div>
         <h2 id="eclipse-title">
           <span data-lang="en">I also run EclipseTone.</span>

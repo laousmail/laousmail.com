@@ -489,16 +489,22 @@ main.sec > p + p {
 }
 
 .hero-title {
-  font-size: clamp(3.2rem, 8.4vw, 6.6rem);
-  line-height: 0.95;
-  letter-spacing: -0.025em;
-  max-width: 11ch;
+  font-size: clamp(3rem, 6.2vw, 5.6rem);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  max-width: 14ch;
 }
 
-.hero-title em {
+@media (max-width: 900px) {
+  .hero-title {
+    font-size: clamp(2.8rem, 11vw, 4.6rem);
+  }
+}
+
+.hero-accent {
   display: block;
-  font-style: italic;
-  font-weight: 500;
+  font-style: normal;
+  font-weight: 600;
   background: var(--grad);
   -webkit-background-clip: text;
   background-clip: text;
@@ -604,7 +610,7 @@ main.sec > p + p {
 .countdown small {
   margin-top: 0.3rem;
   color: var(--mute);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -771,7 +777,7 @@ main.sec > p + p {
 .orbit-core-text span {
   margin-top: 0.3rem;
   color: rgba(242, 233, 221, 0.75);
-  font-size: clamp(0.62rem, 2.3cqi, 0.78rem);
+  font-size: clamp(0.7rem, 2.5cqi, 0.82rem);
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -1199,7 +1205,7 @@ main.sec > p + p {
   color: var(--mute);
 }
 
-.studio-meta em {
+.studio-translation {
   font-family: var(--serif);
   font-size: 1.3rem;
   color: var(--ink);
@@ -1243,7 +1249,7 @@ main.sec > p + p {
 }
 
 .studio-steps small {
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   font-weight: 400;
   letter-spacing: 0;
   text-transform: none;
@@ -1271,11 +1277,11 @@ main.sec > p + p {
 }
 
 .studio-note p {
-  font-family: var(--serif);
-  font-style: italic;
-  font-weight: 500;
-  font-size: clamp(1.25rem, 2.3vw, 1.6rem);
-  line-height: 1.4;
+  max-width: 40rem;
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: clamp(1.08rem, 1.7vw, 1.25rem);
+  line-height: 1.65;
 }
 
 .studio-note footer {
@@ -1291,7 +1297,7 @@ main.sec > p + p {
   }
 
   .studio-note p {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
   }
 }
 
@@ -1748,8 +1754,8 @@ main.sec > p + p {
   animation-delay: calc(0.15s + var(--d, 0) * 0.14s);
 }
 
-/* The italic line keeps a slow light moving through it */
-.hero-title em {
+/* The accent line keeps a slow light moving through it */
+.hero-accent {
   background: linear-gradient(100deg, var(--hot) 0%, var(--gold) 35%, #ffe2b0 50%, var(--gold) 65%, var(--hot) 100%);
   background-size: 250% 100%;
   -webkit-background-clip: text;
@@ -1757,7 +1763,7 @@ main.sec > p + p {
   animation: shimmer 7s ease-in-out infinite alternate;
 }
 
-:root[data-theme="light"] .hero-title em {
+:root[data-theme="light"] .hero-accent {
   background-image: linear-gradient(100deg, var(--hot) 0%, var(--gold) 35%, #e07b1a 50%, var(--gold) 65%, var(--hot) 100%);
 }
 
@@ -2087,7 +2093,7 @@ main.sec > p + p {
 
 .guide-step {
   color: var(--gold);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -2341,4 +2347,14 @@ body.guide-open .orbit-spin {
   .orbit-flow {
     opacity: 0.9;
   }
+}
+
+/* No italics anywhere: keep everything upright and easy to read */
+em,
+i,
+cite,
+address,
+var,
+dfn {
+  font-style: normal;
 }

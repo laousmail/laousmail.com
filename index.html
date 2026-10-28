@@ -210,12 +210,19 @@
         <span data-lang="fr">Des chansons écrites au fil des années, enfin terminées une à une. Chacune allume le cercle. Quand il sera plein, je les emmène sur scène: le premier spectacle avec ma propre musique.</span>
       </p>
 
-      <div class="countdown hero-in" style="--d:4" data-days-left>
-        <strong data-days-left-count>0</strong>
-        <span class="countdown-label">
-          <span data-days-left-label>days left in 2026</span>
-          <small data-days-left-sub>until December 31</small>
-        </span>
+      <div class="countdown hero-in" style="--d:4" data-days-left role="timer" aria-label="Time left in 2026">
+        <div class="cd-days">
+          <strong data-cd-days>0</strong>
+          <small data-cd-days-unit>days</small>
+        </div>
+        <div class="cd-clock" aria-hidden="true">
+          <span><b data-cd-h>00</b><small data-cd-unit="h">hrs</small></span>
+          <i>:</i>
+          <span><b data-cd-m>00</b><small data-cd-unit="m">min</small></span>
+          <i>:</i>
+          <span><b data-cd-s>00</b><small data-cd-unit="s">sec</small></span>
+        </div>
+        <p class="cd-caption" data-cd-caption>left in 2026 · until December 31</p>
       </div>
 
       <div class="cta-row hero-in" style="--d:5">

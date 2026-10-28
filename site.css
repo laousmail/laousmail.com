@@ -549,6 +549,7 @@ main.sec > p + p {
 
   .countdown {
     order: 5;
+    justify-self: center;
     margin: 0 auto 1.5rem;
   }
 
@@ -563,45 +564,98 @@ main.sec > p + p {
   }
 }
 
-/* Days left until December 31 */
+/* Live countdown to the end of December 31 */
 .countdown {
-  display: inline-flex;
+  display: inline-grid;
+  grid-template-columns: auto auto;
   align-items: center;
-  gap: 0.9rem;
+  column-gap: 1.1rem;
   margin: 0 0 2rem;
-  padding: 0.7rem 1.25rem 0.7rem 1rem;
+  padding: 0.8rem 1.25rem 0.75rem;
   border: 1px solid var(--line);
   border-radius: 18px;
   background: color-mix(in srgb, var(--bg2) 80%, transparent);
 }
 
+.countdown b,
 .countdown strong {
-  min-width: 2ch;
-  font-size: clamp(2.4rem, 4.6vw, 3.2rem);
   font-weight: 300;
   line-height: 1;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
+}
+
+.cd-days,
+.cd-clock span {
+  display: grid;
+  justify-items: center;
+}
+
+.cd-days strong {
+  min-width: 2ch;
+  font-size: clamp(2.5rem, 4.8vw, 3.3rem);
   background: var(--grad);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  text-align: right;
+  text-align: center;
 }
 
-.countdown-label {
-  display: grid;
-  line-height: 1.25;
-  text-align: left;
-}
-
-.countdown-label > span {
+.countdown small {
+  margin-top: 0.3rem;
+  color: var(--mute);
+  font-size: 0.72rem;
   font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
-.countdown-label small {
+.cd-clock {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding-left: 1.1rem;
+  border-left: 1px solid var(--line);
+}
+
+.cd-clock b {
+  display: inline-block;
+  min-width: 2ch;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  text-align: center;
+}
+
+.cd-clock i {
+  font-style: normal;
+  font-size: clamp(1.4rem, 2.6vw, 1.8rem);
+  line-height: 1.1;
+  color: var(--mute);
+  animation: blink 1s steps(2, start) infinite;
+}
+
+[data-cd-s] {
+  color: var(--gold);
+}
+
+.cd-caption {
+  grid-column: 1 / -1;
+  margin-top: 0.55rem;
   color: var(--mute);
   font-size: 0.85rem;
+  text-align: center;
+}
+
+/* Each change drops in */
+.tick {
+  animation: tick 0.35s var(--ease);
+}
+
+@keyframes tick {
+  from { opacity: 0.2; transform: translateY(-35%); }
+}
+
+@keyframes blink {
+  to { opacity: 0.35; }
 }
 
 /* ——— Orbit ——— */

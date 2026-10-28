@@ -314,6 +314,43 @@
     if (label && latest) label.textContent = `${t('Play', 'Écouter')} ${latest.title}`
   }
 
+  /* ——— Days left until December 31 ——— */
+  let countedUp = false
+
+  function daysLeft() {
+    const year = Number(window.LAOUSMAIL_JOURNEY?.year) || new Date().getFullYear()
+    // End of December 31 in the visitor's own time zone; today counts as a day left
+    const end = new Date(year, 11, 31, 23, 59, 59, 999).getTime()
+    const now = Date.now()
+    return { year, days: now >= end ? 0 : Math.ceil((end - now) / 86400000) }
+  }
+
+  function renderDaysLeft() {
+    const root = $('[data-days-left]')
+    const count = $('[data-days-left-count]')
+    if (!root || !count) return
+    const { year, days } = daysLeft()
+    root.hidden = days <= 0
+    if (days <= 0) return
+    $('[data-days-left-label]').textContent =
+      days === 1 ? t(`day left in ${year}`, `jour restant en ${year}`) : t(`days left in ${year}`, `jours restants en ${year}`)
+    $('[data-days-left-sub]').textContent = t('until December 31', 'jusqu’au 31 décembre')
+    root.setAttribute('aria-label', t(`${days} days left in ${year}`, `${days} jours restants en ${year}`))
+    if (countedUp || reduceMotion) {
+      count.textContent = String(days)
+      return
+    }
+    // Count up once, as the hero arrives
+    countedUp = true
+    const start = performance.now() + 700
+    const tick = (now) => {
+      const k = Math.min(1, Math.max(0, (now - start) / 1300))
+      count.textContent = String(Math.round(days * (1 - Math.pow(1 - k, 3))))
+      if (k < 1) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  }
+
   /* ——— The orbit ——— */
   const RADIUS = 42 // % of the stage; matches r=168 in the 400 viewBox
   let hovering = false
@@ -1033,6 +1070,7 @@
 
   function renderAll() {
     renderProof()
+    renderDaysLeft()
     renderOrbit()
     renderTracks()
     renderStudio()

@@ -508,7 +508,7 @@ main.sec > p + p {
 
 .hero-lead {
   max-width: 32rem;
-  margin: 1.5rem 0 2rem;
+  margin: 1.5rem 0 1.5rem;
   color: var(--mute);
   font-size: clamp(1.08rem, 1.5vw, 1.2rem);
 }
@@ -547,8 +547,13 @@ main.sec > p + p {
     margin: 1.75rem auto 1.5rem;
   }
 
-  .hero .cta-row {
+  .countdown {
     order: 5;
+    margin: 0 auto 1.5rem;
+  }
+
+  .hero .cta-row {
+    order: 6;
     justify-content: center;
   }
 
@@ -556,6 +561,47 @@ main.sec > p + p {
     inset: 10rem 0 auto;
     height: 34rem;
   }
+}
+
+/* Days left until December 31 */
+.countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin: 0 0 2rem;
+  padding: 0.7rem 1.25rem 0.7rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bg2) 80%, transparent);
+}
+
+.countdown strong {
+  min-width: 2ch;
+  font-size: clamp(2.4rem, 4.6vw, 3.2rem);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-align: right;
+}
+
+.countdown-label {
+  display: grid;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.countdown-label > span {
+  font-weight: 500;
+}
+
+.countdown-label small {
+  color: var(--mute);
+  font-size: 0.85rem;
 }
 
 /* ——— Orbit ——— */

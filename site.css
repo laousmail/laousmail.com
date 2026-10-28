@@ -1517,14 +1517,34 @@ main.sec > p + p {
   background: var(--bg2);
 }
 
-.eclipse-dot {
-  width: 3.25rem;
-  height: 3.25rem;
+.et-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+}
+
+.et-mark {
+  flex: 0 0 auto;
+  width: 3.5rem;
+  height: 3.5rem;
+  display: block;
   border-radius: 50%;
-  background: var(--bg);
   box-shadow:
-    0 0 0 2px var(--hot),
-    0 0 24px 2px color-mix(in srgb, var(--hot) 55%, transparent);
+    0 0 0 1px color-mix(in srgb, var(--hot) 35%, transparent),
+    0 0 22px color-mix(in srgb, var(--hot) 28%, transparent);
+}
+
+.et-word {
+  font-family: "Outfit", system-ui, sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.15rem, 2.4vw, 1.45rem);
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--ink) 92%, #efe6da);
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .eclipse-band h2 {
@@ -1540,6 +1560,10 @@ main.sec > p + p {
 @media (max-width: 760px) {
   .eclipse-band-inner {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .et-logo {
+    width: 100%;
   }
 }
 
@@ -2005,13 +2029,13 @@ main.sec > p + p {
   animation: breathe 6s ease-in-out infinite alternate;
 }
 
-.eclipse-dot {
+.et-mark {
   animation: corona 4s ease-in-out infinite alternate;
 }
 
 @keyframes corona {
-  from { box-shadow: 0 0 0 2px var(--hot), 0 0 14px 0 color-mix(in srgb, var(--hot) 40%, transparent); }
-  to { box-shadow: 0 0 0 2px var(--gold), 0 0 30px 4px color-mix(in srgb, var(--hot) 65%, transparent); }
+  from { box-shadow: 0 0 0 1px color-mix(in srgb, var(--hot) 35%, transparent), 0 0 14px 0 color-mix(in srgb, var(--hot) 28%, transparent); }
+  to { box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 55%, transparent), 0 0 28px 2px color-mix(in srgb, var(--hot) 48%, transparent); }
 }
 
 /* ——————————————————————————————————————————————

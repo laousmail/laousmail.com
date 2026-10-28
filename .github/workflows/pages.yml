@@ -19,9 +19,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Publish only what the site needs. Fan comments (fan-reactions/,
+      # avatars/), comments-api/ and scripts/ stay in the repo but off the site.
+      - name: Stage public files
+        run: |
+          mkdir _site
+          cp -r index.html privacy.html site.css artist.js releases.js config.js \
+            favicon.svg media CNAME robots.txt sitemap.xml .nojekyll _site/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
   deploy:
     needs: build
     runs-on: ubuntu-latest

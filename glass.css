@@ -1,0 +1,339 @@
+/* laousmail.com — glass edition.
+   Loaded after site.css. Every surface becomes frosted glass over a slow,
+   drifting field of ember and gold. Text contrast is kept high: glass panels
+   are tinted dark enough (or light enough, in light mode) to read on. */
+
+:root,
+:root[data-theme="dark"] {
+  --glass: rgba(20, 13, 10, 0.4);
+  --glass-strong: rgba(16, 11, 9, 0.62);
+  --glass-edge: rgba(255, 226, 190, 0.2);
+  --glass-shine: rgba(255, 255, 255, 0.09);
+  --glass-shadow: 0 10px 40px -12px rgba(0, 0, 0, 0.6);
+  --blob-a: rgba(255, 106, 19, 0.55);
+  --blob-b: rgba(255, 179, 71, 0.4);
+  --blob-c: rgba(176, 44, 82, 0.48);
+  --blob-d: rgba(255, 140, 60, 0.32);
+  --blob-e: rgba(255, 120, 40, 0.3);
+}
+
+:root[data-theme="light"] {
+  --glass: rgba(255, 252, 247, 0.55);
+  --glass-strong: rgba(255, 252, 247, 0.8);
+  --glass-edge: rgba(255, 255, 255, 0.75);
+  --glass-shine: rgba(255, 255, 255, 0.55);
+  --glass-shadow: 0 10px 40px -16px rgba(120, 60, 20, 0.28);
+  --blob-a: rgba(255, 140, 70, 0.4);
+  --blob-b: rgba(255, 200, 120, 0.45);
+  --blob-c: rgba(230, 110, 140, 0.3);
+  --blob-d: rgba(255, 170, 90, 0.3);
+  --blob-e: rgba(255, 190, 140, 0.3);
+  /* Deeper gold so small gold labels stay readable on the warm glass */
+  --gold: #9a4606;
+}
+
+/* ——— The field behind the glass ——— */
+html {
+  background: var(--bg);
+}
+
+body {
+  background: transparent;
+  isolation: isolate;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  pointer-events: none;
+}
+
+body::before {
+  inset: -25%;
+  background:
+    radial-gradient(32% 28% at 18% 22%, var(--blob-a), transparent 70%),
+    radial-gradient(30% 26% at 82% 18%, var(--blob-b), transparent 70%),
+    radial-gradient(36% 32% at 70% 78%, var(--blob-c), transparent 70%),
+    radial-gradient(28% 26% at 22% 82%, var(--blob-d), transparent 70%),
+    radial-gradient(26% 24% at 55% 45%, var(--blob-e), transparent 70%);
+  filter: blur(30px);
+  animation: field 38s ease-in-out infinite alternate;
+}
+
+/* A faint grain so the glass has something to catch */
+body::after {
+  inset: 0;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes field {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  50% { transform: translate3d(4%, -3%, 0) rotate(8deg) scale(1.06); }
+  100% { transform: translate3d(-3%, 4%, 0) rotate(-6deg) scale(1.02); }
+}
+
+/* Sections that painted their own background let the field through */
+.studio {
+  background: transparent;
+  border-block: 0;
+}
+
+.hero-corona,
+.show-glow {
+  opacity: 0.7;
+}
+
+/* ——— One glass recipe, shared by every surface ——— */
+.nav,
+.proof li,
+.countdown,
+.orbit-stage::before,
+.track,
+.track-rest,
+.studio-inner,
+.beats li,
+.join,
+.eclipse-band-inner,
+.foot,
+.player,
+.guide,
+.menu,
+.chip,
+.btn.ghost,
+.lang,
+.mode,
+.nav-open,
+.guide-replay,
+.studio-cue {
+  background:
+    linear-gradient(160deg, var(--glass-shine), transparent 45%),
+    var(--glass);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-shine);
+}
+
+/* Surfaces you read long text on get a denser glass */
+.studio-inner,
+.guide,
+.menu,
+.player {
+  background:
+    linear-gradient(160deg, var(--glass-shine), transparent 45%),
+    var(--glass-strong);
+}
+
+/* ——— Header ——— */
+.nav {
+  border-width: 0 0 1px;
+  box-shadow: 0 8px 30px -18px rgba(0, 0, 0, 0.5);
+}
+
+/* ——— Hero ——— */
+.proof {
+  gap: 0.6rem;
+}
+
+.proof li {
+  padding: 0.55rem 0.9rem;
+  border-radius: 14px;
+}
+
+.countdown {
+  border-radius: 22px;
+}
+
+.cd-clock {
+  border-left-color: var(--glass-edge);
+}
+
+/* The orbit sits on a frosted disc */
+.orbit-stage::before {
+  content: "";
+  position: absolute;
+  inset: 3%;
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.orbit-core,
+.orbit-halo,
+.orbit-comet,
+.orbit-spin {
+  z-index: 1;
+}
+
+.guide-replay {
+  z-index: 3;
+}
+
+/* ——— Music ——— */
+.tracks {
+  gap: 0.8rem;
+  border-top: 0;
+}
+
+.track {
+  padding: 1rem clamp(1rem, 2.5vw, 1.5rem);
+  border-radius: 22px;
+}
+
+.track.is-playing {
+  border-color: color-mix(in srgb, var(--gold) 55%, transparent);
+}
+
+.track-rest {
+  padding: 1rem 1.4rem;
+  border-radius: 22px;
+}
+
+.track-studio .track-art {
+  background: none;
+}
+
+/* ——— Studio ——— */
+.studio-inner {
+  padding: clamp(1.4rem, 3.5vw, 2.6rem);
+  border-radius: 28px;
+}
+
+.studio-bar {
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+.studio-cue {
+  color: var(--ink);
+}
+
+/* ——— Story ——— */
+.story-photo {
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-shadow);
+}
+
+.beats {
+  gap: 0.9rem;
+}
+
+.beats li {
+  padding: 1.4rem 1.5rem;
+  border-radius: 22px;
+}
+
+/* ——— The show ——— */
+.join {
+  padding: clamp(1.1rem, 3vw, 1.6rem);
+  border-radius: 26px;
+}
+
+.join-row {
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  border-color: var(--glass-edge);
+}
+
+.eclipse-band-inner {
+  border-radius: 28px;
+}
+
+/* ——— Footer ——— */
+.foot {
+  margin: 0 var(--gutter) calc(1rem + env(safe-area-inset-bottom));
+  border-radius: 24px;
+}
+
+/* ——— Buttons and chips ——— */
+.btn.ghost {
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-shine);
+}
+
+.btn.ghost:hover {
+  border-color: var(--gold);
+}
+
+.chip {
+  box-shadow: inset 0 1px 0 var(--glass-shine);
+}
+
+.chip:hover {
+  border-color: var(--gold);
+  box-shadow: inset 0 1px 0 var(--glass-shine);
+}
+
+.btn:not(.ghost),
+.pill {
+  box-shadow:
+    0 10px 30px -10px color-mix(in srgb, var(--hot) 70%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.lang {
+  padding: 3px;
+}
+
+.lang button[aria-pressed="true"] {
+  background: var(--ink);
+}
+
+/* ——— Floating pieces ——— */
+.player {
+  border-radius: 26px;
+}
+
+.player-links .chip {
+  background: color-mix(in srgb, var(--bg) 40%, transparent);
+}
+
+.guide {
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--glass-edge));
+}
+
+.guide-arrow {
+  background: var(--glass-strong);
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--glass-edge));
+}
+
+.menu {
+  border-width: 1px 0 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Browsers without backdrop blur get solid tinted panels instead */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .nav,
+  .proof li,
+  .countdown,
+  .track,
+  .track-rest,
+  .studio-inner,
+  .beats li,
+  .join,
+  .eclipse-band-inner,
+  .foot,
+  .player,
+  .guide,
+  .menu {
+    background: var(--glass-strong);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
+}
+
+/* Glass costs more to draw on small screens: lighter blur there */
+@media (max-width: 600px) {
+  .track,
+  .beats li,
+  .proof li,
+  .chip {
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    backdrop-filter: blur(10px) saturate(140%);
+  }
+}

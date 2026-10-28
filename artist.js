@@ -105,15 +105,6 @@
     }
   }
 
-  /** Local avatars/… paths or https image URLs only (no javascript:). */
-  function safeAvatarSrc(url) {
-    const raw = String(url || '').trim()
-    if (!raw) return ''
-    if (/^avatars\/[A-Za-z0-9._-]+\.(jpe?g|png|webp|gif)$/i.test(raw)) return raw
-    if (isSafeHttps(raw) && /\.(jpe?g|png|webp|gif)(\?|$)/i.test(raw)) return raw
-    return ''
-  }
-
   const pad = (n) => String(n).padStart(2, '0')
 
   /* ——— Data ——— */
@@ -637,97 +628,6 @@
     setMode()
   }
 
-  /* ——— What people say ——— */
-  let voices = []
-  let showAll = false
-
-  function normalizeVoices(list) {
-    if (!Array.isArray(list)) return []
-    const out = []
-    const seen = new Set()
-    for (const raw of list) {
-      if (!raw || typeof raw !== 'object') continue
-      const id = String(raw.id || '').trim()
-      const username = String(raw.username || '').trim().replace(/^@/, '')
-      const text = String(raw.commentText || '').replace(/\s+/g, ' ').trim()
-      if (!id || !username || !text || seen.has(id)) continue
-      seen.add(id)
-      out.push({
-        id,
-        name: (String(raw.displayName || '').trim() || `@${username}`).slice(0, 48),
-        avatar: safeAvatarSrc(raw.profileImageUrl),
-        text: text.slice(0, 500),
-        featured: !!raw.featured,
-      })
-    }
-    return out
-  }
-
-  function renderWall() {
-    const wall = $('[data-wall]')
-    const section = $('#voices')
-    if (!wall || !section) return
-    if (!voices.length) {
-      section.hidden = true
-      return
-    }
-    section.hidden = false
-    const featured = voices.filter((v) => v.featured)
-    const list = showAll || !featured.length ? voices : featured
-    wall.innerHTML = list
-      .map((v) => {
-        const initial = escapeHtml(v.name.replace(/^@/, '').charAt(0).toUpperCase() || '?')
-        const avatar = v.avatar
-          ? `<img class="voice-avatar" src="${escapeHtml(v.avatar)}" alt="" width="36" height="36" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-initial="${initial}" />`
-          : `<span class="voice-avatar is-fallback" aria-hidden="true">${initial}</span>`
-        return `<li class="voice">${avatar}<div><span class="voice-name" dir="auto">${escapeHtml(v.name)}</span><p class="voice-text" dir="auto">${escapeHtml(v.text)}</p></div></li>`
-      })
-      .join('')
-    $$('img.voice-avatar', wall).forEach((img) =>
-      img.addEventListener('error', () => {
-        const fb = document.createElement('span')
-        fb.className = 'voice-avatar is-fallback'
-        fb.setAttribute('aria-hidden', 'true')
-        fb.textContent = img.dataset.initial || '?'
-        img.replaceWith(fb)
-      }),
-    )
-    const toggle = $('[data-wall-toggle]')
-    const label = $('[data-wall-toggle-label]')
-    const hasMore = featured.length && voices.length > featured.length
-    if (toggle) toggle.hidden = !hasMore
-    if (toggle) toggle.setAttribute('aria-expanded', showAll ? 'true' : 'false')
-    if (label) {
-      label.textContent = showAll
-        ? t('Show the selection', 'Voir la sélection')
-        : t(`Show all ${voices.length}, unfiltered`, `Voir les ${voices.length}, non filtrés`)
-    }
-    const warn = $('[data-wall-warn]')
-    if (warn) warn.hidden = !showAll
-  }
-
-  function initWall() {
-    const toggle = $('[data-wall-toggle]')
-    toggle?.addEventListener('click', () => {
-      showAll = !showAll
-      renderWall()
-      if (!showAll) $('#voices')?.scrollIntoView({ block: 'start' })
-    })
-    fetch('fan-reactions/reactions.json', { headers: { Accept: 'application/json' } })
-      .then((res) => {
-        if (!res.ok) throw new Error(`status ${res.status}`)
-        return res.json()
-      })
-      .then((data) => {
-        voices = normalizeVoices(data?.reactions)
-        renderWall()
-      })
-      .catch(() => {
-        const section = $('#voices')
-        if (section) section.hidden = true
-      })
-  }
-
   /* ——— Menu ——— */
   function initMenu() {
     const menu = $('[data-menu]')
@@ -804,7 +704,6 @@
     renderOrbit()
     renderTracks()
     renderStudio()
-    renderWall()
     if (current >= 0) {
       const wasPlaying = isPlaying()
       const box = $('[data-player]')
@@ -1008,7 +907,6 @@
   initLang()
   initOrbitObserve()
   initStudioScroll()
-  initWall()
   observeReveals()
   initMenu()
   initJoinForm()

@@ -628,12 +628,6 @@ main.sec > p + p {
   object-fit: cover;
 }
 
-/* Lift my face above the play button and label */
-.orbit-core-img.is-face {
-  height: 122%;
-  margin-top: -24%;
-}
-
 .orbit-core-img {
   transition: opacity 0.35s var(--ease), transform 0.6s var(--ease);
 }
@@ -769,7 +763,7 @@ main.sec > p + p {
   min-height: 44px;
   box-shadow:
     0 0 0 2px var(--gold),
-    0 0 0 5px var(--bg),
+    0 0 0 4px var(--bg),
     0 0 22px 2px color-mix(in srgb, var(--gold) 45%, transparent);
 }
 
@@ -791,7 +785,7 @@ main.sec > p + p {
 .node-out.is-active {
   box-shadow:
     0 0 0 2px var(--hot),
-    0 0 0 5px var(--bg),
+    0 0 0 4px var(--bg),
     0 0 30px 6px color-mix(in srgb, var(--hot) 60%, transparent);
 }
 
@@ -962,6 +956,7 @@ main.sec > p + p {
 
 .track-listen {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.35rem;
 }
 
@@ -1170,6 +1165,7 @@ main.sec > p + p {
 }
 
 .studio-note {
+  visibility: var(--note-vis, visible);
   margin: 0;
   padding: 0 0 0 1.5rem;
   border-left: 2px solid var(--hot);
@@ -1627,7 +1623,500 @@ main.sec > p + p {
     transition-delay: 0s !important;
   }
 
-  .js .reveal {
+  .js .reveal,
+  .js .hero-in,
+  .js .tracks .track {
+    opacity: 1;
+    transform: none;
+  }
+
+  .orbit-comet,
+  .guide-target-ring {
+    display: none;
+  }
+}
+
+/* ——————————————————————————————————————————————
+   Motion
+   —————————————————————————————————————————————— */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Hero arrives in sequence */
+.js .hero-in {
+  opacity: 0;
+  animation: rise 0.9s var(--ease) forwards;
+  animation-delay: calc(0.15s + var(--d, 0) * 0.14s);
+}
+
+/* The italic line keeps a slow light moving through it */
+.hero-title em {
+  background: linear-gradient(100deg, var(--hot) 0%, var(--gold) 35%, #ffe2b0 50%, var(--gold) 65%, var(--hot) 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer 7s ease-in-out infinite alternate;
+}
+
+:root[data-theme="light"] .hero-title em {
+  background-image: linear-gradient(100deg, var(--hot) 0%, var(--gold) 35%, #e07b1a 50%, var(--gold) 65%, var(--hot) 100%);
+}
+
+@keyframes shimmer {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+/* Orbit: a comet travels the ring, an inner dotted ring turns, the core breathes */
+.orbit-dash {
+  fill: none;
+  stroke: color-mix(in srgb, var(--gold) 30%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 1.5 9;
+  transform-origin: 200px 200px;
+  animation: turn 90s linear infinite reverse;
+}
+
+@keyframes turn {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes comet {
+  from { transform: rotate(0deg) translateY(-42cqi); }
+  to { transform: rotate(360deg) translateY(-42cqi); }
+}
+
+.orbit-comet {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* The dot itself travels: rotate around the centre, then step out to the ring */
+.orbit-comet i {
+  position: absolute;
+  left: calc(50% - 3.5px);
+  top: calc(50% - 3.5px);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffe2b0;
+  transform: rotate(0deg) translateY(-42cqi);
+  animation: comet 26s linear infinite;
+  box-shadow:
+    0 0 8px 2px var(--gold),
+    0 0 22px 6px color-mix(in srgb, var(--hot) 55%, transparent);
+}
+
+.orbit-halo {
+  position: absolute;
+  inset: 20%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side, transparent 88%, color-mix(in srgb, var(--hot) 45%, transparent) 94%, transparent 100%);
+  animation: breathe 5s ease-in-out infinite alternate;
+}
+
+@keyframes breathe {
+  from { opacity: 0.45; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1.03); }
+}
+
+/* While a song plays, a light ring spins around the core */
+.orbit.is-playing .orbit-halo {
+  inset: 20.5%;
+  background: conic-gradient(from 0deg, transparent 0 55%, var(--gold) 80%, var(--hot) 100%);
+  -webkit-mask: radial-gradient(closest-side, transparent 95%, #000 96%);
+  mask: radial-gradient(closest-side, transparent 95%, #000 96%);
+  opacity: 1;
+  animation: turn 3.2s linear infinite;
+}
+
+.node-out.is-active::after {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--gold);
+  animation: turn 6s linear infinite;
+}
+
+/* Nodes are tappable: lift a touch on hover */
+.orbit.is-in .node-out {
+  transition:
+    opacity 0.5s var(--ease) calc(0.25s + var(--i) * 0.09s),
+    transform 0.35s var(--ease);
+}
+
+/* Equalizer in the mini-player */
+.eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 0.75rem;
+  margin-right: 0.35rem;
+  vertical-align: -1px;
+}
+
+.eq i {
+  width: 3px;
+  height: 30%;
+  border-radius: 1px;
+  background: var(--gold);
+}
+
+.player.is-playing .eq i {
+  animation: eq 0.9s ease-in-out infinite alternate;
+}
+
+.player.is-playing .eq i:nth-child(2) { animation-delay: -0.3s; }
+.player.is-playing .eq i:nth-child(3) { animation-delay: -0.6s; }
+.player.is-playing .eq i:nth-child(4) { animation-delay: -0.15s; }
+
+@keyframes eq {
+  from { height: 25%; }
+  to { height: 100%; }
+}
+
+/* Track rows rise one after another */
+.js .tracks .track {
+  opacity: 0;
+}
+
+.js .tracks.in .track {
+  animation: rise 0.7s var(--ease) both;
+  animation-delay: calc(var(--n, 0) * 0.1s);
+}
+
+.track-art img {
+  transition: transform 0.6s var(--ease);
+}
+
+.track:hover .track-art img,
+.track.is-playing .track-art img {
+  transform: scale(1.06);
+}
+
+.track.is-playing .track-play {
+  background: rgba(7, 6, 5, 0.5);
+}
+
+/* Story beats follow each other in; the photo settles */
+.beats li.reveal:nth-child(2) { transition-delay: 0.08s; }
+.beats li.reveal:nth-child(3) { transition-delay: 0.16s; }
+.beats li.reveal:nth-child(4) { transition-delay: 0.24s; }
+
+.story-photo img {
+  transform: scale(1.08);
+  transition: transform 1.8s var(--ease);
+}
+
+.story-photo.in img {
+  transform: none;
+}
+
+/* Eyebrows draw a short line in when their section arrives */
+.sec-head .eyebrow::before,
+.show-inner > .eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 1px;
+  margin-right: 0;
+  vertical-align: middle;
+  background: currentColor;
+  transition: width 0.8s var(--ease) 0.2s, margin 0.8s var(--ease) 0.2s;
+}
+
+.sec-head.in .eyebrow::before,
+.studio .eyebrow::before,
+.show-inner > .eyebrow.in::before {
+  width: 1.5rem;
+  margin-right: 0.6rem;
+}
+
+.sec-head.center .eyebrow::before {
+  display: none;
+}
+
+/* Studio bar: light runs along the filled part; the current step pulses */
+.studio-bar i {
+  background: linear-gradient(90deg, var(--hot), var(--gold), #ffe2b0, var(--gold), var(--hot));
+  background-size: 200% 100%;
+  animation: shimmer 2.8s linear infinite alternate;
+}
+
+.studio-steps li {
+  position: relative;
+}
+
+.studio-steps .is-current {
+  padding-left: 1rem;
+}
+
+.studio-steps .is-current::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--hot);
+  box-shadow: 0 0 0 0 var(--hot);
+  animation: ping 1.8s ease-out infinite;
+}
+
+@keyframes ping {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--hot) 70%, transparent); }
+  100% { box-shadow: 0 0 0 10px transparent; }
+}
+
+/* Buttons: a sheen crosses on hover */
+.btn,
+.pill {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.btn:not(.ghost)::after,
+.pill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.7s var(--ease);
+}
+
+.btn:not(.ghost):hover::after,
+.pill:hover::after {
+  transform: translateX(120%);
+}
+
+.show-glow {
+  animation: breathe 6s ease-in-out infinite alternate;
+}
+
+.eclipse-dot {
+  animation: corona 4s ease-in-out infinite alternate;
+}
+
+@keyframes corona {
+  from { box-shadow: 0 0 0 2px var(--hot), 0 0 14px 0 color-mix(in srgb, var(--hot) 40%, transparent); }
+  to { box-shadow: 0 0 0 2px var(--gold), 0 0 30px 4px color-mix(in srgb, var(--hot) 65%, transparent); }
+}
+
+/* ——————————————————————————————————————————————
+   Guide (first visit + "How it works")
+   —————————————————————————————————————————————— */
+.guide-replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  margin: 0.4rem auto 0;
+  padding: 0 0.9rem 0 0.4rem;
+  border: 0;
+  border-radius: 99px;
+  background: none;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.orbit-caption > span {
+  display: block;
+}
+
+.guide-replay > span[aria-hidden] {
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--gold);
+  color: var(--gold);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.guide-replay:hover > span[aria-hidden] {
+  background: var(--gold);
+  color: var(--on);
+}
+
+.guide {
+  position: fixed;
+  z-index: 90;
+  width: min(20rem, calc(100vw - 1.5rem));
+  padding: 1rem 1.1rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line));
+  border-radius: 18px;
+  background: var(--bg2);
+  box-shadow: var(--shadow), 0 0 40px -12px color-mix(in srgb, var(--hot) 45%, transparent);
+  animation: guide-in 0.35s var(--ease);
+}
+
+@keyframes guide-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+}
+
+.guide-arrow {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: var(--bg2);
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line));
+  transform: rotate(45deg);
+}
+
+.guide[data-side="below"] .guide-arrow {
+  top: -8px;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.guide[data-side="above"] .guide-arrow {
+  bottom: -8px;
+  border-left: 0;
+  border-top: 0;
+}
+
+.guide-step {
+  color: var(--gold);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.guide-text {
+  margin-top: 0.35rem;
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.guide-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+.guide-skip,
+.guide-next {
+  min-height: 44px;
+  border: 0;
+  border-radius: 99px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.guide-skip {
+  padding: 0 0.4rem;
+  background: none;
+  color: var(--mute);
+}
+
+.guide-skip:hover {
+  color: var(--ink);
+}
+
+.guide-next {
+  padding: 0 1.15rem;
+  background: var(--grad);
+  color: var(--on);
+}
+
+/* The element a tip is about gets a pulsing ring */
+.guide-target-ring {
+  position: fixed;
+  z-index: 89;
+  border-radius: 999px;
+  pointer-events: none;
+  box-shadow: 0 0 0 2px var(--gold);
+  animation: target 1.6s ease-out infinite;
+}
+
+@keyframes target {
+  0% { box-shadow: 0 0 0 2px var(--gold), 0 0 0 0 color-mix(in srgb, var(--gold) 60%, transparent); }
+  100% { box-shadow: 0 0 0 2px var(--gold), 0 0 0 14px transparent; }
+}
+
+/* ——— Small phones: give the orbit the full width so songs never touch ——— */
+@media (max-width: 420px) {
+  .orbit {
+    width: calc(100% + 2 * var(--gutter) - 6px);
+    max-width: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .node-out {
+    box-shadow:
+      0 0 0 2px var(--gold),
+      0 0 0 3px var(--bg),
+      0 0 16px 1px color-mix(in srgb, var(--gold) 45%, transparent);
+  }
+}
+
+/* Studio: a scroll cue that fades out as the song builds (only while pinned) */
+.studio-cue {
+  display: none;
+}
+
+.studio.is-pinned .studio-cue {
+  position: absolute;
+  left: 50%;
+  bottom: calc(1.25rem + var(--player-room, 0px));
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: max-content;
+  max-width: calc(100% - 2rem);
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: var(--bg);
+  color: var(--mute);
+  font-size: 0.9rem;
+  pointer-events: none;
+  transform: translateX(-50%);
+  opacity: calc(1 - var(--p) * 3);
+  visibility: var(--cue-vis, visible);
+}
+
+.studio-cue-arrow {
+  color: var(--gold);
+  animation: nudge 1.4s ease-in-out infinite;
+}
+
+@keyframes nudge {
+  0%, 100% { transform: translateY(-2px); }
+  50% { transform: translateY(3px); }
+}
+
+.studio.is-pinned .studio-pin {
+  padding-bottom: calc(2rem + var(--player-room, 0px));
+}
+
+/* Reduced motion, part 2: rules above this line start some things hidden for their entrance */
+@media (prefers-reduced-motion: reduce) {
+  .js .hero-in,
+  .js .tracks .track {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .story-photo img {
     transform: none;
   }
 }

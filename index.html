@@ -192,23 +192,23 @@
     <div class="hero-corona" aria-hidden="true"></div>
 
     <div class="hero-copy">
-      <ul class="proof" aria-label="Where the project is">
+      <ul class="proof hero-in" style="--d:0" aria-label="Where the project is">
         <li><b data-proof-out>3</b><span data-lang="en">songs out</span><span data-lang="fr">chansons sorties</span></li>
         <li><b data-proof-next>04</b><span data-proof-step></span></li>
         <li><b>Kabyle</b><span data-lang="en">R&amp;B · soul</span><span data-lang="fr">R&amp;B · soul</span></li>
       </ul>
 
-      <h1 id="hero-title" class="hero-title">
+      <h1 id="hero-title" class="hero-title hero-in" style="--d:1">
         <span data-lang="en">15 songs <em>before the show.</em></span>
         <span data-lang="fr">15 chansons <em>avant le spectacle.</em></span>
       </h1>
 
-      <p class="hero-lead">
+      <p class="hero-lead hero-in" style="--d:3">
         <span data-lang="en">Songs I wrote over the years, finally finished one by one. Each one lights up the circle. When it’s full, I take them on stage: the first show with my own music.</span>
         <span data-lang="fr">Des chansons écrites au fil des années, enfin terminées une à une. Chacune allume le cercle. Quand il sera plein, je les emmène sur scène: le premier spectacle avec ma propre musique.</span>
       </p>
 
-      <div class="cta-row">
+      <div class="cta-row hero-in" style="--d:4">
         <button class="btn" type="button" data-play-latest>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
           <span data-play-latest-label>Play TAFAT</span>
@@ -218,7 +218,7 @@
     </div>
 
     <!-- The orbit -->
-    <figure class="orbit" data-orbit>
+    <figure class="orbit hero-in" style="--d:2" data-orbit>
       <div class="orbit-stage">
         <svg class="orbit-svg" viewBox="0 0 400 400" aria-hidden="true">
           <defs>
@@ -227,13 +227,16 @@
               <stop offset="1" stop-color="var(--gold)" />
             </linearGradient>
           </defs>
+          <circle class="orbit-dash" cx="200" cy="200" r="132" />
           <circle class="orbit-track" cx="200" cy="200" r="168" />
           <circle class="orbit-arc" data-orbit-arc cx="200" cy="200" r="168" pathLength="1000" stroke="url(#orbit-grad)" />
           <circle class="orbit-studio-arc" data-orbit-studio-arc cx="200" cy="200" r="168" pathLength="1000" />
         </svg>
 
+        <div class="orbit-comet" aria-hidden="true"><i></i></div>
+        <div class="orbit-halo" aria-hidden="true"></div>
         <div class="orbit-core" data-orbit-core>
-          <img class="orbit-core-img is-face" data-core-img src="media/portrait-circle.webp" alt="" width="160" height="160" />
+          <img class="orbit-core-img" data-core-img src="media/portrait-core.webp" alt="" width="720" height="720" />
           <div class="orbit-core-shade" aria-hidden="true"></div>
           <div class="orbit-core-text">
             <button type="button" class="orbit-core-play" data-core-play aria-label="Play">
@@ -252,6 +255,10 @@
       <figcaption class="orbit-caption">
         <span data-lang="en">Tap a lit song to play it. The glowing one is in the studio now.</span>
         <span data-lang="fr">Touche une chanson allumée pour l’écouter. Celle qui brille est en studio.</span>
+        <button type="button" class="guide-replay" data-guide-replay>
+          <span aria-hidden="true">?</span>
+          <span data-lang="en">How it works</span><span data-lang="fr">Comment ça marche</span>
+        </button>
       </figcaption>
     </figure>
   </section>
@@ -287,6 +294,11 @@
         </div>
         <ol class="studio-steps" data-studio-steps></ol>
 
+        <p class="studio-cue" aria-hidden="true">
+          <span class="studio-cue-arrow">↓</span>
+          <span data-lang="en">Keep scrolling: the song comes together as you go.</span>
+          <span data-lang="fr">Continue de défiler: la chanson se construit au fil du défilement.</span>
+        </p>
         <blockquote class="studio-note" data-studio-note-wrap>
           <p data-studio-note></p>
           <footer>
@@ -435,6 +447,7 @@
   <img class="player-art" data-player-art src="" alt="" width="48" height="48" />
   <div class="player-info">
     <strong data-player-title></strong>
+    <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
     <span class="player-sub"><span data-lang="en">30s preview</span><span data-lang="fr">Extrait 30s</span></span>
     <div class="player-time" aria-hidden="true"><i data-player-progress></i></div>
   </div>
@@ -446,6 +459,17 @@
   <button type="button" class="player-close" data-player-close aria-label="Close player">×</button>
 </div>
 <audio data-audio preload="none" playsinline></audio>
+
+<!-- First-visit guide: one tip at a time, pointing at the thing it explains -->
+<div class="guide" data-guide hidden role="dialog" aria-modal="false" aria-labelledby="guide-text">
+  <span class="guide-arrow" data-guide-arrow aria-hidden="true"></span>
+  <p class="guide-step" data-guide-step></p>
+  <p class="guide-text" id="guide-text" data-guide-text></p>
+  <div class="guide-actions">
+    <button type="button" class="guide-skip" data-guide-skip></button>
+    <button type="button" class="guide-next" data-guide-next></button>
+  </div>
+</div>
 
 <script src="config.js"></script>
 <script src="releases.js"></script>

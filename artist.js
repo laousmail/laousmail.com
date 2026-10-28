@@ -194,6 +194,7 @@
       markPreviewMissing()
     }
     syncPlaying()
+    guide.onPlay()
   }
 
   function togglePlay() {
@@ -225,7 +226,7 @@
     const r = releases()[current]
     box.hidden = !r
     document.body.classList.toggle('player-on', !!r)
-    if (!r) return
+    if (!r) return relayoutStudio()
     const art = $('[data-player-art]', box)
     art.src = artFor(r)
     withArtFallback(art, r)
@@ -235,6 +236,7 @@
       .map(([name, url]) => `<a class="chip" href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${name}</a>`)
       .join('')
     $('[data-player-progress]', box).style.width = '0%'
+    relayoutStudio()
   }
 
   function syncPlaying() {
@@ -258,6 +260,7 @@
 
     const core = $('[data-orbit-core]')
     core?.classList.toggle('is-playing', playing)
+    $('[data-orbit]')?.classList.toggle('is-playing', playing)
     const corePlay = $('[data-core-play]')
     if (corePlay) {
       const latest = releases()[releases().length - 1]
@@ -327,7 +330,7 @@
     const title = $('[data-core-title]', core)
     const sub = $('[data-core-sub]', core)
     const r = index == null ? null : releases()[index]
-    const src = r ? artFor(r) : 'media/portrait-circle.webp'
+    const src = r ? artFor(r) : 'media/portrait-core.webp'
     if (r) {
       title.textContent = r.title
       sub.textContent =
@@ -342,7 +345,6 @@
     core.classList.add('is-swapping')
     window.setTimeout(() => {
       img.src = src
-      img.classList.toggle('is-face', !r)
       if (r) withArtFallback(img, r)
       core.classList.remove('is-swapping')
     }, reduceMotion ? 0 : 180)
@@ -482,7 +484,7 @@
         const playIcons =
           '<svg class="i-play" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>' +
           '<svg class="i-pause" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>'
-        return `<li class="track" data-track="${i}" data-title="${escapeHtml(r.title)}">
+        return `<li class="track" style="--n:${i}" data-track="${i}" data-title="${escapeHtml(r.title)}">
           <div class="track-art">
             <img src="${escapeHtml(artFor(r))}" alt="" width="104" height="104" loading="lazy" decoding="async" data-art="${i}" />
             <button type="button" class="track-play" data-play="${i}">${playIcons}</button>
@@ -582,6 +584,9 @@
     studioShown = f
     const shown = s.overall * f
     root.style.setProperty('--p', f.toFixed(3))
+    // Cue and note take turns; whichever is faded out is also hidden from layout checks and taps
+    root.style.setProperty('--cue-vis', f > 0.33 ? 'hidden' : 'visible')
+    root.style.setProperty('--note-vis', f < 0.42 ? 'hidden' : 'visible')
     $('[data-studio-fill]')?.style.setProperty('--fill', (shown * 100).toFixed(1))
     const n = s.steps.length
     $$('[data-studio-steps] li', root).forEach((li, i) => {
@@ -596,25 +601,68 @@
     })
   }
 
+  /** Re-checks whether the studio scene can pin (set up by initStudioScroll). */
+  let relayoutStudio = () => {}
+
   function initStudioScroll() {
     const root = $('[data-studio]')
     if (!root || reduceMotion) return
-    const tall = window.matchMedia('(min-height: 640px)')
     let raf = 0
+    let pending = false
 
     function update() {
       raf = 0
-      if (!root.classList.contains('is-pinned')) return
       const rect = root.getBoundingClientRect()
+      const outOfView = rect.bottom < 0 || rect.top > window.innerHeight
+      if (pending && outOfView) setMode()
+      if (!root.classList.contains('is-pinned')) return
       const travel = rect.height - window.innerHeight
       const p = travel > 0 ? Math.min(1, Math.max(0, -rect.top / (travel * 0.8))) : 1
       paintStudio(p)
     }
 
+    // Pin only when everything fits on screen, leaving room for the mini-player
     function setMode() {
-      root.classList.toggle('is-pinned', tall.matches)
-      if (tall.matches) update()
-      else paintStudio(1)
+      pending = false
+      const navH = $('.nav')?.offsetHeight || 64
+      const player = $('[data-player]')
+      const playerRoom = player && !player.hidden ? player.offsetHeight + 16 : 0
+      const inner = $('.studio-inner', root)?.offsetHeight || 0
+      const fits = inner + 48 + playerRoom <= window.innerHeight - navH
+      root.style.setProperty('--player-room', `${playerRoom}px`)
+      root.classList.toggle('is-pinned', fits)
+      if (fits) update()
+      else playOnce()
+    }
+
+    // When the scene can't pin, the progress still builds up once, as the section arrives
+    let played = false
+    let watcher = null
+    function playOnce() {
+      if (played || !('IntersectionObserver' in window)) return paintStudio(1)
+      paintStudio(0)
+      watcher?.disconnect()
+      watcher = new IntersectionObserver((entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return
+        watcher.disconnect()
+        played = true
+        const start = performance.now()
+        const step = (now) => {
+          if (root.classList.contains('is-pinned')) return
+          const k = Math.min(1, (now - start) / 1800)
+          paintStudio(1 - Math.pow(1 - k, 3))
+          if (k < 1) requestAnimationFrame(step)
+        }
+        requestAnimationFrame(step)
+      }, { threshold: 0.35 })
+      watcher.observe(root)
+    }
+
+    relayoutStudio = () => {
+      const rect = root.getBoundingClientRect()
+      // Changing the layout under the reader would make the page jump: wait until they leave
+      if (rect.bottom < 0 || rect.top > window.innerHeight) setMode()
+      else pending = true
     }
 
     window.addEventListener(
@@ -624,8 +672,271 @@
       },
       { passive: true },
     )
-    tall.addEventListener?.('change', setMode)
+    window.addEventListener('resize', setMode)
     setMode()
+  }
+
+  /* ——— Guide: a short first-visit tour of the orbit, plus one-time tips ——— */
+  const GUIDE_KEY = 'laousmail-guide-v1'
+  const guide = (() => {
+    const box = $('[data-guide]')
+    const ring = document.createElement('div')
+    ring.className = 'guide-target-ring'
+    ring.hidden = true
+    ring.setAttribute('aria-hidden', 'true')
+    document.body.append(ring)
+
+    let seen = {}
+    try {
+      const raw = localStorage.getItem(GUIDE_KEY)
+      seen = raw === 'done' ? { tour: 1, player: 1 } : JSON.parse(raw || '{}') || {}
+    } catch {
+      seen = {}
+    }
+
+    let steps = []
+    let index = 0
+    let kind = ''
+    let target = null
+    let raf = 0
+    const queue = []
+
+    function remember(key) {
+      seen[key] = 1
+      try {
+        localStorage.setItem(GUIDE_KEY, JSON.stringify(seen))
+      } catch {
+        /* private mode */
+      }
+    }
+
+    function visible(sel) {
+      return $$(sel).find((el) => {
+        const r = el.getBoundingClientRect()
+        return r.width > 0 && r.height > 0
+      })
+    }
+
+    function place() {
+      raf = 0
+      if (!box || box.hidden || !target) return
+      const r = target.getBoundingClientRect()
+      const navH = $('.nav')?.offsetHeight || 64
+      // Targets in the sticky header are always on screen; others hide behind it
+      const inNav = !!target.closest('.nav')
+      const offscreen = (!inNav && r.bottom < navH) || r.top > window.innerHeight || !r.width
+      box.style.visibility = offscreen ? 'hidden' : ''
+      ring.hidden = offscreen
+      if (offscreen) return
+
+      const pad = 6
+      const round = target.matches('.node, .orbit-core, .lang, .mode')
+      Object.assign(ring.style, {
+        left: `${r.left - pad}px`,
+        top: `${r.top - pad}px`,
+        width: `${r.width + pad * 2}px`,
+        height: `${r.height + pad * 2}px`,
+        borderRadius: round ? '999px' : '16px',
+      })
+
+      const vw = document.documentElement.clientWidth
+      const vh = window.innerHeight
+      const bw = box.offsetWidth
+      const bh = box.offsetHeight
+      const gap = 16
+      // Some tips sit beside a whole area (the orbit) instead of on top of it
+      const areaEl = steps[index]?.area && target.closest(steps[index].area)
+      let a = areaEl ? areaEl.getBoundingClientRect() : r
+      if (areaEl && vh - a.bottom - gap < bh && a.top - navH - gap < bh) a = r
+      const spaceBelow = vh - a.bottom - gap
+      const spaceAbove = inNav ? -1 : a.top - navH - gap
+      const side = spaceBelow >= bh || spaceBelow >= spaceAbove ? 'below' : 'above'
+      const top = side === 'below' ? a.bottom + gap : a.top - gap - bh
+      const cx = r.left + r.width / 2
+      const left = Math.min(Math.max(12, cx - bw / 2), vw - bw - 12)
+      box.dataset.side = side
+      box.style.left = `${left}px`
+      box.style.top = `${Math.max(inNav ? top : navH + 8, Math.min(top, vh - bh - 8))}px`
+      const arrow = $('[data-guide-arrow]', box)
+      if (arrow) arrow.style.left = `${Math.min(Math.max(16, cx - left - 7), bw - 30)}px`
+    }
+
+    function schedule() {
+      if (!raf) raf = requestAnimationFrame(place)
+    }
+
+    function onTargetClick() {
+      if (kind !== 'tour') return close()
+      const leaves = target?.matches('a[href^="#"]')
+      if (leaves || index >= steps.length - 1) finish()
+      else show(index + 1)
+    }
+
+    function show(i) {
+      index = i
+      const step = steps[i]
+      target?.removeEventListener('click', onTargetClick)
+      target = visible(step.target)
+      if (!target) {
+        // Nothing to point at (e.g. no song in the studio): skip ahead
+        if (i < steps.length - 1) return show(i + 1)
+        return finish()
+      }
+      target.addEventListener('click', onTargetClick)
+      const last = i === steps.length - 1
+      $('[data-guide-step]', box).textContent =
+        kind === 'tour' ? `${t('How it works', 'Comment ça marche')} · ${i + 1}/${steps.length}` : t('Tip', 'Astuce')
+      $('[data-guide-text]', box).textContent = step.text()
+      $('[data-guide-skip]', box).textContent = t('Skip', 'Passer')
+      $('[data-guide-skip]', box).hidden = kind !== 'tour' || last
+      $('[data-guide-next]', box).textContent = last ? t('Got it', 'Compris') : t('Next', 'Suivant')
+      box.hidden = false
+      ring.hidden = false
+      const r = target.getBoundingClientRect()
+      const areaEl = step.area && target.closest(step.area)
+      const a = areaEl ? areaEl.getBoundingClientRect() : r
+      const navH = $('.nav')?.offsetHeight || 64
+      const room = window.innerHeight - navH
+      const need = a.height + box.offsetHeight + 40
+      if (!target.closest('.nav')) {
+        if (need <= room && (a.top < navH + 8 || a.bottom + box.offsetHeight + 32 > window.innerHeight)) {
+          // Scroll so the area and its tip both fit below the header
+          window.scrollBy({ top: a.top - navH - 12, behavior: 'auto' })
+        } else if (a.top < 70 || a.bottom > window.innerHeight - 40) {
+          target.scrollIntoView({ block: 'center', behavior: 'auto' })
+        }
+      }
+      place()
+    }
+
+    function close() {
+      target?.removeEventListener('click', onTargetClick)
+      target = null
+      if (box) box.hidden = true
+      ring.hidden = true
+      if (kind && kind !== 'tour') remember(kind)
+      kind = ''
+      const next = queue.shift()
+      if (next) window.setTimeout(next, 400)
+    }
+
+    function finish() {
+      remember('tour')
+      close()
+    }
+
+    function start(k, list, focus = false) {
+      if (!box) return
+      if (kind) {
+        if (k !== 'tour') queue.push(() => !seen[k] && start(k, list))
+        return
+      }
+      kind = k
+      steps = list
+      show(0)
+      if (focus) $('[data-guide-next]', box)?.focus()
+    }
+
+    const TOUR = [
+      {
+        target: '.node-out:last-of-type, [data-orbit-nodes] li:nth-child(3) .node-out',
+        area: '.orbit-stage',
+        text: () =>
+          t(
+            'Each lit circle is a song that’s out. Tap one to hear a 30-second preview.',
+            'Chaque cercle allumé est une chanson sortie. Touche-en un pour écouter un extrait de 30 secondes.',
+          ),
+      },
+      {
+        target: '.node-studio',
+        area: '.orbit-stage',
+        text: () =>
+          t(
+            'The glowing ring is the song in the studio right now. Tap it to see how far along it is.',
+            'L’anneau qui brille, c’est la chanson en studio en ce moment. Touche-le pour voir où elle en est.',
+          ),
+      },
+      {
+        target: '[data-orbit-core]',
+        area: '.orbit-stage',
+        text: () =>
+          t(
+            'The circle fills as songs come out. When all 15 are lit, it’s show time. Press play to start with the latest.',
+            'Le cercle se remplit au fil des sorties. Quand les 15 sont allumées, place au spectacle. Appuie sur lecture pour commencer par la dernière.',
+          ),
+      },
+      {
+        target: '.nav .lang',
+        text: () => t('Prefer French? Switch language here anytime.', 'Tu préfères l’anglais? Change de langue ici, à tout moment.'),
+      },
+    ]
+
+    function tour(focus) {
+      const last = releases().length - 1
+      TOUR[0].target = `[data-orbit-song="${last}"]`
+      if (kind === 'tour') return
+      if (kind) close()
+      start('tour', TOUR, focus)
+    }
+
+    if (box) {
+      $('[data-guide-next]', box).addEventListener('click', () => {
+        if (kind === 'tour' && index < steps.length - 1) show(index + 1)
+        else if (kind === 'tour') finish()
+        else close()
+      })
+      $('[data-guide-skip]', box).addEventListener('click', finish)
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !box.hidden) kind === 'tour' ? finish() : close()
+      })
+      window.addEventListener('scroll', schedule, { passive: true })
+      window.addEventListener('resize', schedule)
+    }
+
+    return {
+      tour,
+      /** First visit: start the tour once the orbit has finished arriving. */
+      autoStart() {
+        if (seen.tour || !box) return
+        window.setTimeout(() => !seen.tour && tour(false), reduceMotion ? 600 : 2600)
+      },
+      onPlay() {
+        if (seen.player) return
+        window.setTimeout(() => {
+          if (seen.player || $('[data-player]')?.hidden) return
+          start('player', [
+            {
+              target: '[data-player-links]',
+              text: () =>
+                t(
+                  'This is a 30-second preview. For the full song, pick where you listen.',
+                  'Ceci est un extrait de 30 secondes. Pour la chanson complète, choisis où tu écoutes.',
+                ),
+            },
+          ])
+        }, 700)
+      },
+      refresh() {
+        if (kind && steps[index]) {
+          $('[data-guide-text]', box).textContent = steps[index].text()
+          show(index)
+        }
+      },
+    }
+  })()
+
+  function initGuide() {
+    $('[data-guide-replay]')?.addEventListener('click', () => guide.tour(true))
+    const orbit = $('[data-orbit]')
+    if (!orbit) return
+    if (!('IntersectionObserver' in window)) return guide.autoStart()
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting && e.intersectionRatio > 0.5)) {
+        io.disconnect()
+        guide.autoStart()
+      }
+    }, { threshold: [0.5] })
+    io.observe(orbit)
   }
 
   /* ——— Menu ——— */
@@ -711,6 +1022,7 @@
       if (sub) sub.textContent = t('30s preview', 'Extrait 30s')
       if (!wasPlaying) syncPlaying()
     }
+    guide.refresh()
   }
 
   /* ——— Fan form (MailerLite / Formspree / custom) ——— */
@@ -906,6 +1218,7 @@
   initPlayer()
   initLang()
   initOrbitObserve()
+  initGuide()
   initStudioScroll()
   observeReveals()
   initMenu()

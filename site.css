@@ -2120,3 +2120,9 @@ main.sec > p + p {
     transform: none;
   }
 }
+
+/* Sections focused after an in-page link don't need a visible ring */
+section[tabindex="-1"]:focus,
+main[tabindex="-1"]:focus {
+  outline: none;
+}

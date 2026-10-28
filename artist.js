@@ -988,6 +988,27 @@
     })
   }
 
+  /* ——— In-page links: scroll there without putting #section in the address,
+     so a refresh always starts on the landing view ——— */
+  function initInPageLinks() {
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('a[href^="#"]')
+      if (!link || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey) return
+      const id = link.getAttribute('href').slice(1)
+      const target = id ? document.getElementById(id) : null
+      if (!target) return
+      e.preventDefault()
+      if (id === 'top') window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
+      else target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
+      // Move keyboard focus with the scroll, without a second jump
+      if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1')
+      target.focus({ preventScroll: true })
+    })
+    window.addEventListener('pageshow', () => {
+      if (!location.hash) window.scrollTo(0, 0)
+    })
+  }
+
   /* ——— Reveal on scroll ——— */
   function observeReveals() {
     const nodes = $$('.reveal')
@@ -1222,6 +1243,7 @@
   initStudioScroll()
   observeReveals()
   initMenu()
+  initInPageLinks()
   initJoinForm()
   initYear()
 })()

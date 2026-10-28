@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<script>(function(){try{var t=localStorage.getItem("laousmail-theme");if(t!=="light"&&t!=="dark")t="dark";document.documentElement.setAttribute("data-theme",t)}catch(e){document.documentElement.setAttribute("data-theme","dark")}document.documentElement.classList.add("js")})();</script>
+<script>(function(){try{var t=localStorage.getItem("laousmail-theme");if(t!=="light"&&t!=="dark")t="dark";document.documentElement.setAttribute("data-theme",t)}catch(e){document.documentElement.setAttribute("data-theme","dark")}document.documentElement.classList.add("js")})();
+/* Always open on the landing view: no jump to a #section, no restored scroll position */
+(function(){try{if("scrollRestoration" in history)history.scrollRestoration="manual";if(location.hash)history.replaceState(null,"",location.pathname+location.search)}catch(e){}})();</script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="description" content="laousmail: Montréal singer-songwriter. Fifteen original songs with Amazigh roots, contemporary R&amp;B and soul, finished one by one ahead of the first show with original music. For listeners, radios and journalists." />

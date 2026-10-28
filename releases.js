@@ -77,8 +77,8 @@ window.LAOUSMAIL_IN_PRODUCTION = {
   stepProgress: 0.88,
   steps: ['writing', 'recording', 'mixing', 'mastering'],
   note: {
-    en: 'I changed the name to D kem because it is simpler. It means “It’s you.” I re-recorded everything because I did not like how it sounded. The groove was not good enough, and when something is not good enough, I do not release it. Right now I am doing the final touches on the arrangement, adding the back vocals and everything else so it becomes mature, then I will release it. Sorry for being late.',
-    fr: 'J’ai changé le titre pour D kem, c’est plus simple. Ça veut dire « C’est toi ». J’ai tout réenregistré parce que je n’aimais pas le son. Le groove n’était pas assez bon, et quand quelque chose n’est pas assez bon, je ne le sors pas. En ce moment je fais les dernières touches sur l’arrangement, j’ajoute les chœurs et le reste pour que ça mûrisse, puis je le sors. Désolé pour le retard.',
+    en: 'New this week: I received the vocals from Nancy Ramdani. She’ll be doing back vocals on D kem. Now I’m adding her parts to the arrangement, then the final touches before the release.',
+    fr: 'Nouveau cette semaine: j’ai reçu les voix de Nancy Ramdani. Elle fera des chœurs sur D kem. J’intègre maintenant ses parties à l’arrangement, puis les dernières touches avant la sortie.',
   },
-  updated: '2026-10-21',
+  updated: '2026-10-28',
 }

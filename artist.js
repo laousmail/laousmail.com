@@ -194,7 +194,6 @@
       markPreviewMissing()
     }
     syncPlaying()
-    guide.onPlay()
   }
 
   function togglePlay() {
@@ -783,8 +782,7 @@
     setMode()
   }
 
-  /* ——— Guide: a short first-visit tour of the orbit, plus one-time tips ——— */
-  const GUIDE_KEY = 'laousmail-guide-v1'
+  /* ——— Guide: a short “How it works” tour of the orbit, opened from the ? button ——— */
   const guide = (() => {
     const box = $('[data-guide]')
     const ring = document.createElement('div')
@@ -793,29 +791,12 @@
     ring.setAttribute('aria-hidden', 'true')
     document.body.append(ring)
 
-    let seen = {}
-    try {
-      const raw = localStorage.getItem(GUIDE_KEY)
-      seen = raw === 'done' ? { tour: 1, player: 1 } : JSON.parse(raw || '{}') || {}
-    } catch {
-      seen = {}
-    }
-
     let steps = []
     let index = 0
     let kind = ''
     let target = null
     let raf = 0
-    const queue = []
-
-    function remember(key) {
-      seen[key] = 1
-      try {
-        localStorage.setItem(GUIDE_KEY, JSON.stringify(seen))
-      } catch {
-        /* private mode */
-      }
-    }
+    let opener = null
 
     function visible(sel) {
       return $$(sel).find((el) => {
@@ -923,27 +904,22 @@
       if (box) box.hidden = true
       ring.hidden = true
       document.body.classList.remove('guide-open')
-      if (kind && kind !== 'tour') remember(kind)
       kind = ''
-      const next = queue.shift()
-      if (next) window.setTimeout(next, 400)
+      // Hand focus back to the ? button that opened the guide
+      opener?.focus({ preventScroll: true })
+      opener = null
     }
 
     function finish() {
-      remember('tour')
       close()
     }
 
-    function start(k, list, focus = false) {
-      if (!box) return
-      if (kind) {
-        if (k !== 'tour') queue.push(() => !seen[k] && start(k, list))
-        return
-      }
+    function start(k, list) {
+      if (!box || kind) return
       kind = k
       steps = list
       show(0)
-      if (focus) $('[data-guide-next]', box)?.focus()
+      $('[data-guide-next]', box)?.focus({ preventScroll: true })
     }
 
     const TOUR = [
@@ -980,12 +956,12 @@
       },
     ]
 
-    function tour(focus) {
+    function tour(from) {
       const last = releases().length - 1
       TOUR[0].target = `[data-orbit-song="${last}"]`
-      if (kind === 'tour') return
-      if (kind) close()
-      start('tour', TOUR, focus)
+      if (kind === 'tour') return finish()
+      opener = from || null
+      start('tour', TOUR)
     }
 
     if (box) {
@@ -1004,27 +980,6 @@
 
     return {
       tour,
-      /** First visit: start the tour once the orbit has finished arriving. */
-      autoStart() {
-        if (seen.tour || !box) return
-        window.setTimeout(() => !seen.tour && tour(false), reduceMotion ? 600 : 2600)
-      },
-      onPlay() {
-        if (seen.player) return
-        window.setTimeout(() => {
-          if (seen.player || $('[data-player]')?.hidden) return
-          start('player', [
-            {
-              target: '[data-player-links]',
-              text: () =>
-                t(
-                  'This is a 30-second preview. For the full song, pick where you listen.',
-                  'Ceci est un extrait de 30 secondes. Pour la chanson complète, choisis où tu écoutes.',
-                ),
-            },
-          ])
-        }, 700)
-      },
       refresh() {
         if (kind && steps[index]) {
           $('[data-guide-text]', box).textContent = steps[index].text()
@@ -1035,17 +990,8 @@
   })()
 
   function initGuide() {
-    $('[data-guide-replay]')?.addEventListener('click', () => guide.tour(true))
-    const orbit = $('[data-orbit]')
-    if (!orbit) return
-    if (!('IntersectionObserver' in window)) return guide.autoStart()
-    const io = new IntersectionObserver((entries) => {
-      if (entries.some((e) => e.isIntersecting && e.intersectionRatio > 0.5)) {
-        io.disconnect()
-        guide.autoStart()
-      }
-    }, { threshold: [0.5] })
-    io.observe(orbit)
+    const btn = $('[data-guide-replay]')
+    btn?.addEventListener('click', () => guide.tour(btn))
   }
 
   /* ——— Menu ——— */
@@ -1141,6 +1087,12 @@
   }
 
   function renderAll() {
+    const help = $('[data-guide-replay]')
+    if (help) {
+      const label = t('How it works', 'Comment ça marche')
+      help.setAttribute('aria-label', label)
+      help.title = label
+    }
     renderProof()
     renderDaysLeft()
     renderOrbit()

@@ -448,10 +448,10 @@
 
     nodesRoot.innerHTML = ''
     for (let i = 0; i < goal; i += 1) {
-      const { x, y } = slotPosition(i, goal)
+      const { x } = slotPosition(i, goal)
       const li = document.createElement('li')
-      li.style.setProperty('--x', `${x}%`)
-      li.style.setProperty('--y', `${y}%`)
+      // Angle on the ring, clockwise from the top; CSS adds the slow --spin
+      li.style.setProperty('--a', `${(360 * i) / goal}deg`)
 
       let node
       if (i < out) {
@@ -500,6 +500,14 @@
         tip.textContent = label
         if (x > 50) tip.classList.add('to-left')
         node.append(tip)
+        // The ring turns, so pick the tip's side when it's about to show
+        const side = () => {
+          const stage = node.closest('.orbit-stage')?.getBoundingClientRect()
+          const r = node.getBoundingClientRect()
+          if (stage) tip.classList.toggle('to-left', r.left + r.width / 2 > stage.left + stage.width / 2)
+        }
+        node.addEventListener('pointerenter', side)
+        node.addEventListener('focus', side)
       } else {
         node = document.createElement('span')
         node.className = 'node node-future'
@@ -528,6 +536,20 @@
         }
       }
     }
+    // A stream of light runs along the ring from the latest song to the one in the studio
+    const flow = $('[data-orbit-flow]')
+    if (flow) {
+      if (b && out > 0) {
+        const at = (i) => {
+          const a = (Math.PI * 2 * i) / goal - Math.PI / 2
+          return `${(200 + 168 * Math.cos(a)).toFixed(2)} ${(200 + 168 * Math.sin(a)).toFixed(2)}`
+        }
+        flow.setAttribute('d', `M ${at(out - 1)} A 168 168 0 0 1 ${at(Number(b.number) - 1)}`)
+      } else {
+        flow.setAttribute('d', '')
+      }
+    }
+
     if (orbit.classList.contains('is-in')) draw()
     else orbit._draw = draw
 
@@ -877,6 +899,7 @@
       $('[data-guide-next]', box).textContent = last ? t('Got it', 'Compris') : t('Next', 'Suivant')
       box.hidden = false
       ring.hidden = false
+      document.body.classList.add('guide-open')
       const r = target.getBoundingClientRect()
       const areaEl = step.area && target.closest(step.area)
       const a = areaEl ? areaEl.getBoundingClientRect() : r
@@ -899,6 +922,7 @@
       target = null
       if (box) box.hidden = true
       ring.hidden = true
+      document.body.classList.remove('guide-open')
       if (kind && kind !== 'tour') remember(kind)
       kind = ''
       const next = queue.shift()

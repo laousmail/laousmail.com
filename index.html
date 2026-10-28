@@ -237,18 +237,6 @@
     <!-- The orbit -->
     <figure class="orbit hero-in" style="--d:2" data-orbit>
       <div class="orbit-stage">
-        <svg class="orbit-svg" viewBox="0 0 400 400" aria-hidden="true">
-          <defs>
-            <linearGradient id="orbit-grad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="var(--hot)" />
-              <stop offset="1" stop-color="var(--gold)" />
-            </linearGradient>
-          </defs>
-          <circle class="orbit-dash" cx="200" cy="200" r="132" />
-          <circle class="orbit-track" cx="200" cy="200" r="168" />
-          <circle class="orbit-arc" data-orbit-arc cx="200" cy="200" r="168" pathLength="1000" stroke="url(#orbit-grad)" />
-          <circle class="orbit-studio-arc" data-orbit-studio-arc cx="200" cy="200" r="168" pathLength="1000" />
-        </svg>
 
         <div class="orbit-comet" aria-hidden="true"><i></i></div>
         <div class="orbit-halo" aria-hidden="true"></div>
@@ -267,7 +255,23 @@
           </div>
         </div>
 
-        <ol class="orbit-nodes" data-orbit-nodes aria-label="The 15 songs"></ol>
+        <!-- The ring of songs turns slowly; covers stay upright -->
+        <div class="orbit-spin" data-orbit-spin>
+          <svg class="orbit-svg" viewBox="0 0 400 400" aria-hidden="true">
+            <defs>
+              <linearGradient id="orbit-grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="var(--hot)" />
+                <stop offset="1" stop-color="var(--gold)" />
+              </linearGradient>
+            </defs>
+            <circle class="orbit-dash" cx="200" cy="200" r="132" />
+            <circle class="orbit-track" cx="200" cy="200" r="168" />
+            <circle class="orbit-arc" data-orbit-arc cx="200" cy="200" r="168" pathLength="1000" stroke="url(#orbit-grad)" />
+            <circle class="orbit-studio-arc" data-orbit-studio-arc cx="200" cy="200" r="168" pathLength="1000" />
+            <path class="orbit-flow" data-orbit-flow d="" />
+          </svg>
+          <ol class="orbit-nodes" data-orbit-nodes aria-label="The 15 songs"></ol>
+        </div>
       </div>
       <figcaption class="orbit-caption">
         <span data-lang="en">Tap a lit song to play it. The glowing one is in the studio now.</span>

@@ -24,7 +24,7 @@ jobs:
       - name: Stage public files
         run: |
           mkdir _site
-          cp -r index.html privacy.html site.css artist.js releases.js config.js \
+          cp -r index.html privacy.html site.css clayglass.css artist.js releases.js config.js \
             favicon.svg media CNAME robots.txt sitemap.xml .nojekyll _site/
       - uses: actions/upload-pages-artifact@v3
         with:

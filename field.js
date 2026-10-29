@@ -76,7 +76,9 @@
     if (!stage) return null
     const r = stage.getBoundingClientRect()
     if (r.bottom < -80 || r.top > H + 80 || !r.width) return null
-    return { cx: r.left + r.width / 2, cy: r.top + r.height / 2, w: r.width }
+    const fade = orbit ? Number(orbit.dataset.fade ?? 1) : 1
+    if (fade < 0.02) return null
+    return { cx: r.left + r.width / 2, cy: r.top + r.height / 2, w: r.width, fade }
   }
 
   function frame(now) {
@@ -123,6 +125,8 @@
 
     if (o) {
       const { cx, cy, w } = o
+      // everything round the orbit fades with it (k is shadowed for this block)
+      const k = (isLight ? 0.55 : 1) * o.fade
       const core = w * 0.28
       const ring = w * 0.42
       // the centre breathes

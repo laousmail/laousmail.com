@@ -888,7 +888,8 @@
       const navH = $('.nav')?.offsetHeight || 64
       const room = window.innerHeight - navH
       const need = a.height + box.offsetHeight + 40
-      if (!target.closest('.nav')) {
+      // inside a pinned scroll scene, scrolling would play the scene: leave the page where it is
+      if (!target.closest('.nav') && !target.closest('.scene.is-pinned')) {
         if (need <= room && (a.top < navH + 8 || a.bottom + box.offsetHeight + 32 > window.innerHeight)) {
           // Scroll so the area and its tip both fit below the header
           window.scrollBy({ top: a.top - navH - 12, behavior: 'auto' })

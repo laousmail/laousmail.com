@@ -2393,19 +2393,7 @@ dfn {
 
 .scene.is-pinned > section {
   position: sticky;
-  top: var(--nav-h);
-}
-
-/* Hero: the words step back, the orbit glides to the middle */
-.scene[data-scene="hero"].is-pinned .hero-copy {
-  visibility: var(--copy-vis, visible);
-  opacity: calc(1 - var(--p) * 2.6);
-  translate: 0 calc(var(--p) * -70px);
-}
-
-.scene[data-scene="hero"].is-pinned .orbit {
-  translate: calc(var(--q, 0) * var(--shift, 0px)) 0;
-  scale: calc(1 + var(--q, 0) * 0.1);
+  top: var(--pin-top, var(--nav-h));
 }
 
 /* Music and story: one stop at a time, with a rail */
@@ -2591,4 +2579,243 @@ dfn {
   .scene[data-scene="story"].is-pinned .story {
     gap: 1.25rem;
   }
+}
+
+/* ——— The orbit gives up its songs (scenes.js: morph) ———
+   The words fade (filter, so the entrance animation can't hold them up), the
+   ring stops turning, and each song's dot flies down into its card. */
+.scene[data-scene="hero"].is-pinned :is(.hero-copy > *, .orbit-caption) {
+  visibility: var(--copy-vis, visible);
+  filter: opacity(calc(1 - var(--a, 0) * 1.7));
+}
+
+.scene[data-scene="hero"].is-morphing .orbit-spin {
+  animation-play-state: paused;
+}
+
+.scene[data-scene="hero"].is-morphing .guide-replay {
+  visibility: hidden;
+}
+
+.orbit-nodes li {
+  transition: opacity 0.25s;
+}
+
+.morph,
+.morph-ghosts {
+  display: none;
+}
+
+.scene[data-scene="hero"].is-pinned .morph {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.85rem;
+  text-align: left;
+  pointer-events: none;
+}
+
+.scene[data-scene="hero"].is-pinned .morph-ghosts {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: block;
+  pointer-events: none;
+}
+
+.morph-ghost {
+  position: absolute;
+  margin: 0;
+  opacity: 0;
+  overflow: hidden;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+.morph-ghost .node-num,
+.morph-ghost.node-studio::after {
+  display: none;
+}
+
+.morph-cards {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.morph-cards > .mcard {
+  position: relative;
+  grid-area: 1 / 1;
+  align-self: start;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.9rem 1.25rem;
+  padding: clamp(1rem, 2.5vw, 1.6rem);
+  border-bottom: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* the card's panel grows in behind the cover */
+.mcard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--panel, var(--bg2));
+  box-shadow: var(--panel-shadow, none);
+  opacity: var(--c, 0);
+  scale: calc(0.94 + var(--c, 0) * 0.06);
+}
+
+.mcard > * {
+  opacity: var(--c, 0);
+  translate: 0 calc((1 - var(--c, 0)) * 12px);
+}
+
+.mcard > .track-art {
+  width: clamp(5rem, 11vw, 8.5rem);
+  opacity: var(--art, 0);
+  translate: none;
+}
+
+/* the song in the studio keeps its ring: the dot grows into it */
+.mcard-studio > .track-art {
+  border: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side, var(--bg) 84%, transparent 86% 100%),
+    conic-gradient(var(--hot) calc(var(--sp, 0) * 1turn), color-mix(in srgb, var(--hot) 18%, transparent) 0);
+}
+
+.mcard .track-actions {
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+}
+
+.morph-cards > .mcard.is-now {
+  visibility: visible;
+}
+
+.morph-cards > .mcard.is-live {
+  pointer-events: auto;
+}
+
+.morph-cards > .mcard-rest {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.mcard-dots {
+  display: flex;
+  gap: 0.45rem;
+  height: 14px;
+  align-items: center;
+  opacity: var(--art, 0) !important;
+  translate: none !important;
+}
+
+.mcard-dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--ink) 30%, transparent);
+  background: var(--bg);
+}
+
+.mcard-rest-text {
+  margin: 0;
+  font: 500 0.95rem var(--mono, monospace);
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+
+/* the songs already shown, as small chips */
+.morph-past {
+  order: -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: auto;
+}
+
+.morph-past button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.75rem;
+  padding: 0.25rem 0.85rem 0.25rem 0.25rem;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: var(--panel, var(--bg2));
+  color: var(--ink);
+  font: 500 0.72rem var(--mono, monospace);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  animation: chip-in 0.35s var(--ease);
+}
+
+.morph-past button:hover {
+  border-color: var(--gold);
+}
+
+@keyframes chip-in {
+  from { opacity: 0; translate: 0 8px; }
+}
+
+.mp-art {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg3);
+  color: var(--hot);
+  font-size: 0.7rem;
+}
+
+.mp-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 900px) {
+  .morph-cards > .mcard {
+    gap: 0.6rem 0.9rem;
+    padding: 0.9rem;
+  }
+
+  .mcard > .track-art {
+    width: 4.5rem;
+  }
+
+  .mcard .track-meta {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .scene[data-scene="hero"].is-pinned .morph {
+    justify-content: flex-start;
+  }
+}
+
+/* while the orbit scene plays, it shows the songs: the separate list steps aside */
+body.morph-on .scene[data-scene="music"] {
+  display: none;
 }

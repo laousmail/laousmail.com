@@ -193,6 +193,7 @@
 
 <main id="top">
   <!-- HERO: the orbit is the centrepiece and the player -->
+  <div class="scene" data-scene="hero">
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero-corona" aria-hidden="true"></div>
 
@@ -287,8 +288,10 @@
       </figcaption>
     </figure>
   </section>
+  </div>
 
   <!-- MUSIC -->
+  <div class="scene" data-scene="music">
   <section class="sec music" id="music" aria-labelledby="music-title">
     <header class="sec-head reveal">
       <p class="eyebrow"><span data-lang="en">The music</span><span data-lang="fr">La musique</span></p>
@@ -300,6 +303,7 @@
     </header>
     <ol class="tracks reveal" data-tracks></ol>
   </section>
+  </div>
 
   <!-- STUDIO: pinned scroll scene -->
   <section class="studio" id="studio" data-studio aria-labelledby="studio-title">
@@ -336,6 +340,7 @@
   </section>
 
   <!-- STORY -->
+  <div class="scene" data-scene="story">
   <section class="sec story" id="story" aria-labelledby="story-title">
     <div class="story-photo reveal">
       <img src="media/drums-park.webp" alt="laousmail playing drums on a rug in a Montréal park, friends around" width="1200" height="1600" loading="lazy" decoding="async" />
@@ -377,8 +382,10 @@
       </ol>
     </div>
   </section>
+  </div>
 
   <!-- THE SHOW + STAY CLOSE -->
+  <div class="scene" data-scene="show">
   <section class="sec show" id="show" aria-labelledby="show-title">
     <div class="show-glow" aria-hidden="true"></div>
     <div class="show-inner">
@@ -429,6 +436,7 @@
       </p>
     </div>
   </section>
+  </div>
 
   <!-- ECLIPSETONE: one compact band -->
   <section class="eclipse-band" aria-labelledby="eclipse-title">
@@ -527,6 +535,7 @@
 <script src="config.js"></script>
 <script src="releases.js"></script>
 <script src="artist.js" defer></script>
+<script src="scenes.js" defer></script>
 <script src="field.js" defer></script>
 <script src="stats.js" defer></script>
 <!-- MailerLite Universal -->

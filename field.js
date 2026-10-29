@@ -86,7 +86,13 @@
     // trails travel with the page instead of smearing when you scroll
     const dy = window.scrollY - lastY
     lastY = window.scrollY
-    if (dy) {
+    // a long jump (a link, the keyboard) starts the trails afresh instead of dragging them
+    if (Math.abs(dy) > H * 0.25) {
+      g.fillStyle = isLight ? '#f6f1ea' : '#070605'
+      g.fillRect(0, 0, W, H)
+      ripples.length = 0
+      sparks.length = 0
+    } else if (dy) {
       g.save()
       g.setTransform(1, 0, 0, 1, 0, 0)
       g.globalCompositeOperation = 'copy'

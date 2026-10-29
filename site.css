@@ -2380,3 +2380,215 @@ var,
 dfn {
   font-style: normal;
 }
+
+/* ——— Scroll scenes (scenes.js): each part of the landing page holds still
+   while the scroll plays it, like "In the studio now". --p runs 0 → 1. ——— */
+.scene {
+  position: relative;
+}
+
+.scene-rail {
+  display: none;
+}
+
+.scene.is-pinned > section {
+  position: sticky;
+  top: var(--nav-h);
+}
+
+/* Hero: the words step back, the orbit glides to the middle */
+.scene[data-scene="hero"].is-pinned .hero-copy {
+  visibility: var(--copy-vis, visible);
+  opacity: calc(1 - var(--p) * 2.6);
+  translate: 0 calc(var(--p) * -70px);
+}
+
+.scene[data-scene="hero"].is-pinned .orbit {
+  translate: calc(var(--q, 0) * var(--shift, 0px)) 0;
+  scale: calc(1 + var(--q, 0) * 0.1);
+}
+
+/* Music and story: one stop at a time, with a rail */
+.scene.is-pinned :is(.music, .story) {
+  display: grid;
+  align-content: center;
+  min-height: calc(100svh - var(--nav-h) - var(--player-room, 0px));
+  padding-block: 1.5rem;
+}
+
+.scene.is-pinned .scene-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 0.5rem;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.scene-rail button {
+  display: grid;
+  gap: 0.2rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.35rem 0 0;
+  border: 0;
+  background: none;
+  color: var(--mute);
+  font: 500 0.72rem var(--mono, monospace);
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.scene-rail b {
+  font-weight: 500;
+  color: inherit;
+}
+
+.scene-rail span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scene-rail i {
+  display: block;
+  height: 3px;
+  margin-top: 0.25rem;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--hot), var(--gold)) 0 0 / calc(var(--fill, 0) * 1%) 100% no-repeat, var(--line);
+}
+
+.scene-rail button:hover,
+.scene-rail .is-now {
+  color: var(--ink);
+}
+
+.scene-rail .is-past {
+  color: var(--gold);
+}
+
+.scene.is-pinned :is(.tracks, .beats) {
+  display: grid;
+}
+
+.scene.is-pinned :is(.tracks > .track, .beats > li) {
+  grid-area: 1 / 1;
+  border-bottom: 0;
+  opacity: 0;
+  visibility: hidden;
+  translate: 0 28px;
+  animation: none;
+  transition: opacity 0.45s var(--ease), translate 0.6s var(--ease), visibility 0s linear 0.45s;
+}
+
+.scene.is-pinned :is(.tracks > .track, .beats > li).is-past {
+  translate: 0 -28px;
+}
+
+.scene.is-pinned :is(.tracks > .track, .beats > li).is-now {
+  opacity: 1;
+  visibility: visible;
+  translate: 0 0;
+  transition-delay: 0s;
+}
+
+.scene.is-pinned .tracks > .track-rest {
+  grid-area: 2 / 1;
+  animation: none;
+  opacity: 1;
+}
+
+/* Story: the photo warms up while the chapters turn */
+.scene[data-scene="story"].is-pinned .story {
+  align-items: center;
+}
+
+.scene[data-scene="story"].is-pinned .story-photo {
+  position: relative;
+  top: auto;
+  height: min(calc(100svh - var(--nav-h) - 3rem - var(--player-room, 0px)), 40rem);
+}
+
+.scene[data-scene="story"].is-pinned .story-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(calc(0.45 + var(--p) * 0.55)) brightness(calc(0.78 + var(--p) * 0.22));
+}
+
+.scene[data-scene="story"].is-pinned .beats li {
+  padding-top: 1.25rem;
+}
+
+.scene[data-scene="story"].is-pinned .beats li h3 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+}
+
+.scene[data-scene="story"].is-pinned .beats li p {
+  font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+}
+
+/* The show: light first, then the words, then the sign-up */
+.scene[data-scene="show"].is-pinned .show {
+  display: grid;
+  align-content: center;
+  min-height: calc(100svh - var(--nav-h) - var(--player-room, 0px));
+  padding-block: 1.5rem;
+}
+
+.scene[data-scene="show"].is-pinned .show-glow {
+  opacity: calc(0.3 + var(--p) * 0.9);
+  scale: calc(0.6 + var(--p) * 0.6);
+}
+
+.scene[data-scene="show"].is-pinned .show-inner > * {
+  transition: none;
+}
+
+.scene[data-scene="show"].is-pinned .show-inner > .eyebrow {
+  opacity: calc(var(--p) * 6);
+}
+
+.scene[data-scene="show"].is-pinned #show-title {
+  opacity: calc((var(--p) - 0.08) * 4);
+  translate: 0 calc((1 - min(1, var(--p) * 3)) * 30px);
+  letter-spacing: calc((1 - min(1, var(--p) * 3)) * 0.06em);
+}
+
+.scene[data-scene="show"].is-pinned .show-inner > .sub {
+  opacity: calc((var(--p) - 0.25) * 4);
+  translate: 0 calc((1 - min(1, max(0, var(--p) - 0.2) * 3.5)) * 24px);
+}
+
+.scene[data-scene="show"].is-pinned .join {
+  visibility: var(--join-vis, visible);
+  opacity: calc((var(--p) - 0.45) * 4);
+  translate: 0 calc((1 - min(1, max(0, var(--p) - 0.4) * 3.5)) * 36px);
+}
+
+.scene[data-scene="show"].is-pinned .press {
+  opacity: calc((var(--p) - 0.65) * 4);
+}
+
+.scene[data-scene="hero"].is-pinned .hero {
+  padding-block: clamp(1.25rem, 3.5vw, 2.75rem);
+}
+
+/* On narrow screens the story pins with the photo as a short banner */
+@media (max-width: 860px) {
+  .scene[data-scene="story"].is-pinned .story-photo {
+    height: 24svh;
+  }
+
+  .scene[data-scene="story"].is-pinned .story-photo img {
+    object-position: 50% 30%;
+  }
+
+  .scene[data-scene="story"].is-pinned .story {
+    gap: 1.25rem;
+  }
+}

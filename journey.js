@@ -25,7 +25,8 @@
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel))
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   const orbit = $('[data-orbit]')
-  if (!orbit || window.innerHeight < 520 || window.innerWidth < 340) return
+  const ready = () => document.documentElement.classList.remove('j-wait')
+  if (!orbit || window.innerHeight < 520 || window.innerWidth < 340) return ready()
   if (reduceMotion) document.documentElement.classList.add('j-calm')
 
   const lang = () => (document.documentElement.lang === 'fr' ? 'fr' : 'en')
@@ -131,6 +132,12 @@
       step.fit.innerHTML = `<p class="eyebrow j-out">${both('Out now', 'Disponible')} · ${pad(r?.number || step.index + 1)} / ${goal()}</p><ol class="j-one"></ol>`
       $('.j-one', step.fit).append(copy)
       step.src = src
+      const share = document.createElement('button')
+      share.type = 'button'
+      share.className = 'chip j-share'
+      share.dataset.share = String(step.index)
+      share.innerHTML = both('Share', 'Partager')
+      $('.track-listen', copy)?.append(share)
       // covers can fall back to a local picture: show whatever the orbit shows
       const img = $('img', copy)
       const fallback = () => $(`[data-orbit-song="${step.index}"] img`)?.currentSrc || $('img', src)?.currentSrc
@@ -234,10 +241,13 @@
     const out = releases().length
     const inStudio = brewing() ? 1 : 0
     const narrow = document.documentElement.clientWidth < 600
+    const fr = lang() === 'fr'
+    const link = (step, html, tag = 'span') => (step >= 0 ? `<button type="button" class="j-st" data-goto="${step}"><${tag}>${html}</${tag}></button>` : `<${tag}>${html}</${tag}>`)
     status.innerHTML =
-      lang() === 'fr'
-        ? `<b>${goal()} chansons${narrow ? '' : ' avant le spectacle'}</b><span>${out} sorties</span>${inStudio ? '<span>1 en studio</span>' : ''}<span>${days} jours</span>`
-        : `<b>${goal()} songs${narrow ? '' : ' before the show'}</b><span>${out} out</span>${inStudio ? `<span>1 in ${narrow ? '' : 'the '}studio</span>` : ''}<span>${days} days</span>`
+      link(0, `${goal()} ${fr ? 'chansons' : 'songs'}${narrow ? '' : fr ? ' avant le spectacle' : ' before the show'}`, 'b') +
+      link(firstOf('song'), fr ? `${out} sorties` : `${out} out`) +
+      (inStudio ? link(firstOf('studio'), fr ? '1 en studio' : `1 in ${narrow ? '' : 'the '}studio`) : '') +
+      link(firstOf('rest'), fr ? `${days} jours` : `${days} days`)
     const d = restStep && $('.j-days', restStep.el)
     if (d) d.textContent = t(`${days} days left in ${year}.`, `${days} jours avant la fin de ${year}.`)
   }
@@ -409,6 +419,7 @@
       b.style.setProperty('--fill', (clamp01((pos - from + 0.5) / Math.max(1, to - from)) * 100).toFixed(1))
     })
     drawBeam(pos)
+    paintCue(pos)
   }
 
   // the light that joins a song's dot to its card
@@ -494,6 +505,32 @@
   }
 
   /* ——— The song copies play the real buttons, and show what's playing ——— */
+  // share a song: the phone's share sheet, or a copied link
+  cardsRoot.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-share]')
+    if (!b) return
+    const r = releases()[Number(b.dataset.share)]
+    if (!r) return
+    const url = r.spotify || r.youtube || 'https://laousmail.com/'
+    const text = t(`${r.title} by laousmail`, `${r.title}, de laousmail`)
+    window.laousmailTrack?.('Share song', { song: r.title })
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `${r.title} · laousmail`, text, url })
+        return
+      }
+      await navigator.clipboard.writeText(`${text} ${url}`)
+      b.dataset.done = '1'
+      b.innerHTML = both('Link copied', 'Lien copié')
+      window.setTimeout(() => {
+        delete b.dataset.done
+        b.innerHTML = both('Share', 'Partager')
+      }, 2200)
+    } catch {
+      /* the visitor closed the share sheet */
+    }
+  })
+
   cardsRoot.addEventListener('click', (e) => {
     const play = e.target.closest('.j-card-song [data-play]')
     if (!play) return
@@ -541,6 +578,56 @@
     if (i >= 0 && i !== active) go(i, false)
   })
 
+  status.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-goto]')
+    if (b) go(Number(b.dataset.goto))
+  })
+
+  /* ——— A first hint to scroll, gone after the first scroll ——— */
+  const cue = document.createElement('p')
+  cue.className = 'j-cue'
+  cue.setAttribute('aria-hidden', 'true')
+  cue.innerHTML = `${both('Scroll', 'Défile')}<i></i>`
+  stage.append(cue)
+  let scrolled = false
+  function paintCue(pos) {
+    if (pos > 0.04) scrolled = true
+    let room = false
+    if (!scrolled && geo) {
+      const r = landing.fit.getBoundingClientRect()
+      const sr = stage.getBoundingClientRect()
+      room = sr.bottom - r.bottom > 56 || geo.wide
+    }
+    cue.classList.toggle('is-on', !scrolled && room)
+  }
+
+  /* ——— Keyboard: one card at a time ——— */
+  window.addEventListener('keydown', (e) => {
+    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return
+    if (document.body.classList.contains('menu-open') || document.body.classList.contains('guide-open')) return
+    const el = e.target
+    if (el.closest?.('input, textarea, select, [contenteditable]')) return
+    const onControl = el.closest?.('button, a, summary')
+    let to = null
+    if (e.key === 'ArrowDown' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey && !onControl)) to = active + 1
+    else if (e.key === 'ArrowUp' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey && !onControl)) to = active - 1
+    else if (e.key === 'Home') to = 0
+    else if (e.key === 'End') to = steps.length - 1
+    if (to === null) return
+    // below the last card the page scrolls on as usual (to the footer)
+    if (to >= steps.length || (to === steps.length - 1 && position() > steps.length - 1.2 && e.key !== 'End')) return
+    e.preventDefault()
+    go(Math.max(0, Math.min(steps.length - 1, to)))
+  })
+
+  /* ——— Tapping a song on the ring opens its card (it still plays) ——— */
+  orbitStage.addEventListener('click', (e) => {
+    const node = e.target.closest('[data-orbit-song]')
+    if (!node) return
+    const i = steps.findIndex((s) => s.key === 'song' && s.index === Number(node.dataset.orbitSong))
+    if (i >= 0 && i !== active) go(i)
+  })
+
   /* ——— Start ——— */
   fillSongs()
   renderStatus()
@@ -549,6 +636,7 @@
   layout()
   setState(Math.max(0, Math.min(steps.length - 1, Math.round(position()))))
   placeOrbit()
+  ready()
 
   let raf = 0
   window.addEventListener(

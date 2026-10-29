@@ -22,6 +22,8 @@
   const $ = (sel, root = document) => root.querySelector(sel)
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel))
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  // the journey (journey.js) runs the page instead when there is room for it
+  if (document.body.classList.contains('journey')) return
   const clamp01 = (v) => Math.min(1, Math.max(0, v))
   const lang = () => (document.documentElement.lang === 'fr' ? 'fr' : 'en')
   const navH = () => $('.nav')?.offsetHeight || 64

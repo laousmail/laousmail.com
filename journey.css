@@ -1,0 +1,737 @@
+/* laousmail.com — the journey (journey.js). The orbit holds the screen from
+   top to bottom; one card per scroll; the orbit turns into what each card is
+   about. Only active when journey.js adds body.journey. */
+
+body.journey main > :not(.j) {
+  display: none;
+}
+
+html:has(body.journey) {
+  scroll-snap-type: y proximity;
+}
+
+.j {
+  position: relative;
+}
+
+.j .reveal,
+.j .hero-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ——— The stage holds still; the steps scroll under it ——— */
+.j-stage {
+  position: sticky;
+  top: var(--nav-h);
+  z-index: 2;
+  height: var(--stage-h, calc(100svh - var(--nav-h)));
+  margin-bottom: calc(-1 * var(--stage-h, calc(100svh - var(--nav-h))));
+  overflow: hidden;
+}
+
+.j-steps {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.j-step {
+  height: var(--stage-h, calc(100svh - var(--nav-h)));
+  scroll-snap-align: start;
+}
+
+/* ——— The status line: the message, always ——— */
+.j-status {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 6;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.2rem 0.9rem;
+  margin: 0;
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: var(--mute);
+  font: 500 0.68rem/1.4 var(--mono, monospace);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.j-status b {
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.j-status span::before {
+  content: "·";
+  margin-right: 0.9rem;
+  color: var(--mute);
+}
+
+/* ——— Chapters: a row on phones, round the ring on wide screens ——— */
+.j-chapters {
+  position: absolute;
+  z-index: 6;
+  left: 0;
+  right: 0;
+  top: var(--status-h, 2.2rem);
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 0.35rem;
+  padding: 0.35rem 1rem 0;
+}
+
+.j-chapters button {
+  display: grid;
+  gap: 0.25rem;
+  min-height: 2.5rem;
+  padding: 0.3rem 0 0;
+  border: 0;
+  background: none;
+  color: var(--mute);
+  font: 500 0.64rem var(--mono, monospace);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.j-chapters i {
+  display: block;
+  height: 3px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--hot), var(--gold)) 0 0 / calc(var(--fill, 0) * 1%) 100% no-repeat, var(--line);
+}
+
+.j-chapters button:hover,
+.j-chapters .is-now {
+  color: var(--ink);
+}
+
+.j.is-wide .j-chapters {
+  inset: 0;
+  display: block;
+  padding: 0;
+  pointer-events: none;
+}
+
+.j.is-wide .j-chapters button {
+  position: absolute;
+  min-height: 2.25rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: var(--panel-soft, var(--bg2));
+  pointer-events: auto;
+  translate: 0 -50%;
+  align-content: center;
+}
+
+.j.is-wide .j-chapters button.to-left {
+  translate: -100% -50%;
+}
+
+.j.is-wide .j-chapters button.to-mid {
+  translate: -50% -50%;
+}
+
+.j.is-wide .j-chapters i {
+  display: none;
+}
+
+.j.is-wide .j-chapters .is-now {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* ——— The orbit ——— */
+.j-orbit {
+  position: absolute;
+  z-index: 3;
+  transition: left 0.6s var(--ease), top 0.6s var(--ease), width 0.6s var(--ease);
+}
+
+.j .orbit {
+  transition: width 0.6s var(--ease);
+}
+
+.j .orbit {
+  width: var(--size) !important;
+  max-width: none;
+  margin: 0;
+}
+
+.j .orbit-caption {
+  display: none;
+}
+
+.j:not([data-state="landing"]) .orbit-spin {
+  animation-play-state: paused;
+}
+
+.j:not([data-state="landing"]) .guide-replay {
+  visibility: hidden;
+}
+
+.j .node {
+  transition:
+    opacity 0.5s var(--ease) calc(0.25s + var(--i) * 0.09s),
+    transform 0.6s var(--ease) calc(0.25s + var(--i) * 0.09s),
+    filter 0.45s,
+    scale 0.45s var(--ease),
+    background 0.45s,
+    border-color 0.45s;
+}
+
+/* the song (or the studio ring) the card is about */
+.j .node.j-on {
+  z-index: 2;
+  scale: 1.3;
+  box-shadow:
+    0 0 0 2px var(--hot),
+    0 0 0 5px var(--bg),
+    0 0 40px 10px color-mix(in srgb, var(--hot) 55%, transparent);
+}
+
+.j:is([data-state="song"], [data-state="studio"], [data-state="story"], [data-state="join"]) .node:not(.j-on) {
+  filter: brightness(0.45) saturate(0.4);
+}
+
+/* the songs to come pulse together */
+.j[data-state="rest"] .node-future {
+  border-color: var(--gold);
+  animation: j-pulse 1.8s var(--ease) infinite;
+  animation-delay: calc(var(--i) * 0.07s);
+}
+
+@keyframes j-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold) 0%, transparent); }
+  40% { box-shadow: 0 0 14px 3px color-mix(in srgb, var(--gold) 70%, transparent); }
+}
+
+/* the show: the circle is full */
+.j[data-state="show"] .node-future {
+  border-color: var(--gold);
+  background: var(--gold);
+  box-shadow: 0 0 14px var(--gold);
+  scale: 1.35;
+}
+
+.j[data-state="show"] .orbit-arc {
+  stroke-dasharray: 1000 0 !important;
+}
+
+/* the centre for the story, the show and the eclipse */
+.j-core {
+  position: absolute;
+  inset: 22%;
+  z-index: 2;
+  overflow: hidden;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease), background 0.6s;
+}
+
+.j:is([data-state="story"], [data-state="show"], [data-state="eclipse"]) .j-core {
+  opacity: 1;
+}
+
+.j-core-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.j[data-state="story"] .j-core-photo {
+  opacity: 1;
+}
+
+.j[data-state="story"] .j-core::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(7, 6, 5, 0.9) 10%, rgba(7, 6, 5, 0) 55%);
+}
+
+.j-core-text {
+  position: absolute;
+  inset: auto 12% 11%;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  color: #f2e9dd;
+  text-align: center;
+}
+
+.j-core-text strong {
+  font: 500 clamp(1.1rem, 7cqi, 2.4rem) var(--mono, monospace);
+  letter-spacing: -0.02em;
+}
+
+.j-core-text small {
+  font: 500 clamp(0.58rem, 2.4cqi, 0.8rem) var(--mono, monospace);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(242, 233, 221, 0.82);
+}
+
+.j[data-state="show"] .j-core {
+  background: radial-gradient(circle at 50% 28%, rgba(255, 179, 71, 0.6), rgba(255, 106, 19, 0.25) 40%, rgba(7, 6, 5, 0.96) 72%);
+}
+
+.j[data-state="show"] .j-core-text {
+  inset: 0;
+  align-content: center;
+}
+
+/* the eclipse: a dark disc slides over a glowing crescent */
+.j[data-state="eclipse"] .j-core {
+  background: linear-gradient(200deg, #e8a05a, #d4682a 45%, #9a3a14);
+}
+
+.j-eclipse {
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  background: #070605;
+  translate: 105% 0;
+  transition: translate 1.2s var(--ease);
+}
+
+.j[data-state="eclipse"] .j-eclipse {
+  translate: 18% 0;
+}
+
+/* the story: the ring becomes four points */
+.j-points {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.j[data-state="story"] .j-points {
+  opacity: 1;
+}
+
+.j-points i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(12px, 3.6cqi);
+  height: max(12px, 3.6cqi);
+  border: 1.5px solid color-mix(in srgb, var(--ink) 40%, transparent);
+  border-radius: 50%;
+  background: var(--bg);
+  transform: translate(-50%, -50%) rotate(var(--a)) translateY(-42cqi);
+  transition: background 0.4s, border-color 0.4s, box-shadow 0.4s;
+}
+
+.j-points i.is-on {
+  border-color: var(--gold);
+  background: var(--gold);
+  box-shadow: 0 0 16px var(--gold);
+}
+
+/* Ceux qui écoutent: the sign-up inside the orbit */
+.j[data-state="join"] .orbit-core {
+  filter: brightness(0.18) saturate(0.4);
+}
+
+.j:is([data-state="join"], [data-state="story"], [data-state="show"], [data-state="eclipse"]) .orbit-core-text {
+  visibility: hidden;
+}
+
+.j-form {
+  position: absolute;
+  inset: 17%;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s var(--ease), visibility 0s linear 0.5s;
+}
+
+.j[data-state="join"] .j-form {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.j-form > .join {
+  width: 100%;
+  max-width: 21rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  text-align: center;
+  transform: scale(var(--fit, 1));
+}
+
+.j-form .join-row {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.j-form .join-row input {
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: var(--panel, var(--bg2));
+  text-align: center;
+}
+
+.j-form .consent {
+  justify-content: center;
+  text-align: left;
+  font-size: 0.78rem;
+}
+
+.j-form .join-note {
+  margin-top: 0.4rem;
+}
+
+/* the marker travels round the ring with you */
+.j-marker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 4;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 14px var(--gold);
+  pointer-events: none;
+}
+
+/* the light from a song's dot to its card */
+.j-beam {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.j-beam line {
+  stroke: url(#j-beam-grad);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 6;
+  animation: j-flow 0.9s linear infinite;
+}
+
+@keyframes j-flow {
+  to { stroke-dashoffset: -20; }
+}
+
+/* ——— The cards ——— */
+.j-cards {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.j-card {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.j-card.is-on {
+  pointer-events: auto;
+}
+
+.j-fit {
+  transform: scale(var(--fit, 1));
+  transform-origin: 0 50%;
+}
+
+.j:not(.is-wide) .j-card {
+  justify-content: flex-start;
+  text-align: center;
+}
+
+.j:not(.is-wide) .j-fit {
+  transform-origin: 50% 0;
+}
+
+/* cards about songs and the studio sit on a panel, like the studio dock */
+:is(.j-card-song, .j-card-rest, .j-card-studio) .j-fit {
+  padding: clamp(1rem, 2.4vw, 1.6rem);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--panel, var(--bg2));
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--panel-shadow, none);
+  text-align: left;
+}
+
+/* landing */
+.j-card-landing .proof {
+  margin-bottom: 1.25rem;
+}
+
+.j-card-landing .hero-lead {
+  margin: 1rem 0;
+}
+
+.j-card-landing .countdown {
+  margin: 0 0 1.25rem;
+}
+
+.j:not(.is-wide) .j-card-landing .proof {
+  display: none;
+}
+
+.j:not(.is-wide) .j-card-landing .hero-title {
+  margin-inline: auto;
+  font-size: clamp(2.2rem, 9vw, 3.6rem);
+}
+
+.j:not(.is-wide) .j-card-landing .hero-lead {
+  margin-inline: auto;
+  font-size: 1rem;
+}
+
+.j:not(.is-wide) .j-card-landing .cta-row {
+  justify-content: center;
+}
+
+/* the songs */
+.j-out {
+  margin-bottom: 0.75rem;
+}
+
+.j-one {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.j-one > .track {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.9rem 1.2rem;
+  padding: 0;
+  border: 0;
+  opacity: 1;
+  animation: none;
+}
+
+.j-one .track-art {
+  width: clamp(4.5rem, 9vw, 7.5rem);
+}
+
+.j-one .track-actions {
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+}
+
+/* still to come */
+.j-card-rest h2 {
+  font: 500 clamp(1.8rem, 4vw, 2.6rem) var(--mono, monospace);
+  letter-spacing: -0.02em;
+}
+
+.j-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 1rem 0;
+}
+
+.j-dots i {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--gold);
+  border-radius: 50%;
+  animation: j-pulse 1.8s var(--ease) infinite;
+}
+
+.j-dots i:nth-child(n) {
+  animation-delay: calc(var(--d, 0) * 1s);
+}
+
+.j-days {
+  margin-top: 0.75rem;
+  color: var(--gold);
+  font: 500 0.78rem var(--mono, monospace);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* the studio, at rest inside its card */
+.j .studio {
+  height: auto !important;
+  border: 0;
+  background: none;
+}
+
+.j .studio-pin {
+  position: static !important;
+  display: block !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+}
+
+.j .studio-inner {
+  max-width: none;
+}
+
+.j .studio .sec-head {
+  margin-bottom: 1rem;
+}
+
+.j .studio-steps {
+  margin: 0.85rem 0 1.25rem;
+}
+
+.j .studio-cue {
+  display: none !important;
+}
+
+.j .studio-note {
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* the story */
+.j-beats {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.j-beats li {
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.j-beats h3 {
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+}
+
+.j-beats p {
+  margin-top: 0.6rem;
+  font-size: clamp(1.02rem, 1.5vw, 1.18rem);
+  color: var(--mute);
+}
+
+.j-card-story .sec-head {
+  margin-bottom: 1.25rem;
+}
+
+.j-card-story .sec-head h2 {
+  font-size: clamp(1.8rem, 3.6vw, 3rem);
+}
+
+/* the show, the sign-up card, EclipseTone */
+.j-card-show h2,
+.j-card-join h2 {
+  font-size: clamp(2rem, 4vw, 3.4rem);
+}
+
+.j-card-show .sub,
+.j-card-join .sub {
+  margin-top: 1rem;
+}
+
+.j-card-show .press {
+  margin-top: 1.25rem;
+}
+
+.j .eclipse-band-inner {
+  grid-template-columns: minmax(0, 1fr);
+  text-align: left;
+}
+
+.j:not(.is-wide) .eclipse-band-inner {
+  justify-items: center;
+  text-align: center;
+}
+
+/* a story card counts its own chapter */
+.j-beats {
+  counter-reset: beat var(--k, 0);
+}
+
+.j.is-small .orbit-core-play {
+  display: none;
+}
+
+/* a tucked orbit: just its centre and glow, when a long card needs the room */
+.j.is-tucked .orbit-spin,
+.j.is-tucked .orbit-core-text,
+.j.is-tucked .j-points {
+  visibility: hidden;
+}
+
+.j.is-tucked .j-marker,
+.j.is-tucked .j-beam {
+  opacity: 0 !important;
+}
+
+/* phones: the studio steps in one row */
+@media (max-width: 899px) {
+  .j .studio-steps {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.4rem;
+  }
+
+  .j .studio-steps li {
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+  }
+
+  .j .studio-steps small {
+    font-size: 0.74rem;
+  }
+
+  .j .studio-title {
+    font-size: clamp(1.8rem, 8vw, 2.6rem);
+  }
+
+  .j .studio-note p {
+    font-size: 0.98rem;
+  }
+}
+
+/* short phones: the sign-up card keeps just its title */
+@media (max-height: 720px) and (max-width: 899px) {
+  .j-card-join .sub {
+    display: none;
+  }
+}

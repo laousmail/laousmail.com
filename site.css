@@ -1608,6 +1608,19 @@ main.sec > p + p {
   color: var(--ink);
 }
 
+/* back to the start, at the very end */
+.foot-top {
+  color: var(--mute);
+  font: 500 0.74rem var(--mono, monospace);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.foot-top:hover {
+  color: var(--gold);
+}
+
 /* ——— Mini-player ——— */
 .player {
   position: fixed;

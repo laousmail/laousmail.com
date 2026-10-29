@@ -378,15 +378,16 @@ html[lang="fr"] [data-lang="en"] {
   margin-top: 2rem;
 }
 
+/* The menu button shows at every width (the playable lives in the menu) */
+.nav-open {
+  display: grid;
+}
+
 @media (max-width: 860px) {
   .nav-links,
   .tools > .pill,
   .tools > .mode {
     display: none;
-  }
-
-  .nav-open {
-    display: grid;
   }
 }
 
@@ -2378,87 +2379,4 @@ address,
 var,
 dfn {
   font-style: normal;
-}
-
-/* ——— Link to the playable ——— */
-.play-band {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 1.25rem;
-  margin-top: 2rem;
-  padding: 1.2rem 1.4rem;
-  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line));
-  border-radius: 24px;
-  background: radial-gradient(30rem 12rem at 0% 50%, color-mix(in srgb, var(--hot) 14%, transparent), transparent 70%), var(--bg2);
-  text-decoration: none;
-  transition: border-color 0.2s, transform 0.25s var(--ease);
-}
-
-.play-band:hover {
-  border-color: var(--gold);
-  transform: translateY(-2px);
-}
-
-.play-band-ring {
-  position: relative;
-  width: 3.4rem;
-  height: 3.4rem;
-  border-radius: 50%;
-  border: 1.5px dashed color-mix(in srgb, var(--gold) 70%, transparent);
-  animation: turn 18s linear infinite;
-}
-
-.play-band-ring i {
-  position: absolute;
-  top: -4px;
-  left: 50%;
-  width: 8px;
-  height: 8px;
-  margin-left: -4px;
-  border-radius: 50%;
-  background: var(--gold);
-  box-shadow: 0 0 10px var(--gold);
-}
-
-.play-band-text {
-  display: grid;
-  gap: 0.15rem;
-  color: var(--mute);
-}
-
-.play-band-kicker {
-  color: var(--gold);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.play-band strong {
-  color: var(--ink);
-  font-family: var(--serif);
-  font-size: clamp(1.6rem, 3vw, 2.1rem);
-  font-weight: 600;
-  line-height: 1.1;
-}
-
-.play-band-go {
-  color: var(--gold);
-  font-size: 1.6rem;
-  transition: transform 0.25s var(--ease);
-}
-
-.play-band:hover .play-band-go {
-  transform: translateX(4px);
-}
-
-@media (max-width: 560px) {
-  .play-band {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .play-band-go {
-    display: none;
-  }
 }

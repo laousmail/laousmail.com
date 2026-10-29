@@ -26,13 +26,15 @@ html:has(body.journey) {
   top: var(--nav-h);
   z-index: 2;
   height: var(--stage-h, calc(100svh - var(--nav-h)));
-  margin-bottom: calc(-1 * var(--stage-h, calc(100svh - var(--nav-h))));
   overflow: hidden;
 }
 
+/* the steps slide up under the stage (pulling them up, rather than pushing
+   the stage down, keeps the stage from running over the footer at the end) */
 .j-steps {
   position: relative;
   z-index: 1;
+  margin-top: calc(-1 * var(--stage-h, calc(100svh - var(--nav-h))));
   pointer-events: none;
 }
 
@@ -788,4 +790,9 @@ html:has(body.journey) {
 
 .j-calm .j .orbit-spin {
   animation: none !important;
+}
+
+/* the footer is a resting point too, so snapping never pulls you back from it */
+body.journey .foot {
+  scroll-snap-align: end;
 }

@@ -2689,6 +2689,7 @@ dfn {
 
 /* the song in the studio keeps its ring: the dot grows into it */
 .mcard-studio > .track-art {
+  color: var(--ink);
   border: 0;
   border-radius: 50%;
   background:
@@ -2818,4 +2819,34 @@ dfn {
 /* while the orbit scene plays, it shows the songs: the separate list steps aside */
 body.morph-on .scene[data-scene="music"] {
   display: none;
+}
+
+/* EclipseTone: the logo lights up, then the words and the link */
+.scene[data-scene="eclipse"].is-pinned .eclipse-band {
+  display: grid;
+  align-content: center;
+  min-height: calc(100svh - var(--nav-h) - var(--player-room, 0px));
+  padding-block: 1.5rem;
+}
+
+.scene[data-scene="eclipse"].is-pinned .eclipse-band-inner {
+  opacity: 1;
+  transform: none;
+  transition: none;
+  box-shadow: 0 0 calc(var(--p) * 80px) calc(var(--p) * -10px) color-mix(in srgb, var(--hot) 45%, transparent), var(--panel-shadow, none);
+}
+
+.scene[data-scene="eclipse"].is-pinned .et-mark {
+  scale: calc(0.82 + min(1, var(--p) * 2.5) * 0.18);
+  filter: drop-shadow(0 0 calc(var(--p) * 18px) color-mix(in srgb, var(--hot) 70%, transparent));
+}
+
+.scene[data-scene="eclipse"].is-pinned .eclipse-band-inner > div {
+  opacity: calc((var(--p) - 0.25) * 4);
+  translate: 0 calc((1 - min(1, max(0, var(--p) - 0.2) * 3.5)) * 20px);
+}
+
+.scene[data-scene="eclipse"].is-pinned .eclipse-band-inner > .btn {
+  visibility: var(--et-vis, visible);
+  opacity: calc((var(--p) - 0.5) * 4);
 }

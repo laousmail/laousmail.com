@@ -12,10 +12,12 @@
    - Story: one chapter at a time beside the photo, which slowly warms up.
    - The show: the light grows, then the title, the words and the sign-up
      arrive.
+   - EclipseTone: the logo lights up, then the words and the link.
 
-   A scene pins only when it fits on screen (with room for the mini-player).
-   Otherwise the page reads as before and the scene plays once as it
-   arrives. With reduced motion nothing pins and everything simply shows. */
+   A scene pins when it fits on screen (with room for the mini-player). The
+   orbit and the story also pin when taller than the screen: they scroll in,
+   then hold on their last part. Otherwise the page reads as before and the
+   scene plays once as it arrives. With reduced motion nothing pins and everything simply shows. */
 (() => {
   const $ = (sel, root = document) => root.querySelector(sel)
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel))
@@ -62,9 +64,11 @@
      grows into it (a "ghost" copy of the dot does the flying), then the card
      fills in. The previous card joins the list of songs already shown. */
   const INTRO = 0.5
+  const HOLD = 0.12
   const STOP = 0.75
   const OUTRO = 0.35
   const ease = (k) => 1 - Math.pow(1 - k, 3)
+  let musicSeen = false // counted once per visit
   const lerp = (a, b, k) => a + (b - a) * k
 
   const morph = {
@@ -156,7 +160,7 @@
           }),
       )
       scene.ghostLayer.replaceChildren()
-      scene.firstSeen = false
+      scene.coreFocus = undefined
     },
 
     // the dots on the ring that belong to a card
@@ -184,6 +188,7 @@
     onMode(scene, on) {
       document.body.classList.toggle('morph-on', on)
       if (!on) {
+        window.laousmailOrbitFocus?.(null)
         scene.el.classList.remove('is-morphing')
         scene.orbit.style.translate = ''
         scene.orbit.style.scale = ''
@@ -238,7 +243,8 @@
       if (!scene.pinned || !scene.move) return
       const n = scene.cards.length
       const u = p * defs.hero.units(scene)
-      const a = ease(clamp01(u / INTRO))
+      // a short hold first, so what's at the bottom of the screen can still be read and tapped
+      const a = ease(clamp01((u - HOLD) / (INTRO - HOLD)))
       const out = clamp01((u - INTRO - STOP * n) / OUTRO)
       const { dx, dy, k } = scene.move
       const o = scene.orbit
@@ -257,8 +263,15 @@
       scene.cards.forEach((c, i) => {
         if (u >= INTRO + STOP * i) active = i
       })
-      if (active >= 0 && !scene.firstSeen) {
-        scene.firstSeen = true
+      // the centre of the orbit shows the song that is leaving
+      const c = scene.cards[active]
+      const focus = !c ? null : c.kind === 'song' ? Number(c.index) : c.kind
+      if (focus !== scene.coreFocus) {
+        scene.coreFocus = focus
+        window.laousmailOrbitFocus?.(focus)
+      }
+      if (active >= 0 && !musicSeen) {
+        musicSeen = true
         window.laousmailTrack?.('Reached Music')
       }
 
@@ -358,6 +371,8 @@
     story: {
       perStop: 0.5,
       idle: 1,
+      // too tall for the screen: it scrolls in, then holds on its chapters
+      tallFallback: true,
       setup(scene) {
         scene.list = $('.beats', scene.section)
         scene.railAt = scene.list
@@ -365,6 +380,14 @@
       },
       stops: (scene) => $$('li', scene.list),
       names: (scene) => scene.stops.map((li) => text($('h3', li))),
+    },
+
+    eclipse: {
+      travel: 0.6,
+      idle: 1,
+      paint(scene, p) {
+        scene.el.style.setProperty('--et-vis', p > 0.5 ? 'visible' : 'hidden')
+      },
     },
 
     show: {
@@ -458,13 +481,12 @@
     scene.el.style.removeProperty('--pin-top')
     scene.pinTop = undefined
     const room = scene.def.ignorePlayer ? 0 : playerRoom()
-    const fits =
-      !reduceMotion &&
-      (scene.def.tall
-        ? window.innerHeight >= 520 && window.innerWidth >= 340
-        : scene.section.offsetHeight + room <= window.innerHeight - navH() + 1)
+    const roomy = window.innerHeight >= 520 && window.innerWidth >= 340
+    const short = scene.section.offsetHeight + room <= window.innerHeight - navH() + 1
+    const tall = !short && (scene.def.tall || scene.def.tallFallback)
+    const fits = !reduceMotion && (scene.def.tall ? roomy : short || (tall && roomy))
     scene.pinned = fits
-    if (fits && scene.def.tall) {
+    if (fits && tall) {
       scene.pinTop = Math.min(navH(), window.innerHeight - room - scene.section.offsetHeight)
       scene.el.style.setProperty('--pin-top', `${scene.pinTop}px`)
     }
@@ -551,6 +573,15 @@
         return
       }
       const scene = scenes.find((s) => s.section.id === id)
+      // a show that can't hold still: bring the sign-up itself into view
+      if (scene && !scene.pinned && id === 'show') {
+        const form = $('.join', scene.section)
+        if (form && form.offsetHeight < window.innerHeight - navH()) {
+          e.preventDefault()
+          form.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' })
+          return
+        }
+      }
       if (!scene || !scene.pinned || scene.def.landAt === undefined) return
       // preventDefault also tells the site's own link handler to stand back
       e.preventDefault()

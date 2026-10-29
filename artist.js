@@ -435,6 +435,31 @@
     }, reduceMotion ? 0 : 180)
   }
 
+  /* The orbit scene (scenes.js) turns the centre toward the song leaving the
+     ring: a release (its index), 'studio', 'rest' (the songs to come), or null. */
+  let coreFocus = null
+  window.laousmailOrbitFocus = (focus) => {
+    coreFocus = focus ?? null
+    const core = $('[data-orbit-core]')
+    if (!core) return
+    if (focus == null) return showCore(current >= 0 ? current : null)
+    if (typeof focus === 'number') return showCore(focus)
+    showCore(null)
+    const title = $('[data-core-title]', core)
+    const sub = $('[data-core-sub]', core)
+    const done = releases().length + (brewing() ? 1 : 0)
+    if (focus === 'studio') {
+      const b = brewing()
+      const s = studioState(b)
+      if (!b || !s) return
+      title.textContent = b.title
+      sub.textContent = `${t('In the studio', 'En studio')} · ${stepLabel(s.steps[s.stepIndex])}`
+    } else {
+      title.textContent = `${pad(done + 1)}–${journeyGoal()}`
+      sub.textContent = t('still to come', 'à venir')
+    }
+  }
+
   function renderOrbit() {
     const orbit = $('[data-orbit]')
     const nodesRoot = $('[data-orbit-nodes]')
@@ -480,7 +505,9 @@
         }
         const unpeek = () => {
           hovering = false
-          showCore(current >= 0 ? current : null)
+          // during the orbit scene the centre goes back to the song that is leaving
+          if (coreFocus != null) window.laousmailOrbitFocus(coreFocus)
+          else showCore(current >= 0 ? current : null)
         }
         node.addEventListener('pointerenter', peek)
         node.addEventListener('pointerleave', unpeek)

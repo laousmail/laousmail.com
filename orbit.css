@@ -21,6 +21,7 @@
 :root[data-theme="light"] {
   --line: rgba(23, 18, 14, 0.13);
   --gold: #974507; /* a touch darker: small mono labels need it to read */
+  --hot: #a9380b;
   --panel: rgba(255, 250, 243, 0.88);
   --panel-soft: rgba(255, 250, 243, 0.6);
   --panel-shadow: 0 20px 50px -24px rgba(60, 30, 10, 0.35);

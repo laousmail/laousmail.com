@@ -118,7 +118,8 @@
 
   // sections people reach on the home page
   const sections = { top: 'Hero', music: 'Music', studio: 'Studio', story: 'Story', show: 'Show' }
-  if ('IntersectionObserver' in window) {
+  // with the journey (journey.js) the cards report the parts people reach themselves
+  if ('IntersectionObserver' in window && !document.body.classList.contains('journey')) {
     const seen = new Set()
     const io = new IntersectionObserver(
       (entries) => {

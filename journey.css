@@ -289,7 +289,8 @@ html:has(body.journey) {
 }
 
 .j[data-state="show"] .j-core {
-  background: radial-gradient(circle at 50% 28%, rgba(255, 179, 71, 0.6), rgba(255, 106, 19, 0.25) 40%, rgba(7, 6, 5, 0.96) 72%);
+  /* a dark stage lit from its edge */
+  background: radial-gradient(circle, rgba(7, 6, 5, 0.97) 52%, rgba(255, 106, 19, 0.35) 82%, rgba(255, 179, 71, 0.7) 100%);
 }
 
 .j[data-state="show"] .j-core-text {
@@ -695,6 +696,7 @@ html:has(body.journey) {
 /* a tucked orbit: just its centre and glow, when a long card needs the room */
 .j.is-tucked .orbit-spin,
 .j.is-tucked .orbit-core-text,
+.j.is-tucked .guide-replay,
 .j.is-tucked .j-points {
   visibility: hidden;
 }
@@ -729,9 +731,50 @@ html:has(body.journey) {
   }
 }
 
-/* short phones: the sign-up card keeps just its title */
+/* short phones: the sign-up card keeps its title, the landing its title, countdown and buttons */
 @media (max-height: 720px) and (max-width: 899px) {
-  .j-card-join .sub {
+  .j-card-join .sub,
+  .j-card-landing .hero-lead {
     display: none;
   }
+}
+
+@media (max-width: 599px) {
+  .j-status {
+    gap: 0.2rem 0.55rem;
+    padding-inline: 0.5rem;
+    font-size: 0.64rem;
+    letter-spacing: 0.06em;
+  }
+
+  .j-status span::before {
+    margin-right: 0.55rem;
+  }
+}
+
+/* the ? sits just outside the ring, clear of the songs */
+.j .guide-replay {
+  translate: 34% 34%;
+}
+
+/* the sign-up sits on its own dark disc, with light text, in both themes */
+.j-form::before {
+  content: "";
+  position: absolute;
+  inset: -4%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(7, 6, 5, 0.94) 78%, rgba(7, 6, 5, 0) 100%);
+}
+
+.j-form {
+  --ink: #f2e9dd;
+  --mute: #cfc5b8;
+  --gold: #ffb347;
+  --line: rgba(242, 233, 221, 0.2);
+  color: var(--ink);
+}
+
+.j-form a {
+  color: var(--ink);
 }

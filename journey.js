@@ -299,6 +299,8 @@
       const free = (S) => H - (top0 + 8 + S + 22) - 12 - room
       let S = Math.min(W * 0.74, Math.max(MIN_RING, (H - top0) * PHONE_SIZE[s.key]))
       if (free(S) < need) S = Math.min(S, H - top0 - 42 - room - need)
+      // the landing always shows the whole orbit: its card gives way instead
+      if (s.key === 'landing') S = Math.max(S, MIN_RING)
       geo.byStep[i] = S >= MIN_RING ? phoneGeo(S, false) : phoneGeo(TUCKED, true)
     })
     for (const [i, s] of steps.entries()) {
@@ -387,7 +389,8 @@
       s.el.style.transform = `translateY(${(-d * 46).toFixed(1)}px)`
       const on = Math.abs(d) < 0.35
       s.el.classList.toggle('is-on', on)
-      s.el.style.visibility = vis > 0.01 ? 'visible' : 'hidden'
+      // hidden cards stay reachable by keyboard: focusing one brings it forward
+      s.el.classList.toggle('is-away', vis <= 0.01)
     }
     if (now !== active) {
       setState(now)

@@ -183,6 +183,7 @@
       return
     }
     current = index
+    window.laousmailTrack?.('Play song', { song: r.title })
     renderPlayer()
     if (r.preview && isSafeHttps(r.preview)) {
       audio.src = r.preview
@@ -1196,6 +1197,7 @@
     const cfg = window.LAOUSMAIL_FORM || {}
 
     function showError(message) {
+      window.laousmailTrack?.('Join error')
       if (!error) return
       error.hidden = false
       error.textContent = message
@@ -1279,6 +1281,7 @@
 
         if (fields) fields.hidden = true
         if (success) success.hidden = false
+        window.laousmailTrack?.('Joined the list')
       } catch {
         showError(
           lang() === 'fr'

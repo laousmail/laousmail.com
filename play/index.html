@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob: data:; connect-src 'self' https://cloud.umami.is; object-src 'none'; base-uri 'self'; form-action 'none'" />
 <script>(function(){try{var l=localStorage.getItem("laousmail-lang");document.documentElement.lang=l==="fr"?"fr":"en"}catch(e){}document.documentElement.classList.add("js")})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="description" content="ORBIT, a playable by laousmail: 15 notes, one for each song, a bendir and a drone. Loop, layer, arrange and bounce a song in your browser, free to use in your own music." />
@@ -188,5 +189,6 @@
 <p class="visually-hidden" aria-live="polite" data-status></p>
 
 <script src="play.js" defer></script>
+<script src="../stats.js" defer></script>
 </body>
 </html>

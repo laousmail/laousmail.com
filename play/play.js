@@ -506,6 +506,7 @@
       T.take = null
     } else {
       T.rec = true
+      window.laousmailTrack?.('ORBIT record')
       if (!T.playing) play(true)
     }
     renderTransport()
@@ -749,6 +750,7 @@
       a.textContent = `${t('Download', 'Télécharger')} ${name} · ${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`
       take.append(a)
       toast(t('Bounce ready', 'Export prêt'))
+      window.laousmailTrack?.('ORBIT export', { what })
       status(t('Bounce ready. Download link in File.', 'Export prêt. Lien dans Fichier.'))
     } catch {
       toast(t('This browser could not render the file', 'Ce navigateur n’a pas pu créer le fichier'))
@@ -759,6 +761,7 @@
 
   /* ——— Project files ——— */
   function saveProjectFile() {
+    window.laousmailTrack?.('ORBIT save project')
     const blob = new Blob([serialize(proj)], { type: 'application/json' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
@@ -1538,6 +1541,7 @@
     wake()
     ac.onstatechange = syncSoundNote
     $('[data-start]').classList.add('is-gone')
+    window.laousmailTrack?.('ORBIT start')
     ;[0, 4, 7].forEach((i, k) => window.setTimeout(() => playNote(i, 0.6), 120 + k * 140))
     status(t('Ready. Play the ring, or press record.', 'Prêt. Joue l’anneau, ou enregistre.'))
   }

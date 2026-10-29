@@ -254,6 +254,15 @@
 
   /* ——— Layout: where the orbit sits and where the cards go ——— */
   let H = 0
+  // scroll distance per card: a short flick, not a whole screen
+  let STEP = 0
+  let lastSize = ''
+  const PAGE = 0.6
+  // the small viewport height (100svh) stays put when the iPhone address bar slides
+  const probe = document.createElement('div')
+  probe.style.cssText = 'position:fixed;left:0;top:0;width:0;height:100svh;visibility:hidden;pointer-events:none'
+  document.body.append(probe)
+  const viewH = () => probe.offsetHeight || window.innerHeight
   let geo = null
   let built = false
 
@@ -270,8 +279,11 @@
 
   function layout() {
     renderStatus()
-    H = window.innerHeight - navH()
+    H = viewH() - navH()
+    STEP = Math.round(H * PAGE)
+    lastSize = `${document.documentElement.clientWidth}x${viewH()}`
     root.style.setProperty('--stage-h', `${H}px`)
+    root.style.setProperty('--step-h', `${STEP}px`)
     const W = document.documentElement.clientWidth
     const wide = W >= 900
     root.classList.toggle('is-wide', wide)
@@ -379,11 +391,35 @@
 
   /* ——— Scrolling: which card, and how far between two ——— */
   const stepsTop = () => stepsRoot.getBoundingClientRect().top + window.scrollY
-  const position = () => (window.scrollY + navH() - stepsTop()) / H
+  const position = () => (window.scrollY + navH() - stepsTop()) / STEP
+
+  const yOf = (i) => Math.round(stepsTop() + i * STEP - navH())
+
+  // our own glide (ease-out, like iOS), so every move lands exactly on a card
+  let glide = null
+  function animateTo(y, ms = 520) {
+    if (glide) cancelAnimationFrame(glide.raf)
+    const from = window.scrollY
+    if (reduceMotion || Math.abs(y - from) < 2) {
+      window.scrollTo(0, y)
+      glide = null
+      return
+    }
+    const t0 = performance.now()
+    const tick = (now) => {
+      const k = Math.min(1, (now - t0) / ms)
+      const e = 1 - Math.pow(1 - k, 3)
+      window.scrollTo(0, Math.round(from + (y - from) * e))
+      if (k < 1) glide = { raf: requestAnimationFrame(tick) }
+      else glide = null
+    }
+    glide = { raf: requestAnimationFrame(tick) }
+  }
 
   function go(i, smooth = true) {
-    const y = stepsTop() + i * H - navH()
-    window.scrollTo({ top: Math.round(y), behavior: smooth && !reduceMotion ? 'smooth' : 'auto' })
+    const to = Math.max(0, Math.min(steps.length - 1, i))
+    if (smooth) animateTo(yOf(to))
+    else window.scrollTo(0, yOf(to))
   }
 
   let active = -1
@@ -628,6 +664,132 @@
     if (i >= 0 && i !== active) go(i)
   })
 
+  /* ——— Paging, like iPhone lists: one gesture moves one card ———
+     The page follows the finger; on release it glides to the next card if you
+     moved a little or flicked, or back if you barely moved. A wheel notch or
+     a trackpad flick moves one card however strong it is. Below the last card
+     the page scrolls normally, down to the footer. */
+  const last = () => steps.length - 1
+  const inJourney = () => position() < last() + 0.02
+  const blocked = (e) =>
+    document.body.classList.contains('menu-open') ||
+    document.body.classList.contains('guide-open') ||
+    e.target.closest?.('.menu, [data-player], input, textarea, select')
+
+  // touch
+  let touch = null
+  window.addEventListener(
+    'touchstart',
+    (e) => {
+      if (e.touches.length !== 1 || blocked(e) || !inJourney()) {
+        touch = null
+        return
+      }
+      if (glide) cancelAnimationFrame(glide.raf)
+      glide = null
+      const t = e.touches[0]
+      touch = { x: t.clientX, y: t.clientY, y0: window.scrollY, at: performance.now(), last: t.clientY, lastAt: performance.now(), v: 0, axis: null, from: Math.round(position()) }
+    },
+    { passive: true },
+  )
+  window.addEventListener(
+    'touchmove',
+    (e) => {
+      if (!touch || e.touches.length !== 1) return
+      const t = e.touches[0]
+      const dx = t.clientX - touch.x
+      const dy = t.clientY - touch.y
+      if (!touch.axis) {
+        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return
+        touch.axis = Math.abs(dy) >= Math.abs(dx) ? 'y' : 'x'
+      }
+      if (touch.axis !== 'y') return
+      // past the last card, going down: let the page scroll on to the footer
+      if (touch.from >= last() && dy < 0) {
+        touch = null
+        return
+      }
+      e.preventDefault()
+      const now = performance.now()
+      touch.v = (t.clientY - touch.last) / Math.max(1, now - touch.lastAt)
+      touch.last = t.clientY
+      touch.lastAt = now
+      // the page follows the finger (a little stiffer past the first card)
+      const pull = touch.from === 0 && dy > 0 ? dy * 0.35 : dy
+      window.scrollTo(0, Math.round(touch.y0 - pull))
+    },
+    { passive: false },
+  )
+  window.addEventListener('touchend', () => {
+    if (!touch || touch.axis !== 'y') {
+      touch = null
+      return
+    }
+    const moved = touch.y - touch.last
+    const fling = -touch.v
+    let to = touch.from
+    if (moved > 28 || fling > 0.25) to = touch.from + 1
+    else if (moved < -28 || fling < -0.25) to = touch.from - 1
+    touch = null
+    go(to)
+  })
+  window.addEventListener('touchcancel', () => {
+    if (touch) go(touch.from)
+    touch = null
+  })
+
+  // wheel and trackpad: one card per gesture, then wait for the gesture to end
+  let wheelLock = 0
+  let wheelQuiet = 0
+  let wheelSum = 0
+  let wheelLast = 0
+  window.addEventListener(
+    'wheel',
+    (e) => {
+      if (e.ctrlKey || blocked(e) || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return
+      const pos = position()
+      const down = e.deltaY > 0
+      // below the last card (or leaving it downwards) the page scrolls as usual
+      if (pos > last() + 0.02 || (Math.round(pos) >= last() && down && !glide)) return
+      e.preventDefault()
+      window.clearTimeout(wheelQuiet)
+      wheelQuiet = window.setTimeout(() => {
+        wheelLock = 0
+        wheelSum = 0
+        wheelLast = 0
+      }, 180)
+      // lines (Firefox) to pixels
+      const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY
+      // a trackpad's coasting slows down; a new push speeds up again: that's a new gesture
+      const strength = Math.abs(dy)
+      if (wheelLock && !glide && strength > wheelLast * 1.3 + 4 && strength >= 12) wheelLock = 0
+      wheelLast = strength
+      // the faint tail of a flick never starts a move on its own
+      if (wheelLock || strength < 12) return
+      wheelSum += dy
+      if (Math.abs(wheelSum) < 24) return
+      wheelLock = 1
+      go(Math.round(pos) + (down ? 1 : -1))
+    },
+    { passive: false },
+  )
+
+  // the scrollbar or anything else that leaves the page between two cards: settle on the nearest
+  let settleTimer = 0
+  window.addEventListener(
+    'scroll',
+    () => {
+      window.clearTimeout(settleTimer)
+      settleTimer = window.setTimeout(() => {
+        if (glide || touch) return
+        const pos = position()
+        if (pos < -0.02 || pos > last() + 0.02) return
+        if (Math.abs(pos - Math.round(pos)) > 0.02) go(Math.round(pos))
+      }, 160)
+    },
+    { passive: true },
+  )
+
   /* ——— Start ——— */
   fillSongs()
   renderStatus()
@@ -653,7 +815,11 @@
   let resizeTimer = 0
   window.addEventListener('resize', () => {
     window.clearTimeout(resizeTimer)
-    resizeTimer = window.setTimeout(layout, 120)
+    // the address bar sliding on a phone changes nothing here: only a real resize lays out again
+    resizeTimer = window.setTimeout(() => {
+      const key = `${document.documentElement.clientWidth}x${viewH()}`
+      if (key !== lastSize) layout()
+    }, 120)
   })
   document.fonts?.ready.then(layout)
   window.addEventListener('load', layout, { once: true })

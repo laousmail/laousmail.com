@@ -6,8 +6,10 @@ body.journey main > :not(.j) {
   display: none;
 }
 
+/* paging is done by journey.js (one gesture, one card): no CSS snapping to fight it */
 html:has(body.journey) {
-  scroll-snap-type: y proximity;
+  scroll-behavior: auto;
+  overscroll-behavior-y: none;
 }
 
 .j {
@@ -39,8 +41,12 @@ html:has(body.journey) {
 }
 
 .j-step {
+  height: var(--step-h, 60svh);
+}
+
+/* the last card keeps the stage on screen for a full screen, then the footer */
+.j-step:last-child {
   height: var(--stage-h, calc(100svh - var(--nav-h)));
-  scroll-snap-align: start;
 }
 
 /* ——— The status line: the message, always ——— */
@@ -882,10 +888,6 @@ html:has(body.journey) {
   padding-block: 0.2rem;
 }
 
-/* the footer is a resting point too, so snapping never pulls you back from it */
-body.journey .foot {
-  scroll-snap-align: end;
-}
 
 .j-share {
   border: 0;

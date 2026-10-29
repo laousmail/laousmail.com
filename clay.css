@@ -1,0 +1,457 @@
+/* laousmail.com — clay edition.
+   Loaded after site.css. Surfaces become soft, solid, puffy clay: big
+   rounded corners, a soft drop shadow under each piece, and light and shade
+   pressed into the surface (light from the top-left). Things you press sink in. */
+
+:root,
+:root[data-theme="dark"] {
+  --bg: #1b130f;
+  --bg2: #2a1d17;
+  --bg3: #33241c;
+  --line: #3c2b22;
+  --clay: #2b1e18;
+  --clay-raised: #34251d;
+  --clay-sunk: #1f1612;
+  --clay-drop: 12px 16px 32px -6px rgba(0, 0, 0, 0.55);
+  --clay-drop-sm: 6px 8px 16px -4px rgba(0, 0, 0, 0.5);
+  --clay-light: rgba(255, 214, 180, 0.1);
+  --clay-shade: rgba(0, 0, 0, 0.42);
+  --glass: rgba(27, 19, 15, 0.86);
+}
+
+:root[data-theme="light"] {
+  --bg: #f4e4d6;
+  --bg2: #fbefe4;
+  --bg3: #f0dccb;
+  --line: #e7cdb8;
+  --mute: #6a5040;
+  --clay: #fcefe4;
+  --clay-raised: #fff6ee;
+  --clay-sunk: #efdccc;
+  --clay-drop: 12px 16px 30px -8px rgba(160, 80, 30, 0.3);
+  --clay-drop-sm: 6px 8px 16px -6px rgba(160, 80, 30, 0.3);
+  --clay-light: rgba(255, 255, 255, 0.95);
+  --clay-shade: rgba(196, 116, 64, 0.26);
+  --gold: #9a4606;
+  --glass: rgba(244, 228, 214, 0.88);
+}
+
+/* The two recipes: raised clay, and clay pressed in */
+.nav,
+.proof li,
+.countdown,
+.cd-days,
+.cd-clock span,
+.track,
+.track-rest,
+.studio-inner,
+.beats li,
+.story-photo,
+.join,
+.eclipse-band-inner,
+.foot,
+.player,
+.guide,
+.chip,
+.btn.ghost,
+.lang,
+.mode,
+.nav-open,
+.guide-replay,
+.studio-cue,
+.orbit-stage::before {
+  background: var(--clay);
+  border: 0;
+  box-shadow:
+    var(--clay-drop),
+    inset 5px 6px 10px var(--clay-light),
+    inset -6px -8px 14px var(--clay-shade);
+}
+
+.join-row,
+.studio-bar,
+.player-time {
+  background: var(--clay-sunk);
+  border: 0;
+  box-shadow:
+    inset 4px 5px 10px var(--clay-shade),
+    inset -4px -5px 10px var(--clay-light);
+}
+
+/* ——— Header: a clay shelf with rounded underside ——— */
+.nav {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-radius: 0 0 26px 26px;
+  box-shadow:
+    0 12px 26px -14px rgba(0, 0, 0, 0.55),
+    inset 0 -6px 12px var(--clay-shade),
+    inset 0 4px 8px var(--clay-light);
+}
+
+.lang {
+  padding: 4px;
+}
+
+.lang button[aria-pressed="true"] {
+  background: var(--clay-sunk);
+  color: var(--ink);
+  box-shadow:
+    inset 3px 4px 8px var(--clay-shade),
+    inset -3px -3px 6px var(--clay-light);
+}
+
+/* ——— Buttons: puffy, and they sink when pressed ——— */
+.btn,
+.pill,
+.play-btn,
+.player-toggle,
+.orbit-core-play {
+  box-shadow:
+    8px 10px 20px -6px color-mix(in srgb, var(--hot) 55%, rgba(0, 0, 0, 0.5)),
+    inset 4px 5px 8px rgba(255, 255, 255, 0.45),
+    inset -5px -6px 10px rgba(120, 40, 0, 0.35);
+}
+
+.btn.ghost {
+  box-shadow:
+    var(--clay-drop-sm),
+    inset 4px 5px 8px var(--clay-light),
+    inset -5px -6px 10px var(--clay-shade);
+}
+
+.btn:active,
+.pill:active,
+.play-btn:active,
+.player-toggle:active,
+.orbit-core-play:active,
+.chip:active,
+.guide-replay:active,
+.mode:active,
+.nav-open:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow:
+    inset 5px 6px 12px rgba(0, 0, 0, 0.35),
+    inset -3px -3px 8px rgba(255, 255, 255, 0.2);
+}
+
+.btn:not(.ghost)::after,
+.pill::after {
+  display: none;
+}
+
+.chip {
+  box-shadow:
+    var(--clay-drop-sm),
+    inset 3px 4px 6px var(--clay-light),
+    inset -4px -4px 8px var(--clay-shade);
+}
+
+.chip:hover {
+  color: var(--ink);
+  box-shadow:
+    var(--clay-drop-sm),
+    inset 3px 4px 6px var(--clay-light),
+    inset -4px -4px 8px var(--clay-shade),
+    0 0 0 2px color-mix(in srgb, var(--gold) 55%, transparent);
+}
+
+/* ——— Hero ——— */
+.proof {
+  gap: 0.7rem;
+}
+
+.proof li {
+  padding: 0.6rem 1rem;
+  border-radius: 18px;
+}
+
+/* Countdown: each number on its own clay tile */
+.countdown {
+  padding: 1rem 1.1rem 0.85rem;
+  border-radius: 30px;
+  column-gap: 0.7rem;
+}
+
+.cd-days,
+.cd-clock span {
+  padding: 0.55rem 0.6rem 0.45rem;
+  border-radius: 18px;
+  background: var(--clay-raised);
+  box-shadow:
+    var(--clay-drop-sm),
+    inset 3px 4px 6px var(--clay-light),
+    inset -4px -4px 8px var(--clay-shade);
+}
+
+.cd-clock {
+  gap: 0.45rem;
+  padding-left: 0;
+  border-left: 0;
+}
+
+.cd-clock i {
+  align-self: center;
+}
+
+/* The orbit sits on a clay plate */
+.orbit-stage::before {
+  content: "";
+  position: absolute;
+  inset: 3%;
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.orbit-core,
+.orbit-halo,
+.orbit-comet,
+.orbit-spin {
+  z-index: 1;
+}
+
+.guide-replay {
+  z-index: 3;
+}
+
+.orbit-core {
+  box-shadow:
+    0 0 0 8px var(--clay-raised),
+    10px 14px 26px -6px rgba(0, 0, 0, 0.55),
+    0 0 70px -10px color-mix(in srgb, var(--hot) 45%, transparent);
+}
+
+.orbit-track {
+  stroke: var(--clay-sunk);
+  stroke-width: 7;
+}
+
+/* Released songs: clay balls with the cover pressed into them */
+.node-out {
+  box-shadow:
+    0 0 0 3px var(--clay-raised),
+    6px 8px 14px -4px rgba(0, 0, 0, 0.6);
+}
+
+.node-out::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow:
+    inset 3px 4px 6px rgba(255, 255, 255, 0.3),
+    inset -4px -5px 8px rgba(0, 0, 0, 0.28);
+}
+
+.node-out.is-active {
+  box-shadow:
+    0 0 0 3px var(--hot),
+    6px 8px 16px -4px rgba(0, 0, 0, 0.6);
+}
+
+.node-out.is-active::after {
+  inset: 0;
+  border: 0;
+  animation: none;
+}
+
+.node-num {
+  box-shadow:
+    2px 3px 6px -1px rgba(0, 0, 0, 0.45),
+    inset 1px 2px 3px rgba(255, 255, 255, 0.5),
+    inset -2px -2px 3px rgba(120, 40, 0, 0.35);
+}
+
+/* Songs still to come: little clay pebbles */
+.node-future {
+  border: 0;
+  background: var(--clay-raised);
+  box-shadow:
+    2px 3px 5px -1px rgba(0, 0, 0, 0.5),
+    inset 1px 1px 2px var(--clay-light),
+    inset -1px -2px 3px var(--clay-shade);
+}
+
+@keyframes twinkle {
+  0%, 100% { background: var(--clay-raised); }
+  50% { background: color-mix(in srgb, var(--gold) 70%, var(--clay-raised)); }
+}
+
+/* The song in the studio */
+.node-studio {
+  box-shadow:
+    6px 8px 14px -4px rgba(0, 0, 0, 0.6),
+    inset 3px 4px 6px rgba(255, 255, 255, 0.2),
+    inset -4px -5px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* ——— Music ——— */
+.tracks {
+  gap: 1rem;
+  border-top: 0;
+}
+
+.track {
+  padding: 1rem clamp(1rem, 2.5vw, 1.5rem);
+  border-radius: 30px;
+}
+
+.track.is-playing {
+  box-shadow:
+    var(--clay-drop),
+    inset 5px 6px 10px var(--clay-light),
+    inset -6px -8px 14px var(--clay-shade),
+    0 0 0 2px color-mix(in srgb, var(--gold) 55%, transparent);
+}
+
+.track-art {
+  border-radius: 20px;
+  box-shadow: 5px 7px 12px -4px rgba(0, 0, 0, 0.5);
+}
+
+.track-rest {
+  padding: 1rem 1.4rem;
+  border-radius: 26px;
+}
+
+.track-studio .track-art {
+  border: 0;
+  background: var(--clay-sunk);
+  box-shadow:
+    inset 4px 5px 10px var(--clay-shade),
+    inset -4px -5px 10px var(--clay-light);
+}
+
+/* ——— Studio ——— */
+.studio {
+  background: transparent;
+  border-block: 0;
+}
+
+.studio-inner {
+  padding: clamp(1.4rem, 3.5vw, 2.6rem);
+  border-radius: 36px;
+}
+
+.studio-bar {
+  height: 14px;
+  padding: 3px;
+}
+
+.studio-bar i {
+  box-shadow:
+    inset 2px 2px 3px rgba(255, 255, 255, 0.45),
+    inset -2px -2px 3px rgba(120, 40, 0, 0.35);
+}
+
+.studio-note {
+  padding: 1.1rem 1.3rem;
+  border-left: 0;
+  border-radius: 22px;
+  background: var(--clay-sunk);
+  box-shadow:
+    inset 4px 5px 10px var(--clay-shade),
+    inset -4px -5px 10px var(--clay-light);
+}
+
+.studio-cue {
+  color: var(--ink);
+}
+
+/* ——— Story ——— */
+.story-photo {
+  padding: 10px;
+  border-radius: 34px;
+}
+
+.story-photo img {
+  border-radius: 24px;
+}
+
+.beats {
+  gap: 1rem;
+}
+
+.beats li {
+  padding: 1.4rem 1.5rem;
+  border-radius: 28px;
+}
+
+/* ——— The show ——— */
+.join {
+  padding: clamp(1.1rem, 3vw, 1.6rem);
+  border-radius: 32px;
+}
+
+.join-row {
+  border-radius: 99px;
+}
+
+.consent input {
+  accent-color: var(--hot);
+}
+
+.eclipse-band-inner {
+  border-radius: 34px;
+}
+
+/* ——— Footer ——— */
+.foot {
+  margin: 0 var(--gutter) calc(1rem + env(safe-area-inset-bottom));
+  border-radius: 30px;
+}
+
+/* ——— Floating pieces ——— */
+.player {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-radius: 30px;
+}
+
+.player-art {
+  border-radius: 16px;
+}
+
+.player-time {
+  height: 8px;
+  padding: 2px;
+}
+
+.guide {
+  border-radius: 26px;
+}
+
+.guide-arrow {
+  background: var(--clay);
+  border: 0;
+}
+
+.menu {
+  background: var(--bg);
+}
+
+.menu-links a {
+  border-bottom-color: var(--line);
+}
+
+/* Section backgrounds that glowed now sit flat on the clay table */
+.hero-corona {
+  opacity: 0.55;
+}
+
+.show-glow {
+  opacity: 0.5;
+}
+
+/* Phones: lighter shadows so scrolling stays smooth */
+@media (max-width: 600px) {
+  .track,
+  .beats li,
+  .proof li {
+    box-shadow:
+      var(--clay-drop-sm),
+      inset 4px 5px 8px var(--clay-light),
+      inset -5px -6px 10px var(--clay-shade);
+  }
+}

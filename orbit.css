@@ -1,0 +1,265 @@
+/* laousmail.com — ORBIT edition. Loaded after site.css.
+   The look of the playable (play/): a black stage with a living canvas behind
+   the whole page (field.js: trails, sparks, ripples, a turning crown of ticks
+   and a sound-wave round the orbit), small mono labels like an instrument's
+   panel, and surfaces like the studio dock: near-black, a hairline edge, a
+   soft blur and a deep shadow. */
+
+:root {
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+:root,
+:root[data-theme="dark"] {
+  --line: rgba(242, 233, 221, 0.14);
+  --panel: rgba(14, 11, 9, 0.86);
+  --panel-soft: rgba(7, 6, 5, 0.6);
+  --panel-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.8);
+  --glass: rgba(7, 6, 5, 0.72);
+}
+
+:root[data-theme="light"] {
+  --line: rgba(23, 18, 14, 0.13);
+  --gold: #974507; /* a touch darker: small mono labels need it to read */
+  --panel: rgba(255, 250, 243, 0.88);
+  --panel-soft: rgba(255, 250, 243, 0.6);
+  --panel-shadow: 0 20px 50px -24px rgba(60, 30, 10, 0.35);
+  --glass: rgba(246, 241, 234, 0.78);
+}
+
+/* The canvas sits under everything; the page background shows through it */
+body {
+  background: transparent;
+}
+
+.field {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.hero-corona {
+  display: none;
+}
+
+/* ——— Panels, like the studio dock ——— */
+.nav {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.menu {
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.countdown,
+.tracks,
+.join,
+.eclipse-band-inner,
+.player,
+.guide {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--panel-shadow);
+}
+
+.tracks {
+  padding: 0 clamp(0.9rem, 3vw, 1.6rem);
+}
+
+.track:last-child,
+.tracks > :last-child {
+  border-bottom: 0;
+}
+
+.join {
+  padding: clamp(1.2rem, 3vw, 1.75rem);
+}
+
+.studio {
+  background:
+    radial-gradient(60rem 30rem at 50% 0%, color-mix(in srgb, var(--hot) 8%, transparent), transparent 70%),
+    color-mix(in srgb, var(--bg) 55%, transparent);
+}
+
+.studio-note {
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--hot);
+  border-radius: 4px 18px 18px 4px;
+  background: var(--panel);
+}
+
+.story-photo {
+  border: 1px solid var(--line);
+  box-shadow: var(--panel-shadow);
+}
+
+/* ——— Labels: small mono, like the instrument's corners ——— */
+.eyebrow {
+  color: var(--gold);
+  font: 500 0.74rem var(--mono);
+  letter-spacing: 0.2em;
+}
+
+.proof span,
+.cd-days small,
+.cd-clock small,
+.cd-caption,
+.orbit-caption,
+.studio-steps li,
+.studio-meta,
+.studio-cue,
+.track-num,
+.track-rest,
+.chip,
+.node-num,
+.node-tip,
+.player-sub,
+.player-time,
+.join-label,
+.join-note,
+.press,
+.foot,
+.nav-links a,
+.lang button,
+.guide-step {
+  font-family: var(--mono);
+}
+
+.proof span,
+.cd-caption,
+.orbit-caption,
+.track-num,
+.track-rest,
+.join-label,
+.foot {
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+}
+
+.proof span,
+.track-num,
+.join-label {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.proof b {
+  font: 500 1.15rem var(--mono);
+  letter-spacing: 0;
+}
+
+.nav-links a {
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.chip {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.chip:hover {
+  color: var(--gold);
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
+
+/* ——— The countdown reads like the studio's position readout ——— */
+.cd-days strong,
+.cd-clock b {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.cd-clock span {
+  border: 1px solid var(--line);
+  background: var(--panel-soft);
+}
+
+/* ——— Buttons ——— */
+.btn,
+.pill {
+  box-shadow: 0 12px 40px -12px rgba(255, 106, 19, 0.8);
+}
+
+.btn:hover,
+.pill:hover {
+  box-shadow: 0 16px 46px -10px rgba(255, 106, 19, 0.95);
+}
+
+/* the ghost button is an ORBIT toggle: hairline, dark, mono */
+.btn.ghost {
+  border: 1px solid var(--line);
+  background: var(--panel-soft);
+  color: var(--ink);
+  box-shadow: none;
+  font: 500 0.8rem var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.btn.ghost:hover {
+  border-color: var(--gold);
+  box-shadow: none;
+}
+
+.lang,
+.mode,
+.nav-open {
+  border: 1px solid var(--line);
+  background: var(--panel-soft);
+}
+
+/* ——— The orbit: songs still to come look like the playable's pads ——— */
+.node-future {
+  border: 1.5px solid color-mix(in srgb, var(--ink) 26%, transparent);
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.1), var(--bg) 70%);
+}
+
+.orbit-track {
+  stroke: color-mix(in srgb, var(--ink) 10%, transparent);
+}
+
+.orbit-core {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--gold) 45%, transparent),
+    0 0 0 10px color-mix(in srgb, var(--bg) 60%, transparent),
+    0 0 90px -6px color-mix(in srgb, var(--hot) 60%, transparent);
+}
+
+.orbit-core-text strong {
+  font: 500 clamp(1.2rem, 6.5cqi, 2.2rem) var(--mono);
+  letter-spacing: -0.02em;
+}
+
+.orbit-core-text span {
+  font-family: var(--mono);
+}
+
+.guide-replay {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  font-family: var(--mono);
+}
+
+/* ——— Small screens ——— */
+@media (max-width: 520px) {
+  .tracks {
+    padding: 0 0.85rem;
+  }
+}

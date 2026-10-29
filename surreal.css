@@ -1,0 +1,541 @@
+/* laousmail.com — surreal edition.
+   Loaded after site.css. The page plays out on a dream stage: a dusk sky
+   (Magritte daylight in light mode), a horizon that glows, a checkerboard
+   floor gliding to infinity, clouds drifting and spheres levitating over
+   their own shadows. The orbit floats like a moon; the countdown is a
+   melting clock. Panels stay solid enough to read on. */
+
+:root,
+:root[data-theme="dark"] {
+  --bg: #120f24;
+  --bg2: #1a1530;
+  --bg3: #241c3c;
+  --line: #2f2648;
+  --mute: #bdb2c8;
+  --sky-top: #0d0b1f;
+  --sky-mid: #2a1d4c;
+  --sky-low: #6b3463;
+  --horizon: #f08a62;
+  --horizon-glow: rgba(255, 150, 100, 0.55);
+  --tile-a: #1d1630;
+  --tile-b: #2a2040;
+  --floor-haze: #4a2a4c;
+  --cloud: rgba(255, 196, 196, 0.22);
+  --orb-a: #f6b36b;
+  --orb-b: #d1607a;
+  --panel: #171229;
+  --panel-edge: rgba(255, 190, 170, 0.14);
+  --float-shadow: 0 46px 50px -34px rgba(0, 0, 0, 0.85);
+  --glass: rgba(18, 15, 36, 0.82);
+}
+
+:root[data-theme="light"] {
+  --bg: #9cc3e6;
+  --bg2: #fbf5ea;
+  --bg3: #f1e6d4;
+  --line: #e2d4bd;
+  --ink: #1d1a2b;
+  --mute: #4c4558;
+  --hot: #b8410f;
+  --gold: #7c3803;
+  --sky-top: #4f86c6;
+  --sky-mid: #86b6e3;
+  --sky-low: #cfe2f1;
+  --horizon: #f6d9b4;
+  --horizon-glow: rgba(255, 236, 200, 0.7);
+  --tile-a: #e9dcc6;
+  --tile-b: #d8c6a8;
+  --floor-haze: #efe0c6;
+  --cloud: rgba(255, 255, 255, 0.92);
+  --orb-a: #f2a65a;
+  --orb-b: #c94f6d;
+  --panel: #fbf5ea;
+  --panel-edge: rgba(120, 90, 60, 0.14);
+  --float-shadow: 0 46px 50px -34px rgba(60, 40, 30, 0.45);
+  --glass: rgba(251, 245, 234, 0.88);
+}
+
+html {
+  background: var(--sky-top);
+}
+
+body {
+  background: transparent;
+  isolation: isolate;
+}
+
+/* ——— The dream stage (fixed behind everything) ——— */
+.dream {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  --horizon-y: 74%;
+}
+
+.dream-sky {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(1.5px 1.5px at 12% 18%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 28% 8%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1.5px 1.5px at 46% 22%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 63% 12%, rgba(255, 255, 255, 0.75), transparent),
+    radial-gradient(1.5px 1.5px at 78% 28%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 88% 9%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 6% 40%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 55% 38%, rgba(255, 255, 255, 0.45), transparent),
+    linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 34%, var(--sky-low) 54%, var(--horizon) var(--horizon-y), var(--floor-haze) calc(var(--horizon-y) + 0.1%));
+}
+
+:root[data-theme="light"] .dream-sky {
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 34%, var(--sky-low) 54%, var(--horizon) var(--horizon-y), var(--floor-haze) calc(var(--horizon-y) + 0.1%));
+}
+
+/* A low sun (or moon) half sunk into the horizon */
+.dream-sun {
+  position: absolute;
+  left: 50%;
+  top: var(--horizon-y);
+  width: min(60vw, 46rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, var(--horizon-glow), transparent 70%);
+}
+
+/* The floor: a checkerboard running to the vanishing point, gliding toward you */
+.dream-floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--horizon-y);
+  bottom: 0;
+  perspective: 260px;
+  perspective-origin: 50% 0%;
+  overflow: hidden;
+}
+
+.dream-grid {
+  position: absolute;
+  left: -150%;
+  right: -150%;
+  top: 0;
+  height: 900%;
+  transform-origin: 50% 0%;
+  transform: rotateX(78deg);
+  background: repeating-conic-gradient(var(--tile-a) 0 25%, var(--tile-b) 0 50%) 0 0 / 70px 70px;
+  animation: glide 9s linear infinite;
+}
+
+.dream-floor::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--floor-haze) 0%, transparent 38%, transparent 70%, color-mix(in srgb, var(--bg) 55%, transparent) 100%);
+}
+
+@keyframes glide {
+  to { background-position: 0 70px; }
+}
+
+/* Clouds drift across the sky */
+.cloud {
+  position: absolute;
+  width: 220px;
+  height: 80px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 80'%3E%3Cpath d='M30 70c-16 0-26-10-26-22s11-22 26-21C34 12 48 4 64 6c10-12 34-14 46-2 14-10 38-6 46 10 18-4 36 6 38 22 14 2 22 12 22 22 0 8-8 12-16 12H30z' fill='white'/%3E%3C/svg%3E") center / contain no-repeat;
+  opacity: 0.12;
+  animation: drift 90s linear infinite;
+}
+
+:root[data-theme="light"] .cloud {
+  opacity: 0.95;
+}
+
+.cloud.c1 { top: 10%; animation-delay: -10s; transform: scale(1.1); }
+.cloud.c2 { top: 30%; animation-delay: -42s; animation-duration: 120s; transform: scale(0.7); }
+.cloud.c3 { top: 52%; animation-delay: -70s; animation-duration: 100s; transform: scale(0.9); }
+.cloud.c4 { top: 6%; animation-delay: -95s; animation-duration: 140s; transform: scale(0.55); }
+
+@keyframes drift {
+  from { left: -260px; }
+  to { left: 100%; }
+}
+
+/* Spheres levitate above their own shadows */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, #fff6e8 0 6%, var(--orb-a) 30%, var(--orb-b) 78%, color-mix(in srgb, var(--orb-b) 50%, #1a0f20) 100%);
+  animation: levitate 7s ease-in-out infinite;
+}
+
+.orb-shadow {
+  position: absolute;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.45), transparent);
+  animation: shadow-breathe 7s ease-in-out infinite;
+}
+
+/* Spheres float only in the side margins, never behind the content column */
+.orb.o1 { left: calc((100vw - 74rem) / 4 - 22px); top: 52%; width: 44px; height: 44px; }
+.orb.o2 { right: calc((100vw - 74rem) / 4 - 15px); top: 34%; width: 30px; height: 30px; animation-delay: -2.5s; animation-duration: 9s; }
+.orb.o3 { right: calc((100vw - 74rem) / 4 - 10px); top: 62%; width: 20px; height: 20px; animation-delay: -4s; animation-duration: 6s; }
+
+.orb-shadow.s1 { left: calc((100vw - 74rem) / 4 - 26px); top: 86%; width: 52px; }
+.orb-shadow.s2 { right: calc((100vw - 74rem) / 4 - 19px); top: 82%; width: 38px; animation-delay: -2.5s; animation-duration: 9s; }
+.orb-shadow.s3 { right: calc((100vw - 74rem) / 4 - 13px); top: 84%; width: 26px; animation-delay: -4s; animation-duration: 6s; }
+
+@media (max-width: 1360px) {
+  .orb,
+  .orb-shadow {
+    display: none;
+  }
+}
+
+@keyframes levitate {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-22px); }
+}
+
+@keyframes shadow-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(0.7); opacity: 0.5; }
+}
+
+/* ——— Sections paint nothing of their own: the dream shows through ——— */
+.studio {
+  background: transparent;
+  border-block: 0;
+}
+
+.hero-corona {
+  opacity: 0.45;
+}
+
+/* ——— Panels: solid dream-paper that floats, casting a long shadow below ——— */
+.proof li,
+.countdown,
+.track,
+.track-rest,
+.studio-inner,
+.beats li,
+.join,
+.eclipse-band-inner,
+.foot,
+.player,
+.guide,
+.story-photo {
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  box-shadow: var(--float-shadow), 0 2px 0 rgba(255, 255, 255, 0.04) inset;
+}
+
+.nav {
+  background: var(--glass);
+  border-bottom-color: var(--panel-edge);
+}
+
+.chip,
+.btn.ghost,
+.lang,
+.mode,
+.nav-open,
+.guide-replay {
+  background: var(--panel);
+}
+
+.hero-title,
+.hero-lead,
+.orbit-caption,
+.sec-head,
+.show-inner > .eyebrow,
+.show-inner > h2,
+.show-inner > .sub,
+.press {
+  text-shadow: 0 2px 18px color-mix(in srgb, var(--bg) 80%, transparent);
+}
+
+.proof {
+  gap: 0.6rem;
+}
+
+.proof li {
+  padding: 0.55rem 0.9rem;
+  border-radius: 16px;
+}
+
+/* Things on the page drift gently, like everything else in the dream */
+.proof li:nth-child(1) { animation: levitate 8s ease-in-out infinite; }
+.proof li:nth-child(2) { animation: levitate 9s ease-in-out -3s infinite; }
+.proof li:nth-child(3) { animation: levitate 7.5s ease-in-out -5s infinite; }
+
+.proof li {
+  --lift: 6px;
+}
+
+/* ——— The melting clock ——— */
+.countdown {
+  position: relative;
+  border-radius: 24px 30px 46px 20px;
+  transform: rotate(-2deg) skewX(-3deg);
+  transform-origin: 30% 0%;
+  animation: sag 8s ease-in-out infinite alternate;
+}
+
+.countdown::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 8%;
+  top: calc(100% - 2px);
+  height: 34px;
+  background: var(--panel);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 34' preserveAspectRatio='none'%3E%3Cpath d='M0 0h200v4c-8 0-10 6-12 14-2 10-10 10-12 0-2-8-6-12-14-12-10 0-10 12-14 24-3 9-12 9-14 0-3-14-8-22-20-22-10 0-12 8-16 16-3 7-10 7-12 0-3-10-8-16-18-16-12 0-14 6-18 12-2 4-8 4-10 0C42 8 36 4 28 4 16 4 12 12 8 20c-2 4-6 4-8 0z' fill='black'/%3E%3C/svg%3E") top / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 34' preserveAspectRatio='none'%3E%3Cpath d='M0 0h200v4c-8 0-10 6-12 14-2 10-10 10-12 0-2-8-6-12-14-12-10 0-10 12-14 24-3 9-12 9-14 0-3-14-8-22-20-22-10 0-12 8-16 16-3 7-10 7-12 0-3-10-8-16-18-16-12 0-14 6-18 12-2 4-8 4-10 0C42 8 36 4 28 4 16 4 12 12 8 20c-2 4-6 4-8 0z' fill='black'/%3E%3C/svg%3E") top / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+@keyframes sag {
+  from { transform: rotate(-2deg) skewX(-3deg); }
+  to { transform: rotate(-1deg) skewX(-6deg) scaleY(1.02); }
+}
+
+.hero .cta-row {
+  margin-top: 1.4rem;
+}
+
+/* ——— The orbit: a moon that floats over its shadow ——— */
+.orbit {
+  position: relative;
+}
+
+.orbit-stage {
+  animation: moon-float 9s ease-in-out infinite;
+}
+
+.orbit::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 1.2rem;
+  height: 26px;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.5), transparent);
+  animation: moon-shadow 9s ease-in-out infinite;
+}
+
+@keyframes moon-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes moon-shadow {
+  0%, 100% { transform: scaleX(1); opacity: 0.85; }
+  50% { transform: scaleX(0.82); opacity: 0.55; }
+}
+
+/* Hold the moon still while a guide tip points into it */
+body.guide-open .orbit-stage,
+.orbit-stage:hover {
+  animation-play-state: paused;
+}
+
+.orbit-core {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--horizon) 50%, transparent),
+    0 0 0 10px color-mix(in srgb, var(--bg) 60%, transparent),
+    0 0 90px -4px var(--horizon-glow);
+}
+
+/* ——— Music ——— */
+.tracks {
+  gap: 0.9rem;
+  border-top: 0;
+}
+
+.track {
+  padding: 1rem clamp(1rem, 2.5vw, 1.5rem);
+  border-radius: 22px;
+}
+
+.track:nth-child(odd) { transform: rotate(-0.4deg); }
+.track:nth-child(even) { transform: rotate(0.5deg); }
+
+.track.is-playing {
+  border-color: color-mix(in srgb, var(--gold) 60%, transparent);
+}
+
+.track-rest {
+  padding: 1rem 1.4rem;
+  border-radius: 20px;
+}
+
+/* ——— Studio: the panel melts at its lower edge ——— */
+.studio-inner {
+  position: relative;
+  padding: clamp(1.4rem, 3.5vw, 2.6rem);
+  border-radius: 30px 30px 26px 26px;
+}
+
+.studio-inner::after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 14%;
+  top: calc(100% - 2px);
+  height: 30px;
+  background: var(--panel);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 34' preserveAspectRatio='none'%3E%3Cpath d='M0 0h200v4c-8 0-10 6-12 14-2 10-10 10-12 0-2-8-6-12-14-12-10 0-10 12-14 24-3 9-12 9-14 0-3-14-8-22-20-22-10 0-12 8-16 16-3 7-10 7-12 0-3-10-8-16-18-16-12 0-14 6-18 12-2 4-8 4-10 0C42 8 36 4 28 4 16 4 12 12 8 20c-2 4-6 4-8 0z' fill='black'/%3E%3C/svg%3E") top / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 34' preserveAspectRatio='none'%3E%3Cpath d='M0 0h200v4c-8 0-10 6-12 14-2 10-10 10-12 0-2-8-6-12-14-12-10 0-10 12-14 24-3 9-12 9-14 0-3-14-8-22-20-22-10 0-12 8-16 16-3 7-10 7-12 0-3-10-8-16-18-16-12 0-14 6-18 12-2 4-8 4-10 0C42 8 36 4 28 4 16 4 12 12 8 20c-2 4-6 4-8 0z' fill='black'/%3E%3C/svg%3E") top / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+/* ——— Story: the photo is a window in the sky (Magritte) ——— */
+.story-photo {
+  padding: 12px;
+  border-radius: 6px;
+  transform: rotate(-1.5deg);
+}
+
+.story-photo img {
+  border-radius: 2px;
+}
+
+.beats {
+  gap: 0.9rem;
+}
+
+.beats li {
+  padding: 1.4rem 1.5rem;
+  border-radius: 22px;
+}
+
+.beats li:nth-child(2) { margin-left: 1.5rem; }
+.beats li:nth-child(4) { margin-left: 0.75rem; }
+
+@media (max-width: 600px) {
+  .beats li:nth-child(n) {
+    margin-left: 0;
+  }
+}
+
+/* ——— The show ——— */
+.join {
+  padding: clamp(1.1rem, 3vw, 1.6rem);
+  border-radius: 26px;
+}
+
+.join-row {
+  background: var(--bg);
+}
+
+.eclipse-band-inner {
+  border-radius: 28px;
+}
+
+.show-glow {
+  opacity: 0.4;
+}
+
+/* ——— Footer ——— */
+.foot {
+  margin: 0 var(--gutter) calc(1rem + env(safe-area-inset-bottom));
+  border-radius: 24px;
+}
+
+/* ——— Floating pieces ——— */
+.player {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-radius: 24px;
+}
+
+.guide-arrow {
+  background: var(--panel);
+}
+
+.menu {
+  background: var(--bg2);
+}
+
+/* Small screens: fewer floating things, so nothing crowds the reading */
+@media (max-width: 720px) {
+  .cloud.c3,
+  .cloud.c4 {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .countdown {
+    transform: rotate(-2deg) skewX(-3deg);
+  }
+
+  .track:nth-child(n),
+  .proof li {
+    animation: none;
+  }
+}
+
+/* ——— Dream mist: a soft fog behind text that sits straight on the scenery,
+   so it stays readable wherever it crosses the sky, the glow or the floor ——— */
+.sec-head,
+.show-inner,
+.hero-title,
+.hero-lead,
+.orbit-caption {
+  position: relative;
+  isolation: isolate;
+}
+
+.sec-head::before,
+.show-inner::before,
+.hero-title::before,
+.hero-lead::before,
+.orbit-caption::before {
+  content: "";
+  position: absolute;
+  inset: -1.1rem -1.6rem;
+  z-index: -1;
+  border-radius: 48px;
+  background: color-mix(in srgb, var(--panel) 86%, transparent);
+  filter: blur(16px);
+  pointer-events: none;
+}
+
+.sec-head.center::before {
+  inset: -1.1rem -2.4rem;
+}
+
+/* The ? stays put while the moon floats around it */
+.orbit-stage .guide-replay {
+  animation: moon-hold 9s ease-in-out infinite;
+}
+
+@keyframes moon-hold {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 14px; }
+}
+
+body.guide-open .orbit-stage .guide-replay,
+.orbit-stage:hover .guide-replay {
+  animation-play-state: paused;
+}
+
+/* Daylight mist: softer and wider, so it reads as haze, not a box */
+:root[data-theme="light"] .sec-head::before,
+:root[data-theme="light"] .show-inner::before,
+:root[data-theme="light"] .hero-title::before,
+:root[data-theme="light"] .hero-lead::before,
+:root[data-theme="light"] .orbit-caption::before {
+  inset: -1.6rem -2.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel) 66%, transparent);
+  filter: blur(28px);
+}

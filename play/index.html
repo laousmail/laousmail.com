@@ -4,12 +4,12 @@
 <meta charset="UTF-8" />
 <script>(function(){try{var l=localStorage.getItem("laousmail-lang");document.documentElement.lang=l==="fr"?"fr":"en"}catch(e){}document.documentElement.classList.add("js")})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="description" content="ORBIT, a playable by laousmail: 15 notes, one for each song, a bendir and a drone. Play in your browser, record a take, and use it in your own music." />
+<meta name="description" content="ORBIT, a playable by laousmail: 15 notes, one for each song, a bendir and a drone. Loop, layer, arrange and bounce a song in your browser, free to use in your own music." />
 <meta name="theme-color" content="#070605" />
 <link rel="canonical" href="https://laousmail.com/play/" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="ORBIT · a playable by laousmail" />
-<meta property="og:description" content="15 notes, one for each song. Play, record a take, use it in your music." />
+<meta property="og:description" content="15 notes, one for each song. Loop, layer, arrange, and bounce your song." />
 <meta property="og:image" content="https://laousmail.com/media/portrait-guitar.webp" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -21,10 +21,9 @@
 <body>
 <canvas class="field" data-field aria-hidden="true"></canvas>
 
-<!-- Corners -->
 <header class="corner corner-tl">
   <a class="back" href="../"><span aria-hidden="true">←</span> laousmail</a>
-  <h1 class="title">ORBIT <span>·</span> <span data-lang="en">Playable 01</span><span data-lang="fr">Jouable 01</span></h1>
+  <h1 class="title">ORBIT <span>·</span> <span data-lang="en">Studio</span><span data-lang="fr">Studio</span></h1>
 </header>
 
 <div class="corner corner-tr">
@@ -32,43 +31,136 @@
     <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
     <button type="button" data-lang-btn="fr" aria-pressed="false">FR</button>
   </div>
-  <button type="button" class="toggle" data-drone aria-pressed="false">
-    <i aria-hidden="true"></i><span data-lang="en">Drone</span><span data-lang="fr">Bourdon</span>
-  </button>
-  <button type="button" class="toggle" data-pulse aria-pressed="false">
-    <i aria-hidden="true"></i><span data-lang="en">Pulse 6/8</span><span data-lang="fr">Pulsation 6/8</span>
-  </button>
-  <button type="button" class="toggle rec" data-rec aria-pressed="false">
-    <i aria-hidden="true"></i><span data-rec-label>Record</span>
-  </button>
-</div>
-
-<div class="corner corner-bl">
-  <p><span data-lang="en">Scale</span><span data-lang="fr">Gamme</span> · D Hijaz · <span data-lang="en">15 notes, one for each song</span><span data-lang="fr">15 notes, une par chanson</span></p>
-  <p class="how">
-    <span data-lang="en">Tap or drag across the ring to strum. Bendir: centre dum, rim tek.</span>
-    <span data-lang="fr">Touche ou glisse sur l’anneau pour gratter. Bendir: centre dum, bord tek.</span>
-    <span class="keys"><span data-lang="en">Keys</span><span data-lang="fr">Touches</span> A–; · Q–T · <span data-lang="en">Space</span><span data-lang="fr">Espace</span> dum · B tek</span>
-  </p>
-</div>
-
-<div class="corner corner-br">
-  <p class="take" data-take hidden></p>
-  <p class="licence">
-    <span data-lang="en">Free to use in your own music. Credit laousmail.</span>
-    <span data-lang="fr">Libre d’utilisation dans ta musique. Crédite laousmail.</span>
-  </p>
 </div>
 
 <!-- The instrument -->
 <main class="stage" data-stage aria-label="ORBIT instrument">
   <div class="ring" data-ring role="group" aria-label="15 notes"></div>
   <!-- One drum, two strokes, like a real bendir: dum in the centre, tek at the rim -->
-  <button type="button" class="bendir" data-bendir aria-label="Bendir: centre plays dum, rim plays tek (B key)">
+  <button type="button" class="bendir" data-bendir aria-label="Bendir: centre plays dum (V key), rim plays tek (B key)">
     <span class="bendir-rim" aria-hidden="true">tek</span>
     <span class="bendir-face" aria-hidden="true">dum</span>
   </button>
 </main>
+
+<!-- The studio: transport always visible, five panels behind tabs -->
+<section class="dock" data-dock aria-label="Studio">
+  <div class="dock-bar">
+    <button type="button" class="tbtn play" data-play aria-pressed="false" aria-label="Play">
+      <svg class="i-play" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
+      <svg class="i-stop" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M6 6h12v12H6z"/></svg>
+    </button>
+    <button type="button" class="tbtn rec" data-rec aria-pressed="false" aria-label="Record">
+      <i aria-hidden="true"></i>
+    </button>
+    <button type="button" class="tbtn" data-undo aria-label="Undo last layer">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+    </button>
+    <div class="readout" aria-live="off">
+      <strong data-pos>1.1</strong>
+      <span data-pos-sub>104 BPM · 6/8</span>
+    </div>
+    <button type="button" class="tbtn mode" data-mode aria-pressed="false">
+      <span data-mode-label>Loop</span>
+    </button>
+    <button type="button" class="tbtn expand" data-expand aria-expanded="false" aria-controls="dock-panels" aria-label="Open studio">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>
+    </button>
+  </div>
+
+  <div class="dock-panels" id="dock-panels" data-panels hidden>
+    <div class="tabs" role="tablist" aria-label="Studio sections">
+      <button type="button" role="tab" data-tab="loop" aria-selected="true"><span data-lang="en">Loop</span><span data-lang="fr">Boucle</span></button>
+      <button type="button" role="tab" data-tab="arrange" aria-selected="false"><span data-lang="en">Arrange</span><span data-lang="fr">Arranger</span></button>
+      <button type="button" role="tab" data-tab="mix" aria-selected="false"><span data-lang="en">Mix</span><span data-lang="fr">Mix</span></button>
+      <button type="button" role="tab" data-tab="setup" aria-selected="false"><span data-lang="en">Setup</span><span data-lang="fr">Réglages</span></button>
+      <button type="button" role="tab" data-tab="file" aria-selected="false"><span data-lang="en">File</span><span data-lang="fr">Fichier</span></button>
+    </div>
+
+    <!-- Loop: patterns and their layers -->
+    <div class="panel" role="tabpanel" data-panel="loop">
+      <div class="row">
+        <span class="label"><span data-lang="en">Pattern</span><span data-lang="fr">Motif</span></span>
+        <div class="seg" data-patterns role="group" aria-label="Patterns"></div>
+        <button type="button" class="chipbtn" data-pat-drone aria-pressed="false"><i aria-hidden="true"></i><span data-lang="en">Drone</span><span data-lang="fr">Bourdon</span></button>
+        <button type="button" class="chipbtn" data-pat-groove aria-pressed="false"><i aria-hidden="true"></i><span data-lang="en">Groove</span><span data-lang="fr">Groove</span></button>
+      </div>
+      <ul class="layers" data-layers></ul>
+      <div class="row end">
+        <button type="button" class="textbtn" data-copy-pattern><span data-lang="en">Copy to next empty</span><span data-lang="fr">Copier vers un motif vide</span></button>
+        <button type="button" class="textbtn danger" data-clear-pattern><span data-lang="en">Clear pattern</span><span data-lang="fr">Vider le motif</span></button>
+      </div>
+    </div>
+
+    <!-- Arrange: the song, as a chain of patterns -->
+    <div class="panel" role="tabpanel" data-panel="arrange" hidden>
+      <p class="hint"><span data-lang="en">Build the song from patterns. In Song mode the transport plays this chain.</span><span data-lang="fr">Construis la chanson avec les motifs. En mode Chanson, la lecture suit cette suite.</span></p>
+      <ol class="arrangement" data-arrangement></ol>
+      <div class="row">
+        <span class="label"><span data-lang="en">Add</span><span data-lang="fr">Ajouter</span></span>
+        <div class="seg" data-arr-add role="group" aria-label="Add pattern to the song"></div>
+        <button type="button" class="textbtn danger" data-arr-clear><span data-lang="en">Clear song</span><span data-lang="fr">Vider la chanson</span></button>
+      </div>
+      <p class="hint" data-arr-length></p>
+    </div>
+
+    <!-- Mix -->
+    <div class="panel" role="tabpanel" data-panel="mix" hidden>
+      <div class="mixer" data-mixer></div>
+    </div>
+
+    <!-- Setup -->
+    <div class="panel" role="tabpanel" data-panel="setup" hidden>
+      <div class="row">
+        <span class="label">Tempo</span>
+        <button type="button" class="chipbtn sq" data-bpm-down aria-label="Slower">−</button>
+        <input class="bpm" data-bpm type="range" min="60" max="160" step="1" value="104" aria-label="Tempo, beats per minute" />
+        <button type="button" class="chipbtn sq" data-bpm-up aria-label="Faster">+</button>
+        <strong class="bpm-val" data-bpm-val>104</strong>
+      </div>
+      <div class="row">
+        <span class="label"><span data-lang="en">Meter</span><span data-lang="fr">Mesure</span></span>
+        <div class="seg" data-meter role="group" aria-label="Meter">
+          <button type="button" data-v="6/8">6/8</button><button type="button" data-v="4/4">4/4</button>
+        </div>
+        <span class="label"><span data-lang="en">Bars</span><span data-lang="fr">Mesures</span></span>
+        <div class="seg" data-bars role="group" aria-label="Loop length in bars">
+          <button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="4">4</button>
+        </div>
+      </div>
+      <div class="row">
+        <span class="label">Quantize</span>
+        <div class="seg" data-quant role="group" aria-label="Quantize">
+          <button type="button" data-v="0"><span data-lang="en">Off</span><span data-lang="fr">Non</span></button><button type="button" data-v="0.5">1/8</button><button type="button" data-v="0.25">1/16</button>
+        </div>
+        <button type="button" class="chipbtn" data-click aria-pressed="true"><i aria-hidden="true"></i><span data-lang="en">Click</span><span data-lang="fr">Métronome</span></button>
+      </div>
+    </div>
+
+    <!-- File -->
+    <div class="panel" role="tabpanel" data-panel="file" hidden>
+      <div class="row">
+        <button type="button" class="chipbtn strong" data-bounce="song"><span data-lang="en">Bounce song (WAV)</span><span data-lang="fr">Exporter la chanson (WAV)</span></button>
+        <button type="button" class="chipbtn" data-bounce="loop"><span data-lang="en">Bounce loop</span><span data-lang="fr">Exporter la boucle</span></button>
+      </div>
+      <p class="take" data-take hidden></p>
+      <div class="row">
+        <button type="button" class="chipbtn" data-save><span data-lang="en">Save project</span><span data-lang="fr">Enregistrer le projet</span></button>
+        <label class="chipbtn" for="open-project"><span data-lang="en">Open project</span><span data-lang="fr">Ouvrir un projet</span></label>
+        <input id="open-project" class="visually-hidden" type="file" accept=".json,application/json" data-open />
+        <button type="button" class="textbtn danger" data-new><span data-lang="en">New project</span><span data-lang="fr">Nouveau projet</span></button>
+      </div>
+      <p class="hint">
+        <span data-lang="en">Your project saves on this device as you go. Free to use in your own music. Credit laousmail.</span>
+        <span data-lang="fr">Ton projet s’enregistre sur cet appareil au fur et à mesure. Libre d’utilisation dans ta musique. Crédite laousmail.</span>
+      </p>
+      <p class="hint keys">
+        <span data-lang="en">Keys: A–; and Q–T play notes · V dum · B tek · Space play/stop · Shift+R record · ⌘/Ctrl+Z undo</span>
+        <span data-lang="fr">Touches: A–; et Q–T jouent les notes · V dum · B tek · Espace lecture/stop · Maj+R enregistrer · ⌘/Ctrl+Z annuler</span>
+      </p>
+    </div>
+  </div>
+</section>
 
 <!-- Start: audio needs a tap before it can play -->
 <div class="start" data-start>
@@ -76,8 +168,8 @@
     <p class="start-kicker"><span data-lang="en">A playable by laousmail</span><span data-lang="fr">Un jouable de laousmail</span></p>
     <h2>ORBIT</h2>
     <p class="start-lead">
-      <span data-lang="en">Fifteen notes, one for each song before the show. A bendir in the centre. Sound and image, together.</span>
-      <span data-lang="fr">Quinze notes, une pour chaque chanson avant le spectacle. Un bendir au centre. Le son et l’image, ensemble.</span>
+      <span data-lang="en">Fifteen notes, one for each song before the show, and a bendir. Play, loop, layer and arrange your own song, then take it with you.</span>
+      <span data-lang="fr">Quinze notes, une pour chaque chanson avant le spectacle, et un bendir. Joue, boucle, superpose et arrange ta chanson, puis emporte-la.</span>
     </p>
     <button type="button" class="start-btn" data-begin>
       <span data-lang="en">Tap to play</span><span data-lang="fr">Touche pour jouer</span>
@@ -92,6 +184,7 @@
   <span data-lang="fr">Le son est en pause. Touche ici pour l’activer.</span>
 </button>
 
+<div class="toast" data-toast role="status" hidden></div>
 <p class="visually-hidden" aria-live="polite" data-status></p>
 
 <script src="play.js" defer></script>

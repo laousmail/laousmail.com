@@ -182,7 +182,7 @@
     const geo = padGeo[i]
     const src = ac.createBufferSource()
     src.buffer = plucks[i]
-    src.detune.value = (Math.random() - 0.5) * 8 // strings are never perfectly in tune
+    if (src.detune) src.detune.value = (Math.random() - 0.5) * 8 // strings are never perfectly in tune
     const out = voiceOut(geo ? Math.max(-0.8, Math.min(0.8, geo.dx)) : 0)
     out.gain.value = 0.55 * velocity
     src.connect(out)
@@ -451,6 +451,9 @@
 
   function initInput() {
     const stage = $('[data-stage]')
+    for (const type of ['pointerdown', 'touchend', 'click', 'keydown']) {
+      window.addEventListener(type, wake, { capture: true, passive: true })
+    }
     stage.addEventListener('pointerdown', (e) => {
       if (!ac) return
       const drum = e.target.closest('[data-bendir]')
@@ -657,27 +660,81 @@
     requestAnimationFrame(frame)
   }
 
-  /* ——— iOS: play through the silent switch ——— */
-  function unlockIOS() {
+  /* ——— Keeping the sound on (iPhone silent switch, paused audio) ——— */
+  let keepAlive = null
+
+  // A real, half-second silent WAV, looped: while an <audio> element plays,
+  // iOS routes web audio through the speaker even with the silent switch on.
+  function silentWav() {
+    const rate = 8000
+    const n = rate / 2
+    const buf = new ArrayBuffer(44 + n)
+    const v = new DataView(buf)
+    const str = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)))
+    str(0, 'RIFF'); v.setUint32(4, 36 + n, true); str(8, 'WAVE'); str(12, 'fmt ')
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true)
+    v.setUint32(24, rate, true); v.setUint32(28, rate, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true)
+    str(36, 'data'); v.setUint32(40, n, true)
+    for (let i = 0; i < n; i += 1) v.setUint8(44 + i, 128) // 8-bit silence
+    return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }))
+  }
+
+  function keepSoundOn() {
+    // Safari 16.4+: ask for "playback", which ignores the silent switch
     try {
-      const a = document.createElement('audio')
-      a.setAttribute('playsinline', '')
-      a.loop = true
-      // a tiny silent WAV keeps the audio session in "playback" mode
-      a.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA='
-      a.volume = 0
-      a.play().catch(() => {})
+      if (navigator.audioSession) navigator.audioSession.type = 'playback'
     } catch {
-      /* not needed elsewhere */
+      /* older browsers */
     }
+    try {
+      if (!keepAlive) {
+        keepAlive = document.createElement('audio')
+        keepAlive.setAttribute('playsinline', '')
+        keepAlive.setAttribute('x-webkit-airplay', 'deny')
+        keepAlive.loop = true
+        keepAlive.preload = 'auto'
+        keepAlive.src = silentWav()
+      }
+      if (keepAlive.paused) keepAlive.play().catch(() => {})
+    } catch {
+      /* not needed everywhere */
+    }
+  }
+
+  // Called from every tap: if the phone paused the sound, start it again (needs a tap on iOS)
+  function wake() {
+    if (!ac) return
+    keepSoundOn()
+    if (ac.state !== 'running') {
+      ac.resume?.().then(syncSoundNote, syncSoundNote)
+      // the classic unlock: play one silent frame inside the tap
+      try {
+        const b = ac.createBuffer(1, 1, ac.sampleRate)
+        const s = ac.createBufferSource()
+        s.buffer = b
+        s.connect(ac.destination)
+        s.start(0)
+      } catch {
+        /* fine */
+      }
+    }
+    syncSoundNote()
+  }
+
+  // If sound is still blocked, say so and offer the tap that fixes it
+  function syncSoundNote() {
+    const note = $('[data-sound-note]')
+    if (!note || !ac) return
+    note.hidden = ac.state === 'running'
   }
 
   /* ——— Start ——— */
   function begin() {
-    if (ac) return
-    unlockIOS()
+    if (ac) return wake()
+    keepSoundOn()
     initAudio()
-    ac.resume?.()
+    wake()
+    ac.onstatechange = syncSoundNote
     $('[data-start]').classList.add('is-gone')
     // a first chord so the room answers straight away
     ;[0, 4, 7].forEach((i, k) => window.setTimeout(() => playNote(i, 0.6), 120 + k * 140))
@@ -714,9 +771,7 @@
     initInput()
     window.addEventListener('resize', layout)
     document.addEventListener('visibilitychange', () => {
-      if (!ac) return
-      if (document.hidden && !recorder) ac.suspend?.()
-      else ac.resume?.()
+      if (ac && !document.hidden) syncSoundNote()
     })
     requestAnimationFrame(frame)
   }

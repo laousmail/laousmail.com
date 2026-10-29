@@ -527,3 +527,21 @@ button {
     max-width: 14rem;
   }
 }
+
+/* Sound paused by the phone: one clear tap to bring it back */
+.sound-note {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 8;
+  max-width: min(22rem, calc(100vw - 2rem));
+  padding: 1rem 1.3rem;
+  border: 1px solid var(--gold);
+  border-radius: 18px;
+  background: rgba(7, 6, 5, 0.92);
+  color: var(--ink);
+  font: 500 0.95rem var(--sans);
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 40px -6px rgba(255, 179, 71, 0.5);
+}

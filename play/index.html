@@ -82,9 +82,15 @@
     <button type="button" class="start-btn" data-begin>
       <span data-lang="en">Tap to play</span><span data-lang="fr">Touche pour jouer</span>
     </button>
-    <p class="start-note"><span data-lang="en">Turn your sound on. Headphones are best.</span><span data-lang="fr">Monte le son. Avec un casque, c’est mieux.</span></p>
+    <p class="start-note"><span data-lang="en">Turn your volume up. Headphones are best.</span><span data-lang="fr">Monte le volume. Avec un casque, c’est mieux.</span></p>
   </div>
 </div>
+
+<!-- Shown only if the phone keeps the sound paused -->
+<button type="button" class="sound-note" data-sound-note hidden>
+  <span data-lang="en">Sound is paused. Tap here to turn it on.</span>
+  <span data-lang="fr">Le son est en pause. Touche ici pour l’activer.</span>
+</button>
 
 <p class="visually-hidden" aria-live="polite" data-status></p>
 

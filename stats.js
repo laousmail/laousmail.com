@@ -109,7 +109,7 @@
       if (song) data.song = song
       // the song cards that fly out of the orbit count as the music section
       const card = a.closest('.j-card')
-      const part = card ? { id: card.dataset.place } : a.closest('.morph') ? { id: 'music' } : a.closest('section[id], footer, header')
+      const part = card ? { id: card.dataset.place } : a.closest('section[id], footer, header')
       data.place = part?.id || part?.tagName.toLowerCase() || 'page'
       send(`Open ${where}`, data)
     },

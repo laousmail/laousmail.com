@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.mailerlite.com https://mailerlite.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.mailerlite.com https://mailerlite.com; font-src 'self' data: https://fonts.gstatic.com https://*.mailerlite.com https://mailerlite.com; img-src 'self' data: blob: https://*.spotifycdn.com https://i.scdn.co https://*.mailerlite.com https://mailerlite.com; media-src 'self' blob: https://p.scdn.co; connect-src 'self' https://cloud.umami.is https://*.mailerlite.com https://mailerlite.com; frame-src https://*.mailerlite.com https://mailerlite.com; form-action 'self' https://*.mailerlite.com https://mailerlite.com; object-src 'none'; base-uri 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.mailerlite.com https://mailerlite.com; style-src 'self' 'unsafe-inline' https://*.mailerlite.com https://mailerlite.com; font-src 'self' data: https://*.mailerlite.com https://mailerlite.com; img-src 'self' data: blob: https://*.spotifycdn.com https://i.scdn.co https://*.mailerlite.com https://mailerlite.com; media-src 'self' blob: https://p.scdn.co; connect-src 'self' https://cloud.umami.is https://*.mailerlite.com https://mailerlite.com; frame-src https://*.mailerlite.com https://mailerlite.com; form-action 'self' https://*.mailerlite.com https://mailerlite.com; object-src 'none'; base-uri 'self'" />
 <script>(function(){try{var t=localStorage.getItem("laousmail-theme");if(t!=="light"&&t!=="dark")t="dark";document.documentElement.setAttribute("data-theme",t)}catch(e){document.documentElement.setAttribute("data-theme","dark")}document.documentElement.classList.add("js")})();
 /* Always open on the landing view: no jump to a #section, no restored scroll position */
 (function(){try{if("scrollRestoration" in history)history.scrollRestoration="manual";if(location.hash)history.replaceState(null,"",location.pathname+location.search)}catch(e){}})();</script>
@@ -27,9 +27,13 @@
 <meta name="twitter:description" content="15 originals. Amazigh roots. Montréal. The first show with original music ahead." />
 <meta name="twitter:image" content="https://laousmail.com/media/portrait-guitar.webp" />
 <meta name="twitter:image:alt" content="laousmail with guitar in Montréal" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="fonts/cormorant-garamond-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="fonts.css" />
+<link rel="preload" href="media/portrait-core.webp" as="image" fetchpriority="high" />
+<link rel="preconnect" href="https://image-cdn-fa.spotifycdn.com" />
+<link rel="preconnect" href="https://image-cdn-ak.spotifycdn.com" />
 <link rel="stylesheet" href="site.css" />
 <link rel="stylesheet" href="orbit.css" />
 <link rel="stylesheet" href="journey.css" />
@@ -194,7 +198,6 @@
 
 <main id="top">
   <!-- HERO: the orbit is the centrepiece and the player -->
-  <div class="scene" data-scene="hero">
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero-corona" aria-hidden="true"></div>
 
@@ -246,7 +249,7 @@
         <div class="orbit-comet" aria-hidden="true"><i></i></div>
         <div class="orbit-halo" aria-hidden="true"></div>
         <div class="orbit-core" data-orbit-core>
-          <img class="orbit-core-img" data-core-img src="media/portrait-core.webp" alt="" width="720" height="720" />
+          <img class="orbit-core-img" data-core-img src="media/portrait-core.webp" alt="" width="720" height="720" fetchpriority="high" />
           <div class="orbit-core-shade" aria-hidden="true"></div>
           <div class="orbit-core-text">
             <button type="button" class="orbit-core-play" data-core-play aria-label="Play">
@@ -289,10 +292,8 @@
       </figcaption>
     </figure>
   </section>
-  </div>
 
   <!-- MUSIC -->
-  <div class="scene" data-scene="music">
   <section class="sec music" id="music" aria-labelledby="music-title">
     <header class="sec-head reveal">
       <p class="eyebrow"><span data-lang="en">The music</span><span data-lang="fr">La musique</span></p>
@@ -304,7 +305,6 @@
     </header>
     <ol class="tracks reveal" data-tracks></ol>
   </section>
-  </div>
 
   <!-- STUDIO: pinned scroll scene -->
   <section class="studio" id="studio" data-studio aria-labelledby="studio-title">
@@ -341,10 +341,9 @@
   </section>
 
   <!-- STORY -->
-  <div class="scene" data-scene="story">
   <section class="sec story" id="story" aria-labelledby="story-title">
     <div class="story-photo reveal">
-      <img src="media/drums-park.webp" alt="laousmail playing drums on a rug in a Montréal park, friends around" width="1200" height="1600" loading="lazy" decoding="async" />
+      <img src="media/drums-park.webp" alt="laousmail playing drums on a rug in a Montréal park, friends around" width="720" height="960" loading="lazy" decoding="async" />
     </div>
     <div class="story-body">
       <header class="sec-head reveal">
@@ -383,10 +382,8 @@
       </ol>
     </div>
   </section>
-  </div>
 
   <!-- THE SHOW + STAY CLOSE -->
-  <div class="scene" data-scene="show">
   <section class="sec show" id="show" aria-labelledby="show-title">
     <div class="show-glow" aria-hidden="true"></div>
     <div class="show-inner">
@@ -437,10 +434,8 @@
       </p>
     </div>
   </section>
-  </div>
 
   <!-- ECLIPSETONE: one compact band -->
-  <div class="scene" data-scene="eclipse">
   <section class="eclipse-band" aria-labelledby="eclipse-title">
     <div class="eclipse-band-inner reveal">
       <a class="et-logo" href="https://eclipsetone.com" target="_blank" rel="noreferrer" aria-label="EclipseTone">
@@ -488,7 +483,6 @@
       </a>
     </div>
   </section>
-  </div>
 </main>
 
 <footer class="foot">
@@ -539,15 +533,7 @@
 <script src="releases.js"></script>
 <script src="artist.js" defer></script>
 <script src="journey.js" defer></script>
-<script src="scenes.js" defer></script>
 <script src="field.js" defer></script>
 <script src="stats.js" defer></script>
-<!-- MailerLite Universal -->
-<script>
-(function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[]).push(arguments);};l=d.createElement(e);l.async=1;l.src=u;n=d.getElementsByTagName(e)[0];n.parentNode.insertBefore(l,n);})
-(window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
-ml('account', '1893739');
-</script>
-<!-- End MailerLite Universal -->
 </body>
 </html>

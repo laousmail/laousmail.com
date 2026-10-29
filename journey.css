@@ -778,3 +778,14 @@ html:has(body.journey) {
 .j-form a {
   color: var(--ink);
 }
+
+/* reduced motion: the same journey, calm */
+.j-calm .j,
+.j-calm .j * {
+  transition-duration: 0.01ms !important;
+  animation: none !important;
+}
+
+.j-calm .j .orbit-spin {
+  animation: none !important;
+}

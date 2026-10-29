@@ -435,8 +435,8 @@
     }, reduceMotion ? 0 : 180)
   }
 
-  /* The orbit scene (scenes.js) turns the centre toward the song leaving the
-     ring: a release (its index), 'studio', 'rest' (the songs to come), or null. */
+  /* The journey (journey.js) turns the centre toward the song its card is
+     about: a release (its index), 'studio', 'rest' (the songs to come), or null. */
   let coreFocus = null
   window.laousmailOrbitFocus = (focus) => {
     coreFocus = focus ?? null
@@ -916,7 +916,7 @@
       const room = window.innerHeight - navH
       const need = a.height + box.offsetHeight + 40
       // inside a pinned scroll scene, scrolling would play the scene: leave the page where it is
-      if (!target.closest('.nav') && !target.closest('.scene.is-pinned, .j-stage')) {
+      if (!target.closest('.nav') && !target.closest('.j-stage')) {
         if (need <= room && (a.top < navH + 8 || a.bottom + box.offsetHeight + 32 > window.innerHeight)) {
           // Scroll so the area and its tip both fit below the header
           window.scrollBy({ top: a.top - navH - 12, behavior: 'auto' })

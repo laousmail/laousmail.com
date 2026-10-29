@@ -34,7 +34,8 @@
   const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`
 
   function size() {
-    dpr = Math.min(2, window.devicePixelRatio || 1)
+    // soft glows and sparks don't need full retina sharpness: a lighter canvas
+    dpr = Math.min(1.5, window.devicePixelRatio || 1)
     W = window.innerWidth
     H = window.innerHeight
     canvas.width = Math.floor(W * dpr)

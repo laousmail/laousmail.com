@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob: data:; connect-src 'self' https://cloud.umami.is; object-src 'none'; base-uri 'self'; form-action 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; media-src 'self' blob: data:; connect-src 'self' https://cloud.umami.is; object-src 'none'; base-uri 'self'; form-action 'none'" />
 <script>(function(){try{var l=localStorage.getItem("laousmail-lang");document.documentElement.lang=l==="fr"?"fr":"en"}catch(e){}document.documentElement.classList.add("js")})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="description" content="ORBIT, a playable by laousmail: 15 notes, one for each song, a bendir and a drone. Loop, layer, arrange and bounce a song in your browser, free to use in your own music." />
@@ -13,9 +13,10 @@
 <meta property="og:description" content="15 notes, one for each song. Loop, layer, arrange, and bounce your song." />
 <meta property="og:image" content="https://laousmail.com/media/portrait-guitar.webp" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="preload" href="../fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../fonts/cormorant-garamond-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="../fonts.css" />
 <link rel="stylesheet" href="play.css" />
 <title>ORBIT · a playable by laousmail</title>
 </head>

@@ -17,14 +17,16 @@
    one card. The cards are real content, moved here from the page (or copied,
    for the song list, which the site rebuilds on a language change).
 
-   Only with room to breathe and without reduced motion; otherwise the page
-   stays as it was and scenes.js runs instead. */
+   Only with room to breathe (not on a phone held sideways, where the page
+   simply reads top to bottom). With reduced motion the same journey stays
+   calm: nothing moves or spins, cards only fade. */
 (() => {
   const $ = (sel, root = document) => root.querySelector(sel)
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel))
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   const orbit = $('[data-orbit]')
-  if (reduceMotion || !orbit || window.innerHeight < 520 || window.innerWidth < 340) return
+  if (!orbit || window.innerHeight < 520 || window.innerWidth < 340) return
+  if (reduceMotion) document.documentElement.classList.add('j-calm')
 
   const lang = () => (document.documentElement.lang === 'fr' ? 'fr' : 'en')
   const t = (en, fr) => (lang() === 'fr' ? fr : en)
@@ -73,7 +75,7 @@
   const core = document.createElement('div')
   core.className = 'j-core'
   core.setAttribute('aria-hidden', 'true')
-  core.innerHTML = `<img class="j-core-photo" src="media/drums-park.webp" alt="" width="1200" height="1600" decoding="async" />
+  core.innerHTML = `<img class="j-core-photo" data-src="media/drums-park.webp" alt="" width="720" height="960" decoding="async" />
     <span class="j-core-text"><strong></strong><small></small></span><span class="j-eclipse"></span>`
   orbitStage.append(core)
   const points = document.createElement('div')
@@ -371,7 +373,7 @@
 
   function go(i, smooth = true) {
     const y = stepsTop() + i * H - navH()
-    window.scrollTo({ top: Math.round(y), behavior: smooth ? 'smooth' : 'auto' })
+    window.scrollTo({ top: Math.round(y), behavior: smooth && !reduceMotion ? 'smooth' : 'auto' })
   }
 
   let active = -1
@@ -386,7 +388,7 @@
       const s = steps[i]
       const vis = clamp01(1 - Math.abs(d) * 1.7)
       s.el.style.opacity = vis.toFixed(3)
-      s.el.style.transform = `translateY(${(-d * 46).toFixed(1)}px)`
+      s.el.style.transform = reduceMotion ? '' : `translateY(${(-d * 46).toFixed(1)}px)`
       const on = Math.abs(d) < 0.35
       s.el.classList.toggle('is-on', on)
       // hidden cards stay reachable by keyboard: focusing one brings it forward
@@ -454,6 +456,10 @@
     } else if (s.key === 'rest') focus = 'rest'
     s.node?.classList.add('j-on')
     window.laousmailOrbitFocus?.(focus)
+
+    // the story photo loads only when the story comes near
+    const photo = $('.j-core-photo', core)
+    if (photo && !photo.src && i >= firstOf('rest') - 1) photo.src = photo.dataset.src
 
     // the centre for the story, the show, the eclipse
     const strong = $('.j-core-text strong', core)

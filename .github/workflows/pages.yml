@@ -19,13 +19,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Publish only what the site needs. Fan comments (fan-reactions/,
-      # avatars/), comments-api/ and scripts/ stay in the repo but off the site.
+      # Publish only what the site needs (README and workflow files stay out).
       - name: Stage public files
         run: |
           mkdir _site
-          cp -r index.html privacy.html site.css orbit.css field.js journey.js journey.css scenes.js stats.js artist.js releases.js config.js \
+          cp -r index.html privacy.html site.css orbit.css fonts.css fonts field.js journey.js journey.css stats.js artist.js releases.js config.js \
             favicon.svg media play CNAME robots.txt sitemap.xml .nojekyll _site/
+      # Smaller files for visitors: minify the scripts and styles in the copy
+      # that gets published (the repo keeps the readable versions).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Minify
+        run: |
+          mkdir -p /tmp/min && cd /tmp/min && npm init -y >/dev/null
+          npm install --no-audit --no-fund terser@5.31.6 lightningcss-cli@1.25.1 >/dev/null
+          cd "$GITHUB_WORKSPACE/_site"
+          for f in *.js play/*.js; do /tmp/min/node_modules/.bin/terser "$f" --compress --mangle --comments false -o "$f"; done
+          for f in *.css play/*.css; do /tmp/min/node_modules/.bin/lightningcss --minify --targets ">= 0.5%" "$f" -o "$f"; done
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.mailerlite.com https://mailerlite.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.mailerlite.com https://mailerlite.com; font-src 'self' data: https://fonts.gstatic.com https://*.mailerlite.com https://mailerlite.com; img-src 'self' data: blob: https://*.spotifycdn.com https://i.scdn.co https://*.mailerlite.com https://mailerlite.com; media-src 'self' blob: https://p.scdn.co; connect-src 'self' https://cloud.umami.is https://*.mailerlite.com https://mailerlite.com; frame-src https://*.mailerlite.com https://mailerlite.com; form-action 'self' https://*.mailerlite.com https://mailerlite.com; object-src 'none'; base-uri 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.mailerlite.com https://mailerlite.com; style-src 'self' 'unsafe-inline' https://*.mailerlite.com https://mailerlite.com; font-src 'self' data: https://*.mailerlite.com https://mailerlite.com; img-src 'self' data: blob: https://*.spotifycdn.com https://i.scdn.co https://*.mailerlite.com https://mailerlite.com; media-src 'self' blob: https://p.scdn.co; connect-src 'self' https://cloud.umami.is https://*.mailerlite.com https://mailerlite.com; frame-src https://*.mailerlite.com https://mailerlite.com; form-action 'self' https://*.mailerlite.com https://mailerlite.com; object-src 'none'; base-uri 'self'" />
 <script>(function(){try{var t=localStorage.getItem("laousmail-theme");if(t!=="light"&&t!=="dark")t="dark";document.documentElement.setAttribute("data-theme",t)}catch(e){document.documentElement.setAttribute("data-theme","dark")}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="mobile-web-app-capable" content="yes" />
@@ -12,9 +12,10 @@
 <meta name="robots" content="index, follow" />
 <link rel="canonical" href="https://laousmail.com/privacy.html" />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="fonts/cormorant-garamond-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="fonts.css" />
 <link rel="stylesheet" href="site.css" />
 <link rel="stylesheet" href="orbit.css" />
 <title>Privacy · laousmail</title>
@@ -56,13 +57,6 @@
   <p style="margin-top:2rem"><a class="btn ghost" href="index.html"><span data-lang="en">Back</span><span data-lang="fr">Retour</span></a></p>
 </main>
 <script src="artist.js" defer></script>
-<!-- MailerLite Universal -->
-<script>
-(function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[]).push(arguments);};l=d.createElement(e);l.async=1;l.src=u;n=d.getElementsByTagName(e)[0];n.parentNode.insertBefore(l,n);})
-(window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
-ml('account', '1893739');
-</script>
-<!-- End MailerLite Universal -->
 <script src="field.js" defer></script>
 <script src="stats.js" defer></script>
 </body>

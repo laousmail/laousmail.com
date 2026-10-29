@@ -4,38 +4,45 @@ Artist website for **laousmail** · singer / songwriter · Montréal.
 
 **Live:** https://laousmail.com/
 
-Static HTML / CSS / JS. GitHub Pages from `main`. No build step. No private API keys in frontend files.
+Static HTML / CSS / JS on GitHub Pages, published from `main` by `.github/workflows/pages.yml`
+(which also minifies the scripts and styles in the published copy). No private keys in any file.
 
-## What’s in the repo
+## What's in the repo
 
 | Path | Role |
 |------|------|
-| `index.html` | Page structure and SEO |
-| `site.css` | Design and motion |
-| `artist.js` | Language, theme, the orbit (hero player), track list, studio scroll scene, signup |
-| `releases.js` | Released songs, journey goal, song currently in the studio |
-| `fan-reactions/` | Archived social video comments (JSON). Not shown on the site |
-| `config.js` | Public fan signup endpoint only (no secrets) |
+| `index.html` | The page: content, SEO, security rules |
+| `releases.js` | **The file you edit**: released songs, the 15-song goal, the song in the studio |
+| `artist.js` | Language, theme, the orbit and its player, song list, studio progress, countdown, sign-up |
+| `journey.js` · `journey.css` | The journey: the orbit stays on screen and becomes each card as you scroll |
+| `field.js` | The living background (embers, sparks, ripples, the ring of ticks) |
+| `site.css` · `orbit.css` | Base design, then the ORBIT look on top |
+| `fonts.css` · `fonts/` | The three fonts, served from this site |
+| `stats.js` | Anonymous visit counts (Umami, no cookies) |
+| `config.js` | Public MailerLite sign-up address only |
+| `play/` | ORBIT Studio, the playable (linked from the menu only) |
 | `privacy.html` | Privacy note |
+| `media/` | Photos and covers |
+
+## Updating content
+
+- **Song in the studio:** edit `window.LAOUSMAIL_IN_PRODUCTION` in `releases.js` (`step`, `stepProgress`, `note`, `updated`).
+  The studio card, the orbit and the status line follow.
+- **New release:** add it to `window.LAOUSMAIL_RELEASES` in `releases.js`, then move `LAOUSMAIL_IN_PRODUCTION`
+  to the next number. The song gets its own card and dot.
 
 ## Local preview
 
 ```bash
-npx --yes serve .
+python3 -m http.server 8000
 ```
 
-## Updating content
+## Your own visits
 
-- **New release:** add the track in `releases.js`. The orbit, the hero proof row and the track list update together. When a song comes out, bump `LAOUSMAIL_IN_PRODUCTION` to the next number so the glowing studio node moves on.
-- **Song in the studio:** edit `window.LAOUSMAIL_IN_PRODUCTION` in `releases.js` (`step`, `stepProgress`, `note`, `updated`).
+Open `https://laousmail.com/?stats=off` once on each of your devices so your visits aren't counted
+(`?stats=on` to count them again).
 
-## Fan signup
+## Sign-up
 
-The “Ceux qui écoutent” form in The show section posts to a public MailerLite subscribe URL set in `config.js`.
-
-- Only use the public embedded-form subscribe endpoint.
-- Never put a private MailerLite API token (or any private credential) in this repo or in browser-facing files.
-
-## Deploy
-
-Push to `main`. GitHub Pages serves the site root. Custom domain is set via `CNAME`.
+The Ceux qui écoutent form posts to the public MailerLite subscribe address in `config.js`.
+Never put a private MailerLite API token (or any private credential) in this repo.

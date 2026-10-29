@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<script>(function(){try{var l=localStorage.getItem("laousmail-lang");document.documentElement.lang=l==="fr"?"fr":"en"}catch(e){}document.documentElement.classList.add("js")})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="description" content="ORBIT, a playable by laousmail: 15 notes, one for each song, a bendir and a drone. Play in your browser, record a take, and use it in your own music." />
+<meta name="theme-color" content="#070605" />
+<link rel="canonical" href="https://laousmail.com/play/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="ORBIT · a playable by laousmail" />
+<meta property="og:description" content="15 notes, one for each song. Play, record a take, use it in your music." />
+<meta property="og:image" content="https://laousmail.com/media/portrait-guitar.webp" />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="play.css" />
+<title>ORBIT · a playable by laousmail</title>
+</head>
+<body>
+<canvas class="field" data-field aria-hidden="true"></canvas>
+
+<!-- Corners -->
+<header class="corner corner-tl">
+  <a class="back" href="../"><span aria-hidden="true">←</span> laousmail</a>
+  <h1 class="title">ORBIT <span>·</span> <span data-lang="en">Playable 01</span><span data-lang="fr">Jouable 01</span></h1>
+</header>
+
+<div class="corner corner-tr">
+  <div class="lang" role="group" aria-label="Language">
+    <button type="button" data-lang-btn="en" aria-pressed="true">EN</button>
+    <button type="button" data-lang-btn="fr" aria-pressed="false">FR</button>
+  </div>
+  <button type="button" class="toggle" data-drone aria-pressed="false">
+    <i aria-hidden="true"></i><span data-lang="en">Drone</span><span data-lang="fr">Bourdon</span>
+  </button>
+  <button type="button" class="toggle" data-pulse aria-pressed="false">
+    <i aria-hidden="true"></i><span data-lang="en">Pulse 6/8</span><span data-lang="fr">Pulsation 6/8</span>
+  </button>
+  <button type="button" class="toggle rec" data-rec aria-pressed="false">
+    <i aria-hidden="true"></i><span data-rec-label>Record</span>
+  </button>
+</div>
+
+<div class="corner corner-bl">
+  <p><span data-lang="en">Scale</span><span data-lang="fr">Gamme</span> · D Hijaz · <span data-lang="en">15 notes, one for each song</span><span data-lang="fr">15 notes, une par chanson</span></p>
+  <p class="how">
+    <span data-lang="en">Tap or drag across the ring to strum. Bendir: centre dum, rim tek.</span>
+    <span data-lang="fr">Touche ou glisse sur l’anneau pour gratter. Bendir: centre dum, bord tek.</span>
+    <span class="keys"><span data-lang="en">Keys</span><span data-lang="fr">Touches</span> A–; · Q–T · <span data-lang="en">Space</span><span data-lang="fr">Espace</span> dum · B tek</span>
+  </p>
+</div>
+
+<div class="corner corner-br">
+  <p class="take" data-take hidden></p>
+  <p class="licence">
+    <span data-lang="en">Free to use in your own music. Credit laousmail.</span>
+    <span data-lang="fr">Libre d’utilisation dans ta musique. Crédite laousmail.</span>
+  </p>
+</div>
+
+<!-- The instrument -->
+<main class="stage" data-stage aria-label="ORBIT instrument">
+  <div class="ring" data-ring role="group" aria-label="15 notes"></div>
+  <!-- One drum, two strokes, like a real bendir: dum in the centre, tek at the rim -->
+  <button type="button" class="bendir" data-bendir aria-label="Bendir: centre plays dum, rim plays tek (B key)">
+    <span class="bendir-rim" aria-hidden="true">tek</span>
+    <span class="bendir-face" aria-hidden="true">dum</span>
+  </button>
+</main>
+
+<!-- Start: audio needs a tap before it can play -->
+<div class="start" data-start>
+  <div class="start-card">
+    <p class="start-kicker"><span data-lang="en">A playable by laousmail</span><span data-lang="fr">Un jouable de laousmail</span></p>
+    <h2>ORBIT</h2>
+    <p class="start-lead">
+      <span data-lang="en">Fifteen notes, one for each song before the show. A bendir in the centre. Sound and image, together.</span>
+      <span data-lang="fr">Quinze notes, une pour chaque chanson avant le spectacle. Un bendir au centre. Le son et l’image, ensemble.</span>
+    </p>
+    <button type="button" class="start-btn" data-begin>
+      <span data-lang="en">Tap to play</span><span data-lang="fr">Touche pour jouer</span>
+    </button>
+    <p class="start-note"><span data-lang="en">Turn your sound on. Headphones are best.</span><span data-lang="fr">Monte le son. Avec un casque, c’est mieux.</span></p>
+  </div>
+</div>
+
+<p class="visually-hidden" aria-live="polite" data-status></p>
+
+<script src="play.js" defer></script>
+</body>
+</html>

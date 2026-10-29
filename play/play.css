@@ -1,0 +1,529 @@
+/* ORBIT · a playable by laousmail.
+   One full-screen instrument: the canvas draws the sound, the ring of pads
+   plays it. Labels sit in the corners in a small mono face. */
+
+:root {
+  --bg: #070605;
+  --ink: #f2e9dd;
+  --mute: #b0a699;
+  --line: rgba(242, 233, 221, 0.14);
+  --hot: #ff6a13;
+  --gold: #ffb347;
+  --on: #1a0a02;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+  --sans: "Outfit", system-ui, sans-serif;
+  --serif: "Cormorant Garamond", Georgia, serif;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 1rem/1.5 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html[lang="en"] [data-lang="fr"],
+html[lang="fr"] [data-lang="en"] {
+  display: none !important;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.field {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ——— Corners ——— */
+.corner {
+  position: fixed;
+  z-index: 5;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--mute);
+}
+
+.corner p {
+  margin: 0;
+}
+
+.corner-tl {
+  top: calc(1rem + env(safe-area-inset-top));
+  left: 1.1rem;
+}
+
+.corner-tr {
+  top: calc(1rem + env(safe-area-inset-top));
+  right: 1.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  max-width: calc(100vw - 2.2rem);
+}
+
+.corner-bl {
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  left: 1.1rem;
+  display: grid;
+  gap: 0.3rem;
+  max-width: 26rem;
+}
+
+.corner-br {
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  right: 1.1rem;
+  display: grid;
+  justify-items: end;
+  gap: 0.4rem;
+  max-width: 20rem;
+  text-align: right;
+}
+
+.back {
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.back:hover {
+  color: var(--gold);
+}
+
+.title {
+  margin: 0.35rem 0 0;
+  font: 500 0.78rem var(--mono);
+  letter-spacing: 0.18em;
+  color: var(--gold);
+}
+
+.title span:first-child {
+  color: var(--mute);
+}
+
+.how .keys {
+  display: block;
+  margin-top: 0.2rem;
+  opacity: 0.85;
+}
+
+.licence {
+  color: var(--mute);
+}
+
+.take {
+  color: var(--ink);
+}
+
+.take a {
+  color: var(--gold);
+}
+
+/* Controls */
+.lang {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 2px;
+}
+
+.lang button {
+  min-width: 2.4rem;
+  min-height: 2.5rem;
+  border: 0;
+  border-radius: 99px;
+  background: none;
+  color: var(--mute);
+  font: 500 0.75rem var(--mono);
+  cursor: pointer;
+}
+
+.lang button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 0.95rem;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: rgba(7, 6, 5, 0.6);
+  color: var(--ink);
+  font: 500 0.75rem var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.toggle i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--mute);
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.toggle:hover {
+  border-color: var(--gold);
+}
+
+.toggle[aria-pressed="true"] {
+  border-color: var(--gold);
+}
+
+.toggle[aria-pressed="true"] i {
+  background: var(--gold);
+  border-color: var(--gold);
+  box-shadow: 0 0 10px var(--gold);
+}
+
+.toggle.rec[aria-pressed="true"],
+.toggle.rec[aria-pressed="true"] i {
+  border-color: #ff4b4b;
+}
+
+.toggle.rec[aria-pressed="true"] i {
+  background: #ff4b4b;
+  box-shadow: 0 0 10px #ff4b4b;
+  animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to { opacity: 0.3; }
+}
+
+/* ——— The instrument ——— */
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+}
+
+.pad {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: var(--pad, 56px);
+  height: var(--pad, 56px);
+  padding: 0;
+  border: 1.5px solid color-mix(in srgb, var(--ink) 22%, transparent);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.08), rgba(7, 6, 5, 0.75) 70%);
+  color: var(--mute);
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  transition: border-color 0.25s, color 0.25s, box-shadow 0.4s var(--ease), scale 0.25s var(--ease);
+  touch-action: none;
+}
+
+.pad b {
+  font: 500 0.82rem var(--mono);
+  letter-spacing: 0;
+  pointer-events: none;
+}
+
+.pad small {
+  position: absolute;
+  bottom: 18%;
+  font: 400 0.62rem var(--mono);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+@media (hover: none) {
+  .pad small {
+    display: none;
+  }
+}
+
+/* Released songs glow gold; the one in the studio glows ember */
+.pad.is-out {
+  border-color: color-mix(in srgb, var(--gold) 70%, transparent);
+  color: var(--ink);
+}
+
+.pad.is-studio {
+  border-color: color-mix(in srgb, var(--hot) 75%, transparent);
+  color: var(--ink);
+}
+
+.pad.is-hit {
+  color: var(--on);
+  background: var(--gold);
+  border-color: var(--gold);
+  box-shadow: 0 0 34px 6px color-mix(in srgb, var(--gold) 60%, transparent);
+  scale: 1.12;
+  transition: none;
+}
+
+.pad.is-studio.is-hit {
+  background: var(--hot);
+  border-color: var(--hot);
+  box-shadow: 0 0 34px 6px color-mix(in srgb, var(--hot) 60%, transparent);
+}
+
+.bendir {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  touch-action: none;
+}
+
+.bendir {
+  display: grid;
+  place-items: center;
+  width: var(--core, 150px);
+  height: var(--core, 150px);
+  border: 1.5px solid color-mix(in srgb, var(--gold) 40%, transparent);
+  background:
+    radial-gradient(circle, transparent 58%, rgba(255, 179, 71, 0.08) 59% 61%, transparent 62%),
+    radial-gradient(circle at 40% 35%, rgba(255, 220, 170, 0.12), rgba(7, 6, 5, 0.55) 70%);
+  transition: scale 0.3s var(--ease), border-color 0.2s;
+}
+
+/* Dum lives in the centre, tek on the rim */
+.bendir-face,
+.bendir-rim {
+  position: absolute;
+  left: 50%;
+  font: 500 0.7rem var(--mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mute);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.bendir-face {
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.bendir-rim {
+  top: 9%;
+  opacity: 0.8;
+}
+
+.bendir.is-hit {
+  scale: 0.96;
+  border-color: var(--gold);
+  transition: none;
+}
+
+.bendir.is-rim .bendir-rim,
+.bendir.is-hit:not(.is-rim) .bendir-face {
+  color: var(--gold);
+}
+
+/* ——— Start ——— */
+.start {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: radial-gradient(60rem 40rem at 50% 50%, rgba(255, 106, 19, 0.14), transparent 70%), rgba(7, 6, 5, 0.86);
+  transition: opacity 0.6s var(--ease), visibility 0.6s;
+}
+
+.start.is-gone {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.start-card {
+  max-width: 30rem;
+  text-align: center;
+}
+
+.start-kicker {
+  margin: 0 0 0.5rem;
+  font: 500 0.75rem var(--mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.start h2 {
+  margin: 0;
+  font: 600 clamp(4rem, 16vw, 8rem) / 0.9 var(--serif);
+  letter-spacing: 0.04em;
+  background: linear-gradient(110deg, var(--hot), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.start-lead {
+  margin: 1rem 0 2rem;
+  color: var(--mute);
+  font-size: 1.08rem;
+}
+
+.start-btn {
+  min-height: 3.4rem;
+  padding: 0 2.2rem;
+  border: 0;
+  border-radius: 99px;
+  background: linear-gradient(110deg, var(--hot), var(--gold));
+  color: var(--on);
+  font-weight: 600;
+  font-size: 1.05rem;
+  cursor: pointer;
+  box-shadow: 0 12px 40px -12px rgba(255, 106, 19, 0.8);
+  transition: transform 0.2s var(--ease);
+}
+
+.start-btn:hover {
+  transform: translateY(-2px);
+}
+
+.start-note {
+  margin: 1rem 0 0;
+  font: 400 0.78rem var(--mono);
+  color: var(--mute);
+}
+
+/* ——— Small screens: corners become top and bottom bars ——— */
+@media (max-width: 700px) {
+  .corner {
+    font-size: 0.72rem;
+  }
+
+  .corner-tl {
+    left: 0.9rem;
+  }
+
+  .corner-tr {
+    top: calc(4.1rem + env(safe-area-inset-top));
+    left: 0.9rem;
+    right: 0.9rem;
+    justify-content: flex-start;
+  }
+
+  .corner-tr .lang {
+    position: fixed;
+    top: calc(1rem + env(safe-area-inset-top));
+    right: 0.9rem;
+  }
+
+  .toggle {
+    min-height: 2.5rem;
+    padding: 0 0.75rem;
+    font-size: 0.68rem;
+  }
+
+  .corner-bl {
+    left: 0.9rem;
+    right: 0.9rem;
+    max-width: none;
+  }
+
+  .corner-bl .keys {
+    display: none;
+  }
+
+  .corner-br {
+    display: none;
+  }
+
+  .corner-br:has(.take:not([hidden])) {
+    display: grid;
+    left: 0.9rem;
+    right: 0.9rem;
+    bottom: calc(4.6rem + env(safe-area-inset-bottom));
+    max-width: none;
+    justify-items: start;
+    text-align: left;
+  }
+
+  .corner-br:has(.take:not([hidden])) .licence {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pad,
+  .bendir,
+  .start {
+    transition: none;
+  }
+
+  .toggle.rec[aria-pressed="true"] i {
+    animation: none;
+  }
+}
+
+/* Tablets: narrower corner notes so the two bottom corners never meet */
+@media (min-width: 701px) and (max-width: 1100px) {
+  .corner-bl {
+    max-width: 19rem;
+  }
+
+  .corner-br {
+    max-width: 14rem;
+  }
+}

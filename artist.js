@@ -18,6 +18,7 @@
   }
 
   function setTheme(theme) {
+    // Dark is the site default; light only when the visitor chooses it.
     const next = theme === 'light' ? 'light' : 'dark'
     document.documentElement.setAttribute('data-theme', next)
     try {
@@ -25,6 +26,8 @@
     } catch {
       /* private mode */
     }
+    const color = next === 'light' ? '#f6f1ea' : '#070605'
+    $$('meta[name="theme-color"]').forEach((meta) => meta.setAttribute('content', color))
     const fr = lang() === 'fr'
     $$('.mode[data-theme-toggle]').forEach((btn) => {
       const label =

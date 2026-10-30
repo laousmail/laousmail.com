@@ -1,17 +1,19 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.mailerlite.com https://mailerlite.com; style-src 'self' 'unsafe-inline' https://*.mailerlite.com https://mailerlite.com; font-src 'self' data: https://*.mailerlite.com https://mailerlite.com; img-src 'self' data: blob: https://*.spotifycdn.com https://i.scdn.co https://*.mailerlite.com https://mailerlite.com; media-src 'self' blob: https://p.scdn.co; connect-src 'self' https://cloud.umami.is https://*.mailerlite.com https://mailerlite.com; frame-src https://*.mailerlite.com https://mailerlite.com; form-action 'self' https://*.mailerlite.com https://mailerlite.com; object-src 'none'; base-uri 'self'" />
-<script>(function(){try{var t=localStorage.getItem("laousmail-theme");if(t!=="light"&&t!=="dark")t="dark";document.documentElement.setAttribute("data-theme",t)}catch(e){document.documentElement.setAttribute("data-theme","dark")}document.documentElement.classList.add("js");try{if(innerHeight>=520&&innerWidth>=340){document.documentElement.classList.add("j-wait");setTimeout(function(){document.documentElement.classList.remove("j-wait")},4000)}}catch(e){}})();
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#070605" />
+<!-- Dark paints first; light is only applied after an explicit saved choice -->
+<style>html{background:#070605;color-scheme:dark}html[data-theme=light]{background:#f6f1ea;color-scheme:light}</style>
+<script>(function(){try{var t=localStorage.getItem("laousmail-theme");if(t!=="light"&&t!=="dark")t="dark";document.documentElement.setAttribute("data-theme",t);var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",t==="light"?"#f6f1ea":"#070605")}catch(e){document.documentElement.setAttribute("data-theme","dark")}document.documentElement.classList.add("js");try{if(innerHeight>=520&&innerWidth>=340){document.documentElement.classList.add("j-wait");setTimeout(function(){document.documentElement.classList.remove("j-wait")},4000)}}catch(e){}})();
 /* Always open on the landing view: no jump to a #section, no restored scroll position */
 (function(){try{if("scrollRestoration" in history)history.scrollRestoration="manual";if(location.hash)history.replaceState(null,"",location.pathname+location.search)}catch(e){}})();</script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="description" content="laousmail: Montréal singer-songwriter. Fifteen original songs with Amazigh roots, contemporary R&amp;B and soul, finished one by one ahead of the first show with original music. For listeners, radios and journalists." />
 <meta name="author" content="laousmail" />
 <meta name="robots" content="index, follow" />
-<meta name="theme-color" content="#070605" />
 <link rel="canonical" href="https://laousmail.com/" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="laousmail" />
